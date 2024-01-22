@@ -179,12 +179,35 @@ def getProcessors() :
     print(processors)
     return processors
 
+def findTBB(tbbPath) -> str :
+    libPath = None
+    for root, _, files in os.walk(tbbPath):
+        for file in files:
+            if file != "libtbb.so":
+                continue
+            currPath = os.path.join(root, file)
+            if not libPath or len(libPath) > len(currPath):
+                libPath = currPath
+    return libPath
+
 def compiletest(sdir) :
     dir = "benchmarks/" + sdir
+    if "TBB_PATH" in os.environ:
+        tbbPath = os.environ["TBB_PATH"]
+        if "TBB_INCLUDE" not in os.environ:
+            includePath = f"{tbbPath}/include"
+            print(f"TBB_INCLUDE: {includePath}")
+            os.environ["TBB_INCLUDE"] = includePath
+        if "TBB_LFLAGS" not in os.environ:
+            libPath = findTBB(tbbPath)
+            rpath = os.path.dirname(libPath)
+            tbbLflags = f"-Wl,-rpath,{rpath} {libPath}"
+            print(f"TBB_LFLAGS: {tbbLflags}")
+            os.environ["TBB_LFLAGS"] = tbbLflags
     if (forceCompile) :
-        ss = "cd " + dir + " ; make -s cleanall ; make -s"
+        ss = f"cd {dir} ; make -s cleanall ; make -j {int(maxcpus / 2)}"
     else :
-        ss = "cd " + dir + " ; make -s"
+        ss = f"cd {dir} ; make -j {int(maxcpus / 2)}"
     os.system("echo")
     os.system("echo \"" + ss + "\"")
     os.system(ss)
