@@ -13,6 +13,7 @@ def onPprocessors(command,p) :
     return "PARLAY_NUM_THREADS="+repr(p)+" " + command
   
 def shellGetOutput(str) :
+  print(f"running {str}")
   process = subprocess.Popen(str,shell=True,stdout=subprocess.PIPE,
                              stderr=subprocess.PIPE,
                              text=True)

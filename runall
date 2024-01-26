@@ -204,6 +204,8 @@ def compiletest(sdir) :
             tbbLflags = f"-Wl,-rpath,{rpath} {libPath}"
             print(f"TBB_LFLAGS: {tbbLflags}")
             os.environ["TBB_LFLAGS"] = tbbLflags
+    # elif "EIGEN_PATH"
+
     if (forceCompile) :
         ss = f"cd {dir} ; make -s cleanall ; make -j {int(maxcpus / 2)}"
     else :

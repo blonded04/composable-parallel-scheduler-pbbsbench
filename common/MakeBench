@@ -13,7 +13,7 @@ CHECK = $(BENCH)Check
 INCLUDE = 
 
 all : $(BENCH) testInputs
-	cd ../bench; make -s $(CHECK)
+	cd ../bench; make $(CHECK)
 
 $(BENCH) : $(TIME) $(BENCH).h $(REQUIRE)
 	$(CC) $(CFLAGS) $(INCLUDE) -include $(BENCH).h -o $(BENCH) $(TIME) $(LFLAGS)
