@@ -9,13 +9,13 @@ import subprocess
 parser = argparse.ArgumentParser(prog="run_benches")
 parser.add_argument("--tbb-path", type=str, help="path to directory with tbb .so and /include")
 
-parser.add_argument("--omp", action=argparse.BooleanOptionalAction, help="set if want to run with OpenMP executor")
-parser.add_argument("--tbb", action=argparse.BooleanOptionalAction, help="set if want to run with oneTBB executor")
-parser.add_argument("--eigen", action=argparse.BooleanOptionalAction, help="set if want to run with eigen executor")
+parser.add_argument("--omp", action="store_true", help="set if want to run with OpenMP executor")
+parser.add_argument("--tbb", action="store_true", help="set if want to run with oneTBB executor")
+parser.add_argument("--eigen", action="store_true", help="set if want to run with eigen executor")
 
-parser.add_argument("--numa", action=argparse.BooleanOptionalAction, help="set if run on numa machine")
+parser.add_argument("--numa", action="store_true", help="set if run on numa machine")
 parser.add_argument("--only", type=str, help="only run given test")
-parser.add_argument("--small", action=argparse.BooleanOptionalAction, help="scjet if want to test on smaller datasets")
+parser.add_argument("--small", action="store_true", help="scjet if want to test on smaller datasets")
 parser.add_help = True
 
 args = parser.parse_args()
