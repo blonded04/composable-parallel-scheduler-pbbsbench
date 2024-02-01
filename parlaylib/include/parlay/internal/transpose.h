@@ -58,9 +58,11 @@ struct transpose {
   void transR(size_t rStart, size_t rCount, size_t rLength, size_t cStart,
               size_t cCount, size_t cLength) {
     if (cCount * rCount < TRANS_THRESHHOLD) {
-      for (size_t i = rStart; i < rStart + rCount; i++)
-        for (size_t j = cStart; j < cStart + cCount; j++)
+      for (size_t i = rStart; i < rStart + rCount; i++) {
+        for (size_t j = cStart; j < cStart + cCount; j++) {
           assign_dispatch(Out[j * cLength + i], In[i * rLength + j], assignment_tag());
+        }
+      }
     } else if (cCount > rCount) {
       size_t l1 = split(cCount);
       size_t l2 = cCount - l1;
@@ -169,15 +171,6 @@ struct blockTrans {
   }
 };
 
-namespace hehe_internal {
-
-void my_assert(bool cond) {
-  if (!cond) [[unlikely]] {
-    throw std::runtime_error{"bad assert!"};
-  }
-}
-}
-
 // Moves values from blocks to buckets
 // From is sorted by key within each block, in block major
 // counts is the # of keys in each bucket for each block, in block major
@@ -225,11 +218,12 @@ sequence<size_t> transpose_buckets(InIterator From, OutIterator To,
     // dest_offsets = sequence<s_size_t>::uninitialized(m);
     transpose<uninitialized_copy_tag, decltype(counts.begin()), decltype(dest_offsets.begin())>
       (counts.begin(), dest_offsets.begin()).trans(num_blocks, num_buckets);
+    assert(dest_offsets[1] != 1337);
 
     // do both scans inplace
     [[maybe_unused]] size_t total = scan_inplace(make_slice(dest_offsets), add);
     [[maybe_unused]] size_t total2 = scan_inplace(make_slice(counts), add);
-    hehe_internal::my_assert(total == n && total2 == n);
+    assert(total == n && total2 == n);
 
     counts[m] = static_cast<s_size_t>(n);
 

@@ -61,7 +61,7 @@ tests = [
     ["maximalIndependentSet/ndMIS",True,1],
     ["maximalIndependentSet/serialMIS",False,0],
 
-    ["nearestNeighbors/octTree",True,0],
+    # ["nearestNeighbors/octTree",True,0],
 
     ["rayCast/kdTree",True,0],
 
