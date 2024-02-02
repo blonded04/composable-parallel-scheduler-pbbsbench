@@ -1,0 +1,25 @@
+HOSTNAME: collab1
+Parallel Only
+Forcing Compile
+running on 48 threads
+TBB_INCLUDE: /home/itmo_denis/local/include
+TBB_LFLAGS: -Wl,-rpath,/home/itmo_denis/local/lib64 /home/itmo_denis/local/lib64/libtbb.so
+
+cd benchmarks/integerSort/parallelRadixSort ; make -s cleanall ; make -j 24
+g++ -DPARLAY_TBB -DTBB_MODE=TBB_AFFINITY -I /home/itmo_denis/local/include   -O2 -g -std=c++17 -DNDEBUG -I .  -include isort.h -o isort ../bench/isortTime.C -Wl,-rpath,/home/itmo_denis/local/lib64 /home/itmo_denis/local/lib64/libtbb.so -ldl 
+cp ../bench/testInputs ../bench/testInputs_small .
+cd ../bench; make isortCheck
+make[1]: Entering directory '/home/itmo_denis/pbbsbench/benchmarks/integerSort/bench'
+g++ -DPARLAY_TBB -DTBB_MODE=TBB_AFFINITY -I /home/itmo_denis/local/include   -O2 -g -std=c++17 -DNDEBUG -I . -Icommon -o isortCheck isortCheck.C -Wl,-rpath,/home/itmo_denis/local/lib64 /home/itmo_denis/local/lib64/libtbb.so -ldl 
+make[1]: Leaving directory '/home/itmo_denis/pbbsbench/benchmarks/integerSort/bench'
+cd benchmarks/integerSort/parallelRadixSort ; numactl -i all ./testInputs -r 3 -p 48
+running cd ../sequenceData/data; make randomSeq_100M_int
+running PARLAY_NUM_THREADS=48 ./isort -b 27 -r 3 -o /tmp/ofile652266_256317 ../sequenceData/data/randomSeq_100M_int
+running ./../bench/isortCheck  ../sequenceData/data/randomSeq_100M_int /tmp/ofile652266_256317
+running rm ../sequenceData/data/randomSeq_100M_int
+randomSeq_100M_int : -b 27 -r 3 -o /tmp/ofile652266_256317 : '0.275', '0.281', '0.268', geomean = 0.275
+running cd ../sequenceData/data; make exptSeq_100M_int
+running PARLAY_NUM_THREADS=48 ./isort -b 27 -r 3 -o /tmp/ofile866606_977844 ../sequenceData/data/exptSeq_100M_int
+running ./../bench/isortCheck  ../sequenceData/data/exptSeq_100M_int /tmp/ofile866606_977844
+TEST TERMINATED ABNORMALLY:
+  cd benchmarks/integerSort/parallelRadixSort ; numactl -i all ./testInputs -r 3 -p 48
