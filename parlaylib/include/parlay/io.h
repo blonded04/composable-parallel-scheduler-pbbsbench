@@ -241,6 +241,99 @@ Float_ chars_to_float_t(const chars& s, FallbackF&& fallback) {
   return fallback(s);
 }
 
+template<typename Float_, size_t max_len, int64_t max_exp, int64_t max_man, typename It, typename FallbackF>
+Float_ chars_to_float_t(const slice<It, It>& str, FallbackF&& fallback) {
+
+  static const Float_ pow_ten[] = {
+    Float_{1e0},  Float_{1e1},  Float_{1e2},  Float_{1e3},  Float_{1e4},
+    Float_{1e5},  Float_{1e6},  Float_{1e7},  Float_{1e8},  Float_{1e9},
+    Float_{1e10}, Float_{1e11}, Float_{1e12}, Float_{1e13}, Float_{1e14},
+    Float_{1e15}, Float_{1e16}, Float_{1e17}, Float_{1e18}, Float_{1e19},
+    Float_{1e20}, Float_{1e21}, Float_{1e22}
+  };
+
+  // Fast Path
+  auto sz = str.size();
+  if (sz <= max_len) {
+    size_t i = 0;
+    uint64_t r = 0;
+    int64_t exponent = 0;
+    bool is_negative = false;
+
+    while (std::isspace(static_cast<unsigned char>(str[i]))) {
+      i++;
+    }
+
+    // Detect sign
+    if (str[i] == '-') {
+      is_negative = true;
+      i++;
+    }
+    else if (str[i] == '+') {
+      i++;
+    }
+
+    // Catches inf and nan
+    if (str[i] == 'i' || str[i] == 'n') {
+      return fallback(str);
+    }
+
+    // Read digits
+    while (i < sz && std::isdigit(static_cast<unsigned char>(str[i]))) {
+      r = r * 10 + (str[i++] - '0');
+    }
+
+    // Whole number. No decimal point and no exponent. Easy.
+    if (i == sz) {
+      if (r < (uint64_t{1} << max_man)) {
+        Float_ res = static_cast<Float_>(r);
+        if (is_negative) res = -res;
+        return res;
+      }
+      else {
+        return fallback(str);
+      }
+    }
+
+    // Found the exponent. No decimal point
+    if (str[i] == 'e' || str[i] == 'E') {
+      exponent = static_cast<int64_t>(internal::chars_to_int_t<uint64_t>(str.cut(i+1, sz)));
+      i = sz;
+    }
+    // Found the decimal point. Continue looking until we find an exponent or the end
+    else {
+      assert(str[i] == '.' || str[i] == ',');
+      int64_t period = static_cast<int64_t>(i++);
+
+      while (i < sz && std::isdigit(static_cast<unsigned char>(str[i]))) {
+        r = r * 10 + (str[i++] - '0');
+      }
+
+      exponent = -(static_cast<int64_t>(i) - period - 1);
+
+      if (i < sz && (str[i] == 'e' || str[i] == 'E')) {
+        exponent += static_cast<int64_t>(internal::chars_to_int_t<uint64_t>(str.cut(i+1, sz)));
+        i = sz;
+      }
+    }
+
+    assert(i == sz);
+
+    // We can represent this exactly!
+    if (-max_exp <= exponent && exponent <= max_exp && r < (uint64_t{1} << max_man)) {
+      Float_ result = static_cast<Float_>(r);
+      Float_ tens = exponent > 0 ? pow_ten[exponent] : pow_ten[-exponent];
+      if (exponent < 0) result = result / tens;
+      else if (exponent > 0) result = result * tens;
+      if (is_negative) result = -result;
+      return result;
+    }
+  }
+
+  // Slow path: Just fall back to std::stof/std::stod/std::stold
+  return fallback(str);
+}
+
 }
 
 inline int chars_to_int(const chars& s) { return internal::chars_to_int_t<int>(make_slice(s)); }
@@ -255,6 +348,26 @@ inline unsigned long long chars_to_ulong_long(const chars& s) { return internal:
 inline float chars_to_float(const chars& s) {
   return internal::chars_to_float_t<float, 10, 10, 24>(s, [](const auto& str) {
     return std::stof(std::string(std::begin(str), std::end(str))); });
+}
+
+template <class Float, class It>
+Float chars_to_float_t(slice<It, It> s) noexcept {
+  if constexpr (std::is_same_v<Float, float>) {
+    return internal::chars_to_float_t<float, 10, 10, 24>(s, [](const slice<It, It> str) {
+      return std::stof(std::string{str.begin(), str.end()});
+    });
+  } else if constexpr (std::is_same_v<Float, double>) {
+    return internal::chars_to_float_t<double, 18, 22, 53>(s, [](const slice<It, It> str) {
+      return std::stod(std::string{str.begin(), str.end()});
+    });
+  } else if constexpr (std::is_same_v<Float, long double>) {
+    return internal::chars_to_float_t<long double, 18, 22, 53>(s, [](const slice<It, It> str) {
+      return std::stold(std::string{str.begin(), str.end()});
+    });
+  } else {
+    // fake check, always false
+    static_assert(std::is_same_v<Float, float>, "provided an unsupported float type");
+  }
 }
 
 inline double chars_to_double(const chars& s) {

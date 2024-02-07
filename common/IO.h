@@ -204,7 +204,7 @@ namespace benchIO {
     return writeSeqToFile(intHeaderIO, A, fileName);
   }
 
-  sequence<sequence<char>> get_tokens(char const *fileName) {
+  inline sequence<sequence<char>> get_tokens(char const *fileName) {
     // parlay::internal::timer t("get_tokens");
     // auto S = parlay::chars_from_file(fileName);
     auto S = parlay::file_map(fileName);
@@ -214,18 +214,37 @@ namespace benchIO {
     return r;
   }
 
+  inline sequence<std::string_view> get_tokens(char const* begin, char const* end) {
+    sequence<std::string_view> out;
+
+    for (char const *cur_start = begin, *cur_end = begin; cur_end < end; cur_start = cur_end + 1) {
+      while (cur_end < end && !benchIO::is_space(*cur_end)) {
+        ++cur_end;
+      }
+
+      out.push_back(std::string_view(cur_start, cur_end - cur_start));
+    }
+
+    return out;
+  }
+
   template <class T>
   parlay::sequence<T> readIntSeqFromFile(char const *fileName) {
-    auto W = get_tokens(fileName);
-    string header(W[0].begin(),W[0].end());
+    std::ifstream file{fileName, std::ios::in};
+
+    std::string header;
+    file >> header;
+
     if (header != intHeaderIO) {
       cout << "readIntSeqFromFile: bad input" << endl;
       abort();
     }
-    long n = W.size()-1;
-    auto A = parlay::tabulate(n, [&] (long i) -> T {
-	return parlay::chars_to_long(W[i+1]);});
-    return A;
-  }
-};
 
+    std::string token;
+    sequence<T> out;
+    while (file >> token) {
+      out.push_back(parlay::internal::chars_to_int_t<long>(make_slice(token)));
+    }
+    return out;
+  }
+}

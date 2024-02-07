@@ -144,47 +144,60 @@ namespace benchIO {
 
   template <class intV>
   edgeArray<intV> readEdgeArrayFromFile(char* fname) {
-    parlay::sequence<char> S = readStringFromFile(fname);
-    parlay::sequence<char*> W = stringToWords(S);
-    if (W[0] != EdgeArrayHeader) {
+    std::ifstream file{fname, std::ios::in};
+
+    std::string header;
+    file >> header;
+    if (header != EdgeArrayHeader) {
       cout << "Bad input file" << endl;
       abort();
     }
-    long n = (W.size()-1)/2;
-    auto E = parlay::tabulate(n, [&] (long i) -> edge<intV> {
-	return edge<intV>(atol(W[2*i + 1]),
-			  atol(W[2*i + 2]));});
 
-    auto mon = parlay::make_monoid([&] (edge<intV> a, edge<intV> b) {
-	return edge<intV>(std::max(a.u, b.u), std::max(a.v, b.v));},
-      edge<intV>(0,0));
-    auto r = parlay::reduce(E, mon);
+    std::string in_part;
+    intV max_vert = 0;
+    sequence<edge<intV>> edges;
+    while (file >> in_part) {
+      auto from = parlay::internal::chars_to_int_t<intV>(make_slice(in_part));
 
-    intV maxrc = std::max(r.u, r.v) + 1;
-    return edgeArray<intV>(std::move(E), maxrc, maxrc);
+      file >> in_part;
+      auto to = parlay::internal::chars_to_int_t<intV>(make_slice(in_part));
+
+      edges.push_back(edge<intV>{from, to});
+      max_vert = std::max(std::max(from, to), max_vert);
+    }
+    max_vert++;
+    return edgeArray<intV>(std::move(edges), max_vert, max_vert);
   }
 
   template <class intV, class Weight>
   wghEdgeArray<intV,Weight> readWghEdgeArrayFromFile(char* fname) {
     using WE = wghEdge<intV,Weight>;
-    parlay::sequence<char> S = readStringFromFile(fname);
-    parlay::sequence<char*> W = stringToWords(S);
-    if (W[0] != WghEdgeArrayHeader) {
+    std::ifstream file{fname, std::ios::in};
+
+    std::string header;
+    file >> header;
+    if (header != WghEdgeArrayHeader) {
       cout << "Bad input file" << endl;
       abort();
     }
-    long n = (W.size()-1)/3;
-    auto E = parlay::tabulate(n, [&] (size_t i) -> WE {
-	return WE(atol(W[3*i + 1]),
-		  atol(W[3*i + 2]),
-		  (Weight) atof(W[3*i + 3]));});
 
-    auto mon = parlay::make_monoid([&] (WE a, WE b) {
-	return WE(std::max(a.u, b.u), std::max(a.v, b.v), 0);},
-      WE(0,0,0));
-    auto r = parlay::reduce(E, mon);
+    std::string in_part;
+    intV max_vert = 0;
+    sequence<WE> edges;
+    while (file >> in_part) {
+      auto from = parlay::internal::chars_to_int_t<intV>(make_slice(in_part));
 
-    return wghEdgeArray<intV,Weight>(std::move(E), max<intV>(r.u, r.v) + 1);
+      file >> in_part;
+      auto to = parlay::internal::chars_to_int_t<intV>(make_slice(in_part));
+
+      file >> in_part;
+      auto weight = static_cast<Weight>(parlay::chars_to_float_t<double>(make_slice(in_part)));
+      edges.push_back(WE{from, to, weight});
+
+      max_vert = std::max(std::max(from, to), max_vert);
+    }
+
+    return wghEdgeArray<intV,Weight>(std::move(edges), max_vert + 1);
   }
 
   template <class intV, class intE=intV>
