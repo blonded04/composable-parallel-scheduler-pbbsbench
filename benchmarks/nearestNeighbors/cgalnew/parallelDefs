@@ -8,12 +8,12 @@ endif
 CCFLAGS = -mcx16 -O3 -std=c++17
 CLFLAGS = -ldl $(JEMALLOC) 
 
-OMPFLAGS = -DPARLAY_OPENMP -fopenmp
+OMPFLAGS = -DPARLAY_OPENMP -fopenmp=libomp
 CILKFLAGS = -DPARLAY_CILK -fcilkplus
 PBBFLAGS = -I/home/magdalen/CGAL-5.2/include -I/home/magdalen/tbb/include
 
 ifdef OPENMP
-CC = g++
+CC = clang++
 CFLAGS = $(OMPFLAGS) $(CCFLAGS)
 LFLAGS = $(OMPFLAGS) $(CLFLAGS)
 
