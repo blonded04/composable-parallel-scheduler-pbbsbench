@@ -100,47 +100,30 @@ namespace benchIO {
 
   template <class Point>
   parlay::sequence<Point> readPointsFromFile(char const *fname) {
-    parlay::sequence<char> S = readStringFromFile(fname);
-    parlay::sequence<char*> W = stringToWords(S);
-    int d = Point::dim;
-    if (W.size() == 0 || W[0] != (d == 2 ? HeaderPoint2d : HeaderPoint3d)) {
+    std::ifstream file{fname, std::ios::in};
+
+    using Coord = typename Point::Coord;
+    int dims = Point::dim;
+    std::string header;
+    file >> header;
+    if (header != (dims == 2 ? HeaderPoint2d : HeaderPoint3d)) {
       cout << "readPointsFromFile wrong file type" << endl;
       abort();
     }
-    return parsePoints<Point>(W.cut(1,W.size()));
+
+    std::string in_part;
+    sequence<Point> points;
+    sequence<Coord> cur_point(dims, Coord{});
+    while (file >> in_part) {
+      cur_point[0] = static_cast<Coord>(parlay::chars_to_float_t<double>(make_slice(in_part)));
+      for (size_t i = 1; i < dims; ++i) {
+        file >> in_part;
+        cur_point[i] = static_cast<Coord>(parlay::chars_to_float_t<double>(make_slice(in_part)));
+      }
+      points.push_back(Point(cur_point));
+    }
+    return points;
   }
-
-  // triangles<point2d> readTrianglesFromFileNodeEle(char const *fname) {
-  //   string nfilename(fname);
-  //   _seq<char> S = readStringFromFile((char*)nfilename.append(".node").c_str());
-  //   words W = stringToWords(S.A, S.n);
-  //   triangles<point2d> Tr;
-  //   Tr.numPoints = atol(W.Strings[0]);
-  //   if (W.m < 4*Tr.numPoints + 4) {
-  //     cout << "readStringFromFileNodeEle inconsistent length" << endl;
-  //     abort();
-  //   }
-
-  //   Tr.P = newA(point2d, Tr.numPoints);
-  //   for(intT i=0; i < Tr.numPoints; i++) 
-  //     Tr.P[i] = point2d(atof(W.Strings[4*i+5]), atof(W.Strings[4*i+6]));
-
-  //   string efilename(fname);
-  //   _seq<char> SN = readStringFromFile((char*)efilename.append(".ele").c_str());
-  //   words WE = stringToWords(SN.A, SN.n);
-  //   Tr.numTriangles = atol(WE.Strings[0]);
-  //   if (WE.m < 4*Tr.numTriangles + 3) {
-  //     cout << "readStringFromFileNodeEle inconsistent length" << endl;
-  //     abort();
-  //   }
-
-  //   Tr.T = newA(triangle, Tr.numTriangles);
-  //   for (long i=0; i < Tr.numTriangles; i++)
-  //     for (int j=0; j < 3; j++)
-  // 	Tr.T[i].C[j] = atol(WE.Strings[4*i + 4 + j]);
-
-  //   return Tr;
-  // }
 
   template <class pointT>
   triangles<pointT> readTrianglesFromFile(char const *fname, int offset) {

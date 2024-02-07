@@ -110,41 +110,28 @@ namespace benchIO {
     xToString(s+l+1, a.second);
   }
 
-  template <class Seq>
-  charstring seqToString(Seq const &A) {
-    size_t n = A.size();
-    auto L = parlay::tabulate(n, [&] (size_t i) -> long {
-	typename Seq::value_type x = A[i];
-	return xToStringLen(x)+1;});
-    size_t m;
-    std::tie(L,m) = parlay::scan(std::move(L));
+  inline std::ostream& writeToStream(std::ostream& os, charstring const &a) {
+    return os << std::string_view(a.data(), a.size());
+  }
+  inline std::ostream& writeToStream(std::ostream& os, long a) { return os << a; }
+  inline std::ostream& writeToStream(std::ostream& os, uint a) { return os << a; }
+  inline std::ostream& writeToStream(std::ostream& os, unsigned long a) { return os << a; }
+  inline std::ostream& writeToStream(std::ostream& os, int a) { return os << a; }
+  inline std::ostream& writeToStream(std::ostream& os, double a) { return os << a; }
+  inline std::ostream& writeToStream(std::ostream& os, char* a) { return os << std::string_view(a, std::strlen(a)); }
 
-    charstring B(m+1, (char) 0);
-    char* Bs = B.begin();
-
-    parlay::parallel_for(0, n-1, [&] (long i) {
-      xToString(Bs + L[i], A[i]);
-      Bs[L[i+1] - 1] = '\n';
-      });
-    xToString(Bs + L[n-1], A[n-1]);
-    Bs[m] = Bs[m-1] = '\n';
-    
-    charstring C = parlay::filter(B, [&] (char c) {return c != 0;}); 
-    C[C.size()-1] = 0;
-    return C;
+  template <class A, class B>
+  inline std::ostream& writeToStream(std::ostream& os, pair<A,B> a) {
+    writeToStream(os, a.first);
+    os << ' ';
+    writeToStream(os, a.second);
+    return os;
   }
 
   template <class T>
   void writeSeqToStream(ofstream& os, parlay::sequence<T> const &A) {
-    size_t bsize = 10000000;
-    size_t offset = 0;
-    size_t n = A.size();
-    while (offset < n) {
-      // Generates a string for a sequence of size at most bsize
-      // and then wrties it to the output stream
-      charstring S = seqToString(A.cut(offset, min(offset + bsize, n)));
-      os.write(S.begin(), S.size()-1);
-      offset += bsize;
+    for (const auto& elem : A) {
+      writeToStream(os, elem) << '\n';
     }
   }
 

@@ -202,8 +202,10 @@ namespace benchIO {
 
   template <class intV, class intE=intV>
   graph<intV, intE> readGraphFromFile(char* fname) {
-    auto W = get_tokens(fname);
-    string header(W[0].begin(), W[0].end());
+    std::ifstream file{fname, std::ios::in};
+
+    std::string header;
+    file >> header;
     if (header != AdjGraphHeader) {
       cout << "Bad input file: missing header: " << AdjGraphHeader << endl;
       abort();
@@ -211,19 +213,25 @@ namespace benchIO {
 
     // file consists of [type, num_vertices, num_edges, <vertex offsets>, <edges>]
     // in compressed sparse row format
-    long n = parlay::chars_to_long(W[1]);
-    long m = parlay::chars_to_long(W[2]);
-    if (W.size() != n + m + 3) {
-      cout << "Bad input file: length = "<< W.size() << " n+m+3 = " << n+m+3 << endl;
-      abort(); }
-    
-    // tags on m at the end (so n+1 total offsets)
-    auto offsets = parlay::tabulate(n+1, [&] (size_t i) -> intE {
-	return (i == n) ? m : parlay::chars_to_long(W[i+3]);});
-    auto edges = parlay::tabulate(m, [&] (size_t i) -> intV {
-	return parlay::chars_to_long(W[n+i+3]);});
+    std::string in_part;
+    long vert_cnt, edge_cnt;
+    file >> vert_cnt >> edge_cnt;
 
-    return graph<intV, intE>(std::move(offsets), std::move(edges), n);
+    // tags on m at the end (so n+1 total offsets)
+    auto offsets = parlay::sequence<intV>::uninitialized(vert_cnt + 1);
+    offsets.back() = edge_cnt;
+    for (size_t i = 0; i < vert_cnt; ++i) {
+      file >> in_part;
+      offsets[i] = parlay::internal::chars_to_int_t<intV>(make_slice(in_part));
+    }
+    
+    auto edges = parlay::sequence<intV>::uninitialized(edge_cnt);
+    for (size_t i = 0; i < edge_cnt; ++i) {
+      file >> in_part;
+      edges[i] = parlay::internal::chars_to_int_t<intV>(make_slice(in_part));
+    }
+
+    return graph<intV, intE>(std::move(offsets), std::move(edges), vert_cnt);
   }
 
   // parlay::sequence<char> mmapStringFromFile(const char *filename) {
@@ -298,31 +306,42 @@ namespace benchIO {
 
   template <class intV, class Weight, class intE>
   wghGraph<intV, Weight, intE> readWghGraphFromFile(char* fname) {
-    parlay::sequence<char> S = readStringFromFile(fname);
-    parlay::sequence<char*> W = stringToWords(S);
-    if (W[0] != WghAdjGraphHeader) {
+    std::ifstream file{fname, std::ios::in};
+
+    std::string header;
+    file >> header;
+    if (header != WghAdjGraphHeader) {
       cout << "Bad input file" << endl;
       abort();
     }
 
-    long n = atol(W[1]);
-    long m = atol(W[2]);
-    if (W.size() != n + 2*m + 3) {
-      cout << "Bad input file: length = "<< W.size()
-	   << " n + 2*m + 3 = " << n+2*m+3 << endl;
-      abort(); }
+    std::string in_part;
+    long vert_cnt, edge_cnt;
+    file >> vert_cnt >> edge_cnt;
     
     // tags on m at the end (so n+1 total offsets)
-    auto offsets = parlay::tabulate(n+1, [&] (size_t i) -> intE {
-	return (i == n) ? m : atol(W[i+3]);});
-    auto edges = parlay::tabulate(m, [&] (size_t i) -> intV {
-	return atol(W[n+i+3]);});
-    auto weights = parlay::tabulate(m, [&] (size_t i) -> Weight {
-	return (Weight) atof(W[n+i+3+m]);});
+    auto offsets = parlay::sequence<intV>::uninitialized(vert_cnt + 1);
+    offsets.back() = edge_cnt;
+    for (size_t i = 0; i < vert_cnt; ++i) {
+      file >> in_part;
+      offsets[i] = parlay::internal::chars_to_int_t<intV>(make_slice(in_part));
+    }
+
+    auto edges = parlay::sequence<intV>::uninitialized(edge_cnt);
+    for (size_t i = 0; i < edge_cnt; ++i) {
+      file >> in_part;
+      edges[i] = parlay::internal::chars_to_int_t<intV>(make_slice(in_part));
+    }
+
+    auto weights = parlay::sequence<Weight>::uninitialized(edge_cnt);
+    for (size_t i = 0; i < edge_cnt; ++i) {
+      file >> in_part;
+      weights[i] = static_cast<Weight>(parlay::chars_to_float_t<double>(make_slice(in_part)));
+    }
 
     return wghGraph<intV,Weight,intE>(std::move(offsets),
 				      std::move(edges),
-				      std::move(weights), n);
+				      std::move(weights), vert_cnt);
   }
 
   // The following two are used by the graph generators to write out in either format
