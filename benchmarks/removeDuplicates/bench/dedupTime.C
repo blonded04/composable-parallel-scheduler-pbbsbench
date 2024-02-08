@@ -34,8 +34,7 @@ using namespace benchIO;
 using parlay::sequence;
 
 template <typename T>
-int timeDedup(sequence<sequence<char>> const &In, int rounds, char* outFile) {
-  sequence<T> A = parseElements<T>(In.cut(1, In.size()));
+int timeDedup(sequence<T> &A, int rounds, char* outFile) {
   size_t n = A.size();
   sequence<T> R;
   time_loop(rounds, 1.0,
@@ -53,14 +52,15 @@ int main(int argc, char* argv[]) {
   int rounds = P.getOptionIntValue("-r",1);
   int verbose = P.getOption("-v");
 
-  auto In = get_tokens(iFile);
-  elementType in_type = elementTypeFromHeader(In[0]);
-  size_t n = In.size() - 1;
+  FileReader reader{iFile};
+  elementType in_type = elementTypeFromHeader(reader.readHeader());
 
   if (in_type == intType) {
+    auto In = reader.readSeq<int>();
     return timeDedup<int>(In, rounds, oFile);
   } else if (in_type == stringT) {
     using str = sequence<char>;
+    auto In = reader.readSeq<str>();
     return timeDedup<str>(In, rounds, oFile);
   } else {
     cout << "dedupTime: input file not of right type" << endl;

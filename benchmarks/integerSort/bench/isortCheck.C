@@ -21,7 +21,6 @@
 // WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 #include <charconv>
-#include <filesystem>
 #include <iostream>
 #include <algorithm>
 #include <cstring>
@@ -55,84 +54,26 @@ void checkSort(sequence<T> in_vals,
   }
 }
 
-std::string readFile(std::string filenameStr) {
-  std::filesystem::path filename{filenameStr};
-  auto fileSize = std::filesystem::file_size(filename);
-  std::string content(fileSize, '\0');
-
-  std::ifstream file{filenameStr};
-  if (!file.read(content.data(), fileSize)) {
-    std::cerr << "I CAN'T READ" << std::endl;
-    throw std::runtime_error{"I CAN'T READ"};
+template <typename T>
+bool assertSizes(char const* progName, sequence<T> const& lhs, sequence<T> const& rhs) {
+  if (lhs.size() != rhs.size()) {
+    cout << progName << ": in and out lengths don't match" << endl;
+    return false;
   }
-
-  return content;
-}
-
-struct Tokens {
-  std::string content;
-  std::vector<std::string_view> parts;
-};
-
-Tokens readTokens(std::string filenameStr) {
-  Tokens tokensRes{.content = readFile(std::move(filenameStr))};
-
-  std::string_view contentView = tokensRes.content;
-  size_t lastNewLine = 0;
-  for (auto newLine = contentView.find_first_of("\n "); newLine != std::string_view::npos; newLine = contentView.find_first_of("\n ", newLine + 1)) {
-    size_t tokenStart = lastNewLine;
-    size_t tokenSize = newLine - tokenStart;
-    auto token = contentView.substr(tokenStart, tokenSize);
-    tokensRes.parts.push_back(token);
-    lastNewLine = newLine + 1;
-  }
-  return tokensRes;
-}
-
-template <class T>
-T parseValue(std::string_view input) {
-  T value{};
-  auto res = std::from_chars(input.data(), input.data() + input.size(), value);
-  if (res.ec != std::errc{}) {
-    throw std::runtime_error{std::string{"couldn't parse value: "} + std::string{input}};
-  }
-  return value;
-}
-
-template <class T, class It>
-sequence<T> parseValues(It begin, It end) {
-  auto size = std::distance(begin, end);
-  if constexpr (std::is_same_v<T, uint>){
-    return parlay::tabulate(size, [&begin](size_t i) { return parseValue<uint>(*(begin + i)); });
-  } else if constexpr (std::is_same_v<T, uintPair>) {
-    return tabulate(size/2, [&] (long i) -> uintPair {
-        return std::make_pair((uint) parseValue<uint>(*(begin + 2*i)), parseValue<uint>(*(begin + 2*i+1)));});
-  } else {
-    static_assert(std::is_same_v<T, uint>);
-  }
+  return true;
 }
 
 int main(int argc, char* argv[]) {
   commandLine P(argc,argv,"<inFile> <outFile>");
   pair<char*,char*> fnames = P.IOFileNames();
-  char* infile = fnames.first;
-  char* outfile = fnames.second;
-  
-  auto myIn = readTokens(infile);
-  elementType in_type = elementTypeFromHeader(myIn.parts[0]);
-  size_t in_n = myIn.parts.size() - 1; // 126528
+  FileReader infile{fnames.first};
+  FileReader outfile(fnames.second);
 
-  auto myOut = readTokens(outfile);
-  elementType out_type = elementTypeFromHeader(myOut.parts[0]);
-  size_t out_n = myOut.parts.size() - 1; // 126528
+  elementType in_type = elementTypeFromHeader(infile.readHeader());
+  elementType out_type = elementTypeFromHeader(outfile.readHeader());
 
   if (in_type != out_type) {
     cout << argv[0] << ": in and out types don't match" << endl;
-    return(1);
-  }
-  
-  if (in_n != out_n) {
-    cout << argv[0] << ": in and out lengths don't match" << endl;
     return(1);
   }
 
@@ -141,14 +82,20 @@ int main(int argc, char* argv[]) {
   
   switch (in_type) {
   case intType: {
-    auto inValues = parseValues<uint>(myIn.parts.begin() + 1, myIn.parts.end());
-    auto outValues = parseValues<uint>(myOut.parts.begin() + 1, myOut.parts.end());
+    auto inValues = infile.readSeq<uint>();
+    auto outValues = outfile.readSeq<uint>();
+    if (!assertSizes(argv[0], inValues, outValues)) {
+      return 1;
+    }
     checkSort(inValues, outValues, less);
     break;
   }
   case intPairT: {
-    auto inValues = parseValues<uintPair>(myIn.parts.begin() + 1, myIn.parts.end());
-    auto outValues = parseValues<uintPair>(myOut.parts.begin() + 1, myOut.parts.end());
+    auto inValues = infile.readSeq<uintPair>();
+    auto outValues = outfile.readSeq<uintPair>();
+    if (!assertSizes(argv[0], inValues, outValues)) {
+      return 1;
+    }
     checkSort(inValues, outValues, lessp);
     break;
   }

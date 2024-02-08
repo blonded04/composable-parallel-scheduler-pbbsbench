@@ -27,6 +27,7 @@
 #include <string>
 #include <string>
 #include <cstring>
+#include <type_traits>
 #include "../parlay/primitives.h"
 #include "../parlay/parallel.h"
 #include "../parlay/io.h"
@@ -130,6 +131,7 @@ namespace benchIO {
 
   template <class T>
   void writeSeqToStream(ofstream& os, parlay::sequence<T> const &A) {
+    os << std::scientific << std::setprecision(11);
     for (const auto& elem : A) {
       writeToStream(os, elem) << '\n';
     }
@@ -215,23 +217,79 @@ namespace benchIO {
     return out;
   }
 
+  template <typename T>
+  struct To {};
+
+  class FileReader {
+  public:
+    FileReader(char const* fileName)
+      : strm{fileName, std::ios::in} {}
+
+    std::string_view readHeader() {
+      strm >> cur_token;
+      return cur_token;
+    }
+
+    template <typename T>
+    std::enable_if_t<std::is_integral_v<T>, bool> readTo(T& to) {
+      if (!(strm >> cur_token)) {
+        return false;
+      }
+      to = parlay::internal::chars_to_int_t<T>(make_slice(cur_token));
+      return true;
+    }
+
+    template <typename T>
+    std::enable_if_t<std::is_floating_point_v<T>, bool> readTo(T& to) {
+      if (!(strm >> cur_token)) {
+        return false;
+      }
+      to = static_cast<T>(parlay::chars_to_float_t<double>(make_slice(cur_token)));
+      return true;
+    }
+
+    template <typename F, typename S>
+    bool readTo(std::pair<F, S>& to) {
+      return readTo(to.first) && readTo(to.second);
+    }
+
+    bool readTo(sequence<char>& to) {
+      if (!(strm >> cur_token)) {
+        return false;
+      }
+      to.clear();
+      to.reserve(cur_token.size());
+      for (char ch : cur_token) {
+        to.push_back(ch);
+      }
+      return true;
+    }
+
+    template <typename T>
+    sequence<T> readSeq() {
+      sequence<T> out;
+      T cur;
+      while (readTo(cur)) {
+        out.push_back(std::move(cur));
+      }
+      return out;
+    }
+
+  private:
+    std::ifstream strm;
+    std::string cur_token;
+  };
+
   template <class T>
   parlay::sequence<T> readIntSeqFromFile(char const *fileName) {
-    std::ifstream file{fileName, std::ios::in};
+    FileReader reader{fileName};
 
-    std::string header;
-    file >> header;
-
+    std::string header{reader.readHeader()};
     if (header != intHeaderIO) {
       cout << "readIntSeqFromFile: bad input" << endl;
       abort();
     }
 
-    std::string token;
-    sequence<T> out;
-    while (file >> token) {
-      out.push_back(parlay::internal::chars_to_int_t<long>(make_slice(token)));
-    }
-    return out;
+    return reader.readSeq<T>();
   }
 }

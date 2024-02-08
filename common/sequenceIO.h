@@ -181,9 +181,9 @@ namespace benchIO {
   // reads file, tokenizes and then dispatches to specialized parsing function
   template <typename T>
   sequence<T> readSequenceFromFile(char const *fileName) {
-    auto S = get_tokens(fileName);
-    check_header<T>(S[0]);
-    return parseElements<T>(S.cut(1,S.size()));
+    FileReader reader{fileName};
+    check_header<T>(reader.readHeader());
+    return reader.readSeq<T>();
   }
   
   template <class T>

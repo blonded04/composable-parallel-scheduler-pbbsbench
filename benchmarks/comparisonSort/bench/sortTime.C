@@ -32,9 +32,7 @@ using namespace std;
 using namespace benchIO;
 
 template <typename T, typename Less>
-int timeSort(sequence<parlay::chars> const &In, Less less, int rounds, bool permute, char* outFile) {
-  sequence<T> A = parseElements<T>(In.cut(1, In.size()));
-  
+int timeSort(sequence<T> &A, Less less, int rounds, bool permute, char* outFile) {
   size_t n = A.size();
   if (permute) A = parlay::random_shuffle(A);
   sequence<T> B;
@@ -56,22 +54,25 @@ int main(int argc, char* argv[]) {
   int rounds = P.getOptionIntValue("-r",1);
   bool permute = P.getOption("-p");
 
-  auto In = get_tokens(iFile);
-  elementType in_type = elementTypeFromHeader(In[0]);
-  size_t n = In.size() - 1;
+  FileReader reader(iFile);
+  elementType in_type = elementTypeFromHeader(reader.readHeader());
 
 
   if (in_type == intType) {
+    auto In = reader.readSeq<int>();
     return timeSort<int>(In, std::less<int>(), rounds, permute, oFile);
   } else if (in_type == doubleT) {
+    auto In = reader.readSeq<double>();
     return timeSort<double>(In, std::less<double>(), rounds, permute, oFile);
   } else if (in_type == intPairT) {
     using ipair = pair<int,int>;
     auto less = [] (ipair a, ipair b) {return a.first < b.first;};
+    auto In = reader.readSeq<ipair>();
     return timeSort<ipair>(In, less, rounds, permute, oFile);
   } else if (in_type == doublePairT) {
     using dpair = pair<double,double>;
     auto less = [] (dpair a, dpair b) {return a.first < b.first;};
+    auto In = reader.readSeq<dpair>();
     return timeSort<dpair>(In, less, rounds, permute, oFile);
   } else if (in_type == stringT) {
     using str = parlay::chars;
@@ -82,6 +83,7 @@ int main(int argc, char* argv[]) {
       while (sa < ea && *sa == *sb) {sa++; sb++;}
       return sa == ea ? (a.size() < b.size()) : *sa < *sb;
     };
+    auto In = reader.readSeq<str>();
     return timeSort<str>(In, strless, rounds, permute, oFile); 
   } else {
     cout << "sortTime: input file not of right type" << endl;
