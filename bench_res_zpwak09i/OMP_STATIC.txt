@@ -4,480 +4,427 @@ Forcing Compile
 running on 48 threads
 
 cd benchmarks/integerSort/parallelRadixSort ; make -s cleanall ; make -j 24
-g++ -DPARLAY_OPENMP -DOMP_MODE=OMP_STATIC -fopenmp -O2 -g -std=c++17 -DNDEBUG -I .  -include isort.h -o isort ../bench/isortTime.C -DPARLAY_OPENMP -DOMP_MODE=OMP_STATIC -fopenmp -ldl 
+clang++ -DPARLAY_OPENMP -DOMP_MODE=OMP_STATIC -fopenmp=libomp -O2 -g -std=c++17 -DNDEBUG -I .  -include isort.h -o isort ../bench/isortTime.C -DPARLAY_OPENMP -DOMP_MODE=OMP_STATIC -fopenmp=libomp -ldl 
 cp ../bench/testInputs ../bench/testInputs_small .
 cd ../bench; make isortCheck
 make[1]: Entering directory '/home/itmo_denis/pbbsbench/benchmarks/integerSort/bench'
-g++ -DPARLAY_OPENMP -DOMP_MODE=OMP_STATIC -fopenmp -O2 -g -std=c++17 -DNDEBUG -I . -Icommon -o isortCheck isortCheck.C -DPARLAY_OPENMP -DOMP_MODE=OMP_STATIC -fopenmp -ldl 
+clang++ -DPARLAY_OPENMP -DOMP_MODE=OMP_STATIC -fopenmp=libomp -O2 -g -std=c++17 -DNDEBUG -I . -Icommon -o isortCheck isortCheck.C -DPARLAY_OPENMP -DOMP_MODE=OMP_STATIC -fopenmp=libomp -ldl 
 make[1]: Leaving directory '/home/itmo_denis/pbbsbench/benchmarks/integerSort/bench'
 cd benchmarks/integerSort/parallelRadixSort ; numactl -i all ./testInputs -r 3 -p 48
 running cd ../sequenceData/data; make randomSeq_100M_int
-running OMP_NUM_THREADS=48 ./isort -b 27 -r 3 -o /tmp/ofile500972_284944 ../sequenceData/data/randomSeq_100M_int
-running ./../bench/isortCheck  ../sequenceData/data/randomSeq_100M_int /tmp/ofile500972_284944
+running OMP_NUM_THREADS=48 ./isort -b 27 -r 3 -o /tmp/ofile226596_43072 ../sequenceData/data/randomSeq_100M_int
+running ./../bench/isortCheck  ../sequenceData/data/randomSeq_100M_int /tmp/ofile226596_43072
 running rm ../sequenceData/data/randomSeq_100M_int
-randomSeq_100M_int : -b 27 -r 3 -o /tmp/ofile500972_284944 : '0.085', '0.086', '0.086', geomean = 0.086
+randomSeq_100M_int : -b 27 -r 3 -o /tmp/ofile226596_43072 : '0.096', '0.093', '0.096', geomean = 0.095
 running cd ../sequenceData/data; make exptSeq_100M_int
-running OMP_NUM_THREADS=48 ./isort -b 27 -r 3 -o /tmp/ofile546889_811764 ../sequenceData/data/exptSeq_100M_int
-running ./../bench/isortCheck  ../sequenceData/data/exptSeq_100M_int /tmp/ofile546889_811764
+running OMP_NUM_THREADS=48 ./isort -b 27 -r 3 -o /tmp/ofile983997_67705 ../sequenceData/data/exptSeq_100M_int
+running ./../bench/isortCheck  ../sequenceData/data/exptSeq_100M_int /tmp/ofile983997_67705
 running rm ../sequenceData/data/exptSeq_100M_int
-exptSeq_100M_int : -b 27 -r 3 -o /tmp/ofile546889_811764 : '0.161', '0.161', '0.161', geomean = 0.161
+exptSeq_100M_int : -b 27 -r 3 -o /tmp/ofile983997_67705 : '0.353', '0.166', '0.167', geomean = 0.214
 running cd ../sequenceData/data; make randomSeq_100M_int_pair_int
-running OMP_NUM_THREADS=48 ./isort -b 27 -r 3 -o /tmp/ofile627387_26806 ../sequenceData/data/randomSeq_100M_int_pair_int
-running ./../bench/isortCheck  ../sequenceData/data/randomSeq_100M_int_pair_int /tmp/ofile627387_26806
+running OMP_NUM_THREADS=48 ./isort -b 27 -r 3 -o /tmp/ofile588938_814165 ../sequenceData/data/randomSeq_100M_int_pair_int
+running ./../bench/isortCheck  ../sequenceData/data/randomSeq_100M_int_pair_int /tmp/ofile588938_814165
 running rm ../sequenceData/data/randomSeq_100M_int_pair_int
-randomSeq_100M_int_pair_int : -b 27 -r 3 -o /tmp/ofile627387_26806 : '0.15', '0.15', '0.15', geomean = 0.15
+randomSeq_100M_int_pair_int : -b 27 -r 3 -o /tmp/ofile588938_814165 : '0.146', '0.146', '0.145', geomean = 0.145
 running cd ../sequenceData/data; make randomSeq_100M_256_int_pair_int
-running OMP_NUM_THREADS=48 ./isort -b 8 -r 3 -o /tmp/ofile172876_70229 ../sequenceData/data/randomSeq_100M_256_int_pair_int
-running ./../bench/isortCheck  ../sequenceData/data/randomSeq_100M_256_int_pair_int /tmp/ofile172876_70229
+running OMP_NUM_THREADS=48 ./isort -b 8 -r 3 -o /tmp/ofile631486_229975 ../sequenceData/data/randomSeq_100M_256_int_pair_int
+running ./../bench/isortCheck  ../sequenceData/data/randomSeq_100M_256_int_pair_int /tmp/ofile631486_229975
 running rm ../sequenceData/data/randomSeq_100M_256_int_pair_int
-randomSeq_100M_256_int_pair_int : -b 8 -r 3 -o /tmp/ofile172876_70229 : '0.059', '0.059', '0.06', geomean = 0.059
-parallelRadixSort : 48 : geomean of mins = 0.105, geomean of geomeans = 0.105
+randomSeq_100M_256_int_pair_int : -b 8 -r 3 -o /tmp/ofile631486_229975 : '0.061', '0.057', '0.063', geomean = 0.06
+parallelRadixSort : 48 : geomean of mins = 0.106, geomean of geomeans = 0.115
 
 cd benchmarks/comparisonSort/sampleSort ; make -s cleanall ; make -j 24
-g++ -DPARLAY_OPENMP -DOMP_MODE=OMP_STATIC -fopenmp -O2 -g -std=c++17 -DNDEBUG -I .  -include sort.h -o sort ../bench/sortTime.C -DPARLAY_OPENMP -DOMP_MODE=OMP_STATIC -fopenmp -ldl 
+clang++ -DPARLAY_OPENMP -DOMP_MODE=OMP_STATIC -fopenmp=libomp -O2 -g -std=c++17 -DNDEBUG -I .  -include sort.h -o sort ../bench/sortTime.C -DPARLAY_OPENMP -DOMP_MODE=OMP_STATIC -fopenmp=libomp -ldl 
 cp ../bench/testInputs ../bench/testInputs_small .
 cd ../bench; make sortCheck
 make[1]: Entering directory '/home/itmo_denis/pbbsbench/benchmarks/comparisonSort/bench'
-g++ -DPARLAY_OPENMP -DOMP_MODE=OMP_STATIC -fopenmp -O2 -g -std=c++17 -DNDEBUG -I . -o sortCheck sortCheck.C -DPARLAY_OPENMP -DOMP_MODE=OMP_STATIC -fopenmp -ldl 
+clang++ -DPARLAY_OPENMP -DOMP_MODE=OMP_STATIC -fopenmp=libomp -O2 -g -std=c++17 -DNDEBUG -I . -o sortCheck sortCheck.C -DPARLAY_OPENMP -DOMP_MODE=OMP_STATIC -fopenmp=libomp -ldl 
 make[1]: Leaving directory '/home/itmo_denis/pbbsbench/benchmarks/comparisonSort/bench'
 cd benchmarks/comparisonSort/sampleSort ; numactl -i all ./testInputs -r 3 -p 48
 running cd ../sequenceData/data; make randomSeq_100M_double
-running OMP_NUM_THREADS=48 ./sort  -r 3 -o /tmp/ofile15_325604 ../sequenceData/data/randomSeq_100M_double
-running ./../bench/sortCheck  ../sequenceData/data/randomSeq_100M_double /tmp/ofile15_325604
+running OMP_NUM_THREADS=48 ./sort  -r 3 -o /tmp/ofile659962_748734 ../sequenceData/data/randomSeq_100M_double
+running ./../bench/sortCheck  ../sequenceData/data/randomSeq_100M_double /tmp/ofile659962_748734
 running rm ../sequenceData/data/randomSeq_100M_double
-randomSeq_100M_double :  -r 3 -o /tmp/ofile15_325604 : '0.276', '0.276', '0.277', geomean = 0.276
+randomSeq_100M_double :  -r 3 -o /tmp/ofile659962_748734 : '0.328', '0.327', '0.313', geomean = 0.322
 running cd ../sequenceData/data; make exptSeq_100M_double
-running OMP_NUM_THREADS=48 ./sort  -r 3 -o /tmp/ofile847705_703274 ../sequenceData/data/exptSeq_100M_double
-running ./../bench/sortCheck  ../sequenceData/data/exptSeq_100M_double /tmp/ofile847705_703274
+running OMP_NUM_THREADS=48 ./sort  -r 3 -o /tmp/ofile483654_152318 ../sequenceData/data/exptSeq_100M_double
+running ./../bench/sortCheck  ../sequenceData/data/exptSeq_100M_double /tmp/ofile483654_152318
 running rm ../sequenceData/data/exptSeq_100M_double
-exptSeq_100M_double :  -r 3 -o /tmp/ofile847705_703274 : '0.277', '0.273', '0.271', geomean = 0.273
+exptSeq_100M_double :  -r 3 -o /tmp/ofile483654_152318 : '0.256', '0.28', '0.274', geomean = 0.27
 running cd ../sequenceData/data; make almostSortedSeq_100M_double
-running OMP_NUM_THREADS=48 ./sort  -r 3 -o /tmp/ofile937014_13012 ../sequenceData/data/almostSortedSeq_100M_double
-running ./../bench/sortCheck  ../sequenceData/data/almostSortedSeq_100M_double /tmp/ofile937014_13012
+running OMP_NUM_THREADS=48 ./sort  -r 3 -o /tmp/ofile901228_258502 ../sequenceData/data/almostSortedSeq_100M_double
+running ./../bench/sortCheck  ../sequenceData/data/almostSortedSeq_100M_double /tmp/ofile901228_258502
 running rm ../sequenceData/data/almostSortedSeq_100M_double
-almostSortedSeq_100M_double :  -r 3 -o /tmp/ofile937014_13012 : '0.2', '0.215', '0.203', geomean = 0.206
+almostSortedSeq_100M_double :  -r 3 -o /tmp/ofile901228_258502 : '0.238', '0.238', '0.239', geomean = 0.238
 running cd ../sequenceData/data; make randomSeq_100M_double_pair_double
-running OMP_NUM_THREADS=48 ./sort  -r 3 -o /tmp/ofile351057_926624 ../sequenceData/data/randomSeq_100M_double_pair_double
-running ./../bench/sortCheck  ../sequenceData/data/randomSeq_100M_double_pair_double /tmp/ofile351057_926624
+running OMP_NUM_THREADS=48 ./sort  -r 3 -o /tmp/ofile306422_749267 ../sequenceData/data/randomSeq_100M_double_pair_double
+running ./../bench/sortCheck  ../sequenceData/data/randomSeq_100M_double_pair_double /tmp/ofile306422_749267
 running rm ../sequenceData/data/randomSeq_100M_double_pair_double
-randomSeq_100M_double_pair_double :  -r 3 -o /tmp/ofile351057_926624 : '0.384', '0.379', '0.409', geomean = 0.39
+randomSeq_100M_double_pair_double :  -r 3 -o /tmp/ofile306422_749267 : '0.397', '0.393', '0.393', geomean = 0.394
 running cd ../sequenceData/data; make trigramSeq_100M
-running OMP_NUM_THREADS=48 ./sort  -r 3 -o /tmp/ofile7136_973862 ../sequenceData/data/trigramSeq_100M
-running ./../bench/sortCheck  ../sequenceData/data/trigramSeq_100M /tmp/ofile7136_973862
+running OMP_NUM_THREADS=48 ./sort  -r 3 -o /tmp/ofile932959_124727 ../sequenceData/data/trigramSeq_100M
+running ./../bench/sortCheck  ../sequenceData/data/trigramSeq_100M /tmp/ofile932959_124727
 running rm ../sequenceData/data/trigramSeq_100M
-trigramSeq_100M :  -r 3 -o /tmp/ofile7136_973862 : '0.798', '0.8', '0.798', geomean = 0.799
-sampleSort : 48 : geomean of mins = 0.339, geomean of geomeans = 0.344
+trigramSeq_100M :  -r 3 -o /tmp/ofile932959_124727 : '1.027', '1.021', '1.027', geomean = 1.025
+sampleSort : 48 : geomean of mins = 0.377, geomean of geomeans = 0.384
 
 cd benchmarks/removeDuplicates/parlayhash ; make -s cleanall ; make -j 24
-g++ -DPARLAY_OPENMP -DOMP_MODE=OMP_STATIC -fopenmp -O2 -g -std=c++17 -DNDEBUG -I .  -include dedup.h -o dedup ../bench/dedupTime.C -DPARLAY_OPENMP -DOMP_MODE=OMP_STATIC -fopenmp -ldl 
+clang++ -DPARLAY_OPENMP -DOMP_MODE=OMP_STATIC -fopenmp=libomp -O2 -g -std=c++17 -DNDEBUG -I .  -include dedup.h -o dedup ../bench/dedupTime.C -DPARLAY_OPENMP -DOMP_MODE=OMP_STATIC -fopenmp=libomp -ldl 
 cp ../bench/testInputs ../bench/testInputs_small .
 cd ../bench; make dedupCheck
 make[1]: Entering directory '/home/itmo_denis/pbbsbench/benchmarks/removeDuplicates/bench'
-g++ -DPARLAY_OPENMP -DOMP_MODE=OMP_STATIC -fopenmp -O2 -g -std=c++17 -DNDEBUG -I . -o dedupCheck dedupCheck.C -DPARLAY_OPENMP -DOMP_MODE=OMP_STATIC -fopenmp -ldl 
+clang++ -DPARLAY_OPENMP -DOMP_MODE=OMP_STATIC -fopenmp=libomp -O2 -g -std=c++17 -DNDEBUG -I . -o dedupCheck dedupCheck.C -DPARLAY_OPENMP -DOMP_MODE=OMP_STATIC -fopenmp=libomp -ldl 
 make[1]: Leaving directory '/home/itmo_denis/pbbsbench/benchmarks/removeDuplicates/bench'
 cd benchmarks/removeDuplicates/parlayhash ; numactl -i all ./testInputs -r 3 -p 48
 running cd ../sequenceData/data; make randomSeq_100M_int
-running OMP_NUM_THREADS=48 ./dedup  -r 3 -o /tmp/ofile76016_684643 ../sequenceData/data/randomSeq_100M_int
-running ./../bench/dedupCheck  ../sequenceData/data/randomSeq_100M_int /tmp/ofile76016_684643
+running OMP_NUM_THREADS=48 ./dedup  -r 3 -o /tmp/ofile617021_483113 ../sequenceData/data/randomSeq_100M_int
+running ./../bench/dedupCheck  ../sequenceData/data/randomSeq_100M_int /tmp/ofile617021_483113
 running rm ../sequenceData/data/randomSeq_100M_int
-randomSeq_100M_int :  -r 3 -o /tmp/ofile76016_684643 : '0.103', '0.103', '0.103', geomean = 0.103
+randomSeq_100M_int :  -r 3 -o /tmp/ofile617021_483113 : '0.111', '0.106', '0.118', geomean = 0.112
 running cd ../sequenceData/data; make exptSeq_100M_int
-running OMP_NUM_THREADS=48 ./dedup  -r 3 -o /tmp/ofile487298_406805 ../sequenceData/data/exptSeq_100M_int
-running ./../bench/dedupCheck  ../sequenceData/data/exptSeq_100M_int /tmp/ofile487298_406805
+running OMP_NUM_THREADS=48 ./dedup  -r 3 -o /tmp/ofile643388_235263 ../sequenceData/data/exptSeq_100M_int
+running ./../bench/dedupCheck  ../sequenceData/data/exptSeq_100M_int /tmp/ofile643388_235263
 running rm ../sequenceData/data/exptSeq_100M_int
-exptSeq_100M_int :  -r 3 -o /tmp/ofile487298_406805 : '0.083', '0.085', '0.082', geomean = 0.083
+exptSeq_100M_int :  -r 3 -o /tmp/ofile643388_235263 : '0.084', '0.084', '0.084', geomean = 0.084
 running cd ../sequenceData/data; make trigramSeq_100M
-running OMP_NUM_THREADS=48 ./dedup  -r 3 -o /tmp/ofile427911_474470 ../sequenceData/data/trigramSeq_100M
-running ./../bench/dedupCheck  ../sequenceData/data/trigramSeq_100M /tmp/ofile427911_474470
+running OMP_NUM_THREADS=48 ./dedup  -r 3 -o /tmp/ofile698059_233123 ../sequenceData/data/trigramSeq_100M
+running ./../bench/dedupCheck  ../sequenceData/data/trigramSeq_100M /tmp/ofile698059_233123
 running rm ../sequenceData/data/trigramSeq_100M
-trigramSeq_100M :  -r 3 -o /tmp/ofile427911_474470 : '0.423', '0.424', '0.42', geomean = 0.422
-parlayhash : 48 : geomean of mins = 0.153, geomean of geomeans = 0.154
+trigramSeq_100M :  -r 3 -o /tmp/ofile698059_233123 : '0.369', '0.368', '0.366', geomean = 0.368
+parlayhash : 48 : geomean of mins = 0.148, geomean of geomeans = 0.151
 
 cd benchmarks/histogram/parallel ; make -s cleanall ; make -j 24
-g++ -DPARLAY_OPENMP -DOMP_MODE=OMP_STATIC -fopenmp -O2 -g -std=c++17 -DNDEBUG -I .  -o histogramTime.o -c ../bench/histogramTime.C
-g++ -DPARLAY_OPENMP -DOMP_MODE=OMP_STATIC -fopenmp -O2 -g -std=c++17 -DNDEBUG -I .  -c histogram.C -o histogram.o
+clang++ -DPARLAY_OPENMP -DOMP_MODE=OMP_STATIC -fopenmp=libomp -O2 -g -std=c++17 -DNDEBUG -I .  -o histogramTime.o -c ../bench/histogramTime.C
+clang++ -DPARLAY_OPENMP -DOMP_MODE=OMP_STATIC -fopenmp=libomp -O2 -g -std=c++17 -DNDEBUG -I .  -c histogram.C -o histogram.o
 cd ../bench; make -s histogramCheck
 cp ../bench/testInputs ../bench/testInputs_small .
-g++ -o histogram histogramTime.o histogram.o -DPARLAY_OPENMP -DOMP_MODE=OMP_STATIC -fopenmp -ldl 
+clang++ -o histogram histogramTime.o histogram.o -DPARLAY_OPENMP -DOMP_MODE=OMP_STATIC -fopenmp=libomp -ldl 
 cd benchmarks/histogram/parallel ; numactl -i all ./testInputs -r 3 -p 48
 running cd ../sequenceData/data; make randomSeq_100M_256_int
-running OMP_NUM_THREADS=48 ./histogram -b 256 -r 3 -o /tmp/ofile529446_868189 ../sequenceData/data/randomSeq_100M_256_int
-running ./../bench/histogramCheck  ../sequenceData/data/randomSeq_100M_256_int /tmp/ofile529446_868189
+running OMP_NUM_THREADS=48 ./histogram -b 256 -r 3 -o /tmp/ofile51004_311105 ../sequenceData/data/randomSeq_100M_256_int
+running ./../bench/histogramCheck  ../sequenceData/data/randomSeq_100M_256_int /tmp/ofile51004_311105
 running rm ../sequenceData/data/randomSeq_100M_256_int
-randomSeq_100M_256_int : -b 256 -r 3 -o /tmp/ofile529446_868189 : '0.007', '0.007', '0.007', geomean = 0.007
+randomSeq_100M_256_int : -b 256 -r 3 -o /tmp/ofile51004_311105 : '0.009', '0.009', '0.009', geomean = 0.009
 running cd ../sequenceData/data; make randomSeq_100M_100K_int
-running OMP_NUM_THREADS=48 ./histogram -b 100000 -r 3 -o /tmp/ofile860227_342546 ../sequenceData/data/randomSeq_100M_100K_int
-running ./../bench/histogramCheck  ../sequenceData/data/randomSeq_100M_100K_int /tmp/ofile860227_342546
+running OMP_NUM_THREADS=48 ./histogram -b 100000 -r 3 -o /tmp/ofile884892_19278 ../sequenceData/data/randomSeq_100M_100K_int
+running ./../bench/histogramCheck  ../sequenceData/data/randomSeq_100M_100K_int /tmp/ofile884892_19278
 running rm ../sequenceData/data/randomSeq_100M_100K_int
-randomSeq_100M_100K_int : -b 100000 -r 3 -o /tmp/ofile860227_342546 : '0.041', '0.041', '0.041', geomean = 0.041
+randomSeq_100M_100K_int : -b 100000 -r 3 -o /tmp/ofile884892_19278 : '0.047', '0.047', '0.058', geomean = 0.051
 running cd ../sequenceData/data; make randomSeq_100M_int
-running OMP_NUM_THREADS=48 ./histogram -b 100000000 -r 3 -o /tmp/ofile301423_965524 ../sequenceData/data/randomSeq_100M_int
-running ./../bench/histogramCheck  ../sequenceData/data/randomSeq_100M_int /tmp/ofile301423_965524
+running OMP_NUM_THREADS=48 ./histogram -b 100000000 -r 3 -o /tmp/ofile229286_241190 ../sequenceData/data/randomSeq_100M_int
+running ./../bench/histogramCheck  ../sequenceData/data/randomSeq_100M_int /tmp/ofile229286_241190
 running rm ../sequenceData/data/randomSeq_100M_int
-randomSeq_100M_int : -b 100000000 -r 3 -o /tmp/ofile301423_965524 : '0.109', '0.11', '0.109', geomean = 0.109
+randomSeq_100M_int : -b 100000000 -r 3 -o /tmp/ofile229286_241190 : '0.118', '0.118', '0.126', geomean = 0.121
 running cd ../sequenceData/data; make exptSeq_100M_int
-running OMP_NUM_THREADS=48 ./histogram -b 100000000 -r 3 -o /tmp/ofile719617_435205 ../sequenceData/data/exptSeq_100M_int
-running ./../bench/histogramCheck  ../sequenceData/data/exptSeq_100M_int /tmp/ofile719617_435205
+running OMP_NUM_THREADS=48 ./histogram -b 100000000 -r 3 -o /tmp/ofile951075_23216 ../sequenceData/data/exptSeq_100M_int
+running ./../bench/histogramCheck  ../sequenceData/data/exptSeq_100M_int /tmp/ofile951075_23216
 running rm ../sequenceData/data/exptSeq_100M_int
-exptSeq_100M_int : -b 100000000 -r 3 -o /tmp/ofile719617_435205 : '0.102', '0.102', '0.102', geomean = 0.102
+exptSeq_100M_int : -b 100000000 -r 3 -o /tmp/ofile951075_23216 : '0.114', '0.113', '0.114', geomean = 0.113
 running cd ../sequenceData/data; make almostEqualSeq_100000000
-running OMP_NUM_THREADS=48 ./histogram -b 100000000 -r 3 -o /tmp/ofile419103_483989 ../sequenceData/data/almostEqualSeq_100000000
-running ./../bench/histogramCheck  ../sequenceData/data/almostEqualSeq_100000000 /tmp/ofile419103_483989
+running OMP_NUM_THREADS=48 ./histogram -b 100000000 -r 3 -o /tmp/ofile802233_828892 ../sequenceData/data/almostEqualSeq_100000000
+running ./../bench/histogramCheck  ../sequenceData/data/almostEqualSeq_100000000 /tmp/ofile802233_828892
 running rm ../sequenceData/data/almostEqualSeq_100000000
-almostEqualSeq_100000000 : -b 100000000 -r 3 -o /tmp/ofile419103_483989 : '0.119', '0.119', '0.119', geomean = 0.119
-parallel : 48 : geomean of mins = 0.052, geomean of geomeans = 0.052
+almostEqualSeq_100000000 : -b 100000000 -r 3 -o /tmp/ofile802233_828892 : '0.159', '0.134', '0.134', geomean = 0.141
+parallel : 48 : geomean of mins = 0.06, geomean of geomeans = 0.062
 
 cd benchmarks/wordCounts/histogram ; make -s cleanall ; make -j 24
-g++ -DPARLAY_OPENMP -DOMP_MODE=OMP_STATIC -fopenmp -O2 -g -std=c++17 -DNDEBUG -I .  -o wcTime.o -c ../bench/wcTime.C
-g++ -DPARLAY_OPENMP -DOMP_MODE=OMP_STATIC -fopenmp -O2 -g -std=c++17 -DNDEBUG -I .  -c wc.C -o wc.o
+clang++ -DPARLAY_OPENMP -DOMP_MODE=OMP_STATIC -fopenmp=libomp -O2 -g -std=c++17 -DNDEBUG -I .  -o wcTime.o -c ../bench/wcTime.C
+clang++ -DPARLAY_OPENMP -DOMP_MODE=OMP_STATIC -fopenmp=libomp -O2 -g -std=c++17 -DNDEBUG -I .  -c wc.C -o wc.o
 cd ../bench; make -s wcCheck
 cp ../bench/testInputs ../bench/testInputs_small .
-g++ -o wc wcTime.o wc.o -DPARLAY_OPENMP -DOMP_MODE=OMP_STATIC -fopenmp -ldl 
+clang++ -o wc wcTime.o wc.o -DPARLAY_OPENMP -DOMP_MODE=OMP_STATIC -fopenmp=libomp -ldl 
 cd benchmarks/wordCounts/histogram ; numactl -i all ./testInputs -r 3 -p 48
 running cd ../sequenceData/data; make trigramString_250000000
-running OMP_NUM_THREADS=48 ./wc  -r 3 -o /tmp/ofile968472_18115 ../sequenceData/data/trigramString_250000000
-running ./../bench/wcCheck  ../sequenceData/data/trigramString_250000000 /tmp/ofile968472_18115
+running OMP_NUM_THREADS=48 ./wc  -r 3 -o /tmp/ofile854046_924505 ../sequenceData/data/trigramString_250000000
+running ./../bench/wcCheck  ../sequenceData/data/trigramString_250000000 /tmp/ofile854046_924505
 running rm ../sequenceData/data/trigramString_250000000
-trigramString_250000000 :  -r 3 -o /tmp/ofile968472_18115 : '0.283', '0.282', '0.282', geomean = 0.282
+trigramString_250000000 :  -r 3 -o /tmp/ofile854046_924505 : '0.322', '0.34', '0.325', geomean = 0.329
 running cd ../sequenceData/data; make etext99
-running OMP_NUM_THREADS=48 ./wc  -r 3 -o /tmp/ofile651551_981410 ../sequenceData/data/etext99
-running ./../bench/wcCheck  ../sequenceData/data/etext99 /tmp/ofile651551_981410
+running OMP_NUM_THREADS=48 ./wc  -r 3 -o /tmp/ofile629473_770339 ../sequenceData/data/etext99
+running ./../bench/wcCheck  ../sequenceData/data/etext99 /tmp/ofile629473_770339
 running rm ../sequenceData/data/etext99
-etext99 :  -r 3 -o /tmp/ofile651551_981410 : '0.096', '0.093', '0.093', geomean = 0.094
+etext99 :  -r 3 -o /tmp/ofile629473_770339 : '0.182', '0.188', '0.179', geomean = 0.183
 running cd ../sequenceData/data; make wikipedia250M.txt
-running OMP_NUM_THREADS=48 ./wc  -r 3 -o /tmp/ofile607684_496038 ../sequenceData/data/wikipedia250M.txt
-running ./../bench/wcCheck  ../sequenceData/data/wikipedia250M.txt /tmp/ofile607684_496038
+running OMP_NUM_THREADS=48 ./wc  -r 3 -o /tmp/ofile38949_869195 ../sequenceData/data/wikipedia250M.txt
+running ./../bench/wcCheck  ../sequenceData/data/wikipedia250M.txt /tmp/ofile38949_869195
 running rm ../sequenceData/data/wikipedia250M.txt
-wikipedia250M.txt :  -r 3 -o /tmp/ofile607684_496038 : '0.228', '0.224', '0.224', geomean = 0.225
-histogram : 48 : geomean of mins = 0.18, geomean of geomeans = 0.182
+wikipedia250M.txt :  -r 3 -o /tmp/ofile38949_869195 : '0.448', '0.418', '0.267', geomean = 0.368
+histogram : 48 : geomean of mins = 0.249, geomean of geomeans = 0.281
 
 cd benchmarks/invertedIndex/parallel ; make -s cleanall ; make -j 24
-g++ -DPARLAY_OPENMP -DOMP_MODE=OMP_STATIC -fopenmp -O2 -g -std=c++17 -DNDEBUG -I .  -o indexTime.o -c ../bench/indexTime.C
-g++ -DPARLAY_OPENMP -DOMP_MODE=OMP_STATIC -fopenmp -O2 -g -std=c++17 -DNDEBUG -I .  -c index.C -o index.o
+clang++ -DPARLAY_OPENMP -DOMP_MODE=OMP_STATIC -fopenmp=libomp -O2 -g -std=c++17 -DNDEBUG -I .  -o indexTime.o -c ../bench/indexTime.C
+clang++ -DPARLAY_OPENMP -DOMP_MODE=OMP_STATIC -fopenmp=libomp -O2 -g -std=c++17 -DNDEBUG -I .  -c index.C -o index.o
 cd ../bench; make -s indexCheck
 cp ../bench/testInputs ../bench/testInputs_small .
-g++ -o index indexTime.o index.o -DPARLAY_OPENMP -DOMP_MODE=OMP_STATIC -fopenmp -ldl 
+clang++ -o index indexTime.o index.o -DPARLAY_OPENMP -DOMP_MODE=OMP_STATIC -fopenmp=libomp -ldl 
 cd benchmarks/invertedIndex/parallel ; numactl -i all ./testInputs -r 3 -p 48
 running cd ../sequenceData/data; make wikisamp.xml
-running OMP_NUM_THREADS=48 ./index  -r 3 -o /tmp/ofile156406_306031 ../sequenceData/data/wikisamp.xml
-running ./../bench/indexCheck  ../sequenceData/data/wikisamp.xml /tmp/ofile156406_306031
+running OMP_NUM_THREADS=48 ./index  -r 3 -o /tmp/ofile904869_661651 ../sequenceData/data/wikisamp.xml
+running ./../bench/indexCheck  ../sequenceData/data/wikisamp.xml /tmp/ofile904869_661651
 running rm ../sequenceData/data/wikisamp.xml
-wikisamp.xml :  -r 3 -o /tmp/ofile156406_306031 : '0.226', '0.222', '0.223', geomean = 0.223
+wikisamp.xml :  -r 3 -o /tmp/ofile904869_661651 : '0.126', '0.122', '0.122', geomean = 0.123
 running cd ../sequenceData/data; make wikipedia250M.txt
-running OMP_NUM_THREADS=48 ./index  -r 3 -o /tmp/ofile607061_957285 ../sequenceData/data/wikipedia250M.txt
-running ./../bench/indexCheck  ../sequenceData/data/wikipedia250M.txt /tmp/ofile607061_957285
+running OMP_NUM_THREADS=48 ./index  -r 3 -o /tmp/ofile559942_854853 ../sequenceData/data/wikipedia250M.txt
+running ./../bench/indexCheck  ../sequenceData/data/wikipedia250M.txt /tmp/ofile559942_854853
 running rm ../sequenceData/data/wikipedia250M.txt
-wikipedia250M.txt :  -r 3 -o /tmp/ofile607061_957285 : '1.012', '1.016', '1.005', geomean = 1.011
-parallel : 48 : geomean of mins = 0.472, geomean of geomeans = 0.475
+wikipedia250M.txt :  -r 3 -o /tmp/ofile559942_854853 : '0.609', '0.61', '0.6', geomean = 0.606
+parallel : 48 : geomean of mins = 0.27, geomean of geomeans = 0.273
 
 cd benchmarks/suffixArray/parallelRange ; make -s cleanall ; make -j 24
-g++ -DPARLAY_OPENMP -DOMP_MODE=OMP_STATIC -fopenmp -O2 -g -std=c++17 -DNDEBUG -I .  -o SATime.o -c ../bench/SATime.C
-g++ -DPARLAY_OPENMP -DOMP_MODE=OMP_STATIC -fopenmp -O2 -g -std=c++17 -DNDEBUG -I .  -c SA.C -o SA.o
+clang++ -DPARLAY_OPENMP -DOMP_MODE=OMP_STATIC -fopenmp=libomp -O2 -g -std=c++17 -DNDEBUG -I .  -o SATime.o -c ../bench/SATime.C
+clang++ -DPARLAY_OPENMP -DOMP_MODE=OMP_STATIC -fopenmp=libomp -O2 -g -std=c++17 -DNDEBUG -I .  -c SA.C -o SA.o
 cd ../bench; make -s SACheck
 cp ../bench/testInputs ../bench/testInputs_small .
-g++ -o SA SATime.o SA.o -DPARLAY_OPENMP -DOMP_MODE=OMP_STATIC -fopenmp -ldl 
+clang++ -o SA SATime.o SA.o -DPARLAY_OPENMP -DOMP_MODE=OMP_STATIC -fopenmp=libomp -ldl 
 cd benchmarks/suffixArray/parallelRange ; numactl -i all ./testInputs -r 3 -p 48
 running cd ../sequenceData/data; make trigramString_100000000
-running OMP_NUM_THREADS=48 ./SA  -r 3 -o /tmp/ofile138132_304114 ../sequenceData/data/trigramString_100000000
-running ./../bench/SACheck  ../sequenceData/data/trigramString_100000000 /tmp/ofile138132_304114
+running OMP_NUM_THREADS=48 ./SA  -r 3 -o /tmp/ofile363229_249145 ../sequenceData/data/trigramString_100000000
+running ./../bench/SACheck  ../sequenceData/data/trigramString_100000000 /tmp/ofile363229_249145
 running rm ../sequenceData/data/trigramString_100000000
-trigramString_100000000 :  -r 3 -o /tmp/ofile138132_304114 : '9.001', '7.264', '7.281', geomean = 7.808
+trigramString_100000000 :  -r 3 -o /tmp/ofile363229_249145 : '1.072', '1.074', '1.078', geomean = 1.075
 running cd ../sequenceData/data; make chr22.dna
-running OMP_NUM_THREADS=48 ./SA  -r 3 -o /tmp/ofile360977_347542 ../sequenceData/data/chr22.dna
-running ./../bench/SACheck  ../sequenceData/data/chr22.dna /tmp/ofile360977_347542
+running OMP_NUM_THREADS=48 ./SA  -r 3 -o /tmp/ofile433327_106014 ../sequenceData/data/chr22.dna
+running ./../bench/SACheck  ../sequenceData/data/chr22.dna /tmp/ofile433327_106014
 running rm ../sequenceData/data/chr22.dna
-chr22.dna :  -r 3 -o /tmp/ofile360977_347542 : '12.242', '12.162', '12.303', geomean = 12.235
+chr22.dna :  -r 3 -o /tmp/ofile433327_106014 : '0.765', '0.772', '0.843', geomean = 0.793
 running cd ../sequenceData/data; make etext99
-running OMP_NUM_THREADS=48 ./SA  -r 3 -o /tmp/ofile888538_854486 ../sequenceData/data/etext99
-running ./../bench/SACheck  ../sequenceData/data/etext99 /tmp/ofile888538_854486
+running OMP_NUM_THREADS=48 ./SA  -r 3 -o /tmp/ofile213638_811899 ../sequenceData/data/etext99
+running ./../bench/SACheck  ../sequenceData/data/etext99 /tmp/ofile213638_811899
 running rm ../sequenceData/data/etext99
-etext99 :  -r 3 -o /tmp/ofile888538_854486 : '38.828', '38.412', '38.567', geomean = 38.602
+etext99 :  -r 3 -o /tmp/ofile213638_811899 : '2.523', '2.497', '2.858', geomean = 2.621
 running cd ../sequenceData/data; make wikisamp.xml
-running OMP_NUM_THREADS=48 ./SA  -r 3 -o /tmp/ofile861496_852313 ../sequenceData/data/wikisamp.xml
-running ./../bench/SACheck  ../sequenceData/data/wikisamp.xml /tmp/ofile861496_852313
+running OMP_NUM_THREADS=48 ./SA  -r 3 -o /tmp/ofile702428_934575 ../sequenceData/data/wikisamp.xml
+running ./../bench/SACheck  ../sequenceData/data/wikisamp.xml /tmp/ofile702428_934575
 running rm ../sequenceData/data/wikisamp.xml
-wikisamp.xml :  -r 3 -o /tmp/ofile861496_852313 : '36.643', '37.304', '37.498', geomean = 37.146
-parallelRange : 48 : geomean of mins = 18.778, geomean of geomeans = 19.239
+wikisamp.xml :  -r 3 -o /tmp/ofile702428_934575 : '3.557', '3.824', '3.614', geomean = 3.663
+parallelRange : 48 : geomean of mins = 1.643, geomean of geomeans = 1.691
 
 cd benchmarks/longestRepeatedSubstring/doubling ; make -s cleanall ; make -j 24
-g++ -DPARLAY_OPENMP -DOMP_MODE=OMP_STATIC -fopenmp -O2 -g -std=c++17 -DNDEBUG -I .  -o lrsTime.o -c ../bench/lrsTime.C
-g++ -DPARLAY_OPENMP -DOMP_MODE=OMP_STATIC -fopenmp -O2 -g -std=c++17 -DNDEBUG -I .  -c lrs.C -o lrs.o
+clang++ -DPARLAY_OPENMP -DOMP_MODE=OMP_STATIC -fopenmp=libomp -O2 -g -std=c++17 -DNDEBUG -I .  -o lrsTime.o -c ../bench/lrsTime.C
+clang++ -DPARLAY_OPENMP -DOMP_MODE=OMP_STATIC -fopenmp=libomp -O2 -g -std=c++17 -DNDEBUG -I .  -c lrs.C -o lrs.o
 cd ../bench; make -s lrsCheck
 cp ../bench/testInputs ../bench/testInputs_small .
-g++ -o lrs lrsTime.o lrs.o -DPARLAY_OPENMP -DOMP_MODE=OMP_STATIC -fopenmp -ldl 
+clang++ -o lrs lrsTime.o lrs.o -DPARLAY_OPENMP -DOMP_MODE=OMP_STATIC -fopenmp=libomp -ldl 
 cd benchmarks/longestRepeatedSubstring/doubling ; numactl -i all ./testInputs -r 3 -p 48
 running cd ../sequenceData/data; make chr22.dna
-running OMP_NUM_THREADS=48 ./lrs  -r 3 -o /tmp/ofile483377_335583 ../sequenceData/data/chr22.dna
-running ./../bench/lrsCheck  ../sequenceData/data/chr22.dna /tmp/ofile483377_335583
+running OMP_NUM_THREADS=48 ./lrs  -r 3 -o /tmp/ofile48825_471332 ../sequenceData/data/chr22.dna
+running ./../bench/lrsCheck  ../sequenceData/data/chr22.dna /tmp/ofile48825_471332
 running rm ../sequenceData/data/chr22.dna
-chr22.dna :  -r 3 -o /tmp/ofile483377_335583 : '12.515', '12.773', '12.702', geomean = 12.663
+chr22.dna :  -r 3 -o /tmp/ofile48825_471332 : '1.011', '1.026', '1.012', geomean = 1.016
 running cd ../sequenceData/data; make etext99
-running OMP_NUM_THREADS=48 ./lrs  -r 3 -o /tmp/ofile833875_187844 ../sequenceData/data/etext99
-running ./../bench/lrsCheck  ../sequenceData/data/etext99 /tmp/ofile833875_187844
+running OMP_NUM_THREADS=48 ./lrs  -r 3 -o /tmp/ofile997835_420800 ../sequenceData/data/etext99
+running ./../bench/lrsCheck  ../sequenceData/data/etext99 /tmp/ofile997835_420800
 running rm ../sequenceData/data/etext99
-etext99 :  -r 3 -o /tmp/ofile833875_187844 : '39.405', '38.923', '38.349', geomean = 38.89
+etext99 :  -r 3 -o /tmp/ofile997835_420800 : '3.879', '4.271', '3.839', geomean = 3.992
 running cd ../sequenceData/data; make wikisamp.xml
-running OMP_NUM_THREADS=48 ./lrs  -r 3 -o /tmp/ofile703612_4974 ../sequenceData/data/wikisamp.xml
-running ./../bench/lrsCheck  ../sequenceData/data/wikisamp.xml /tmp/ofile703612_4974
+running OMP_NUM_THREADS=48 ./lrs  -r 3 -o /tmp/ofile628834_410500 ../sequenceData/data/wikisamp.xml
+running ./../bench/lrsCheck  ../sequenceData/data/wikisamp.xml /tmp/ofile628834_410500
 running rm ../sequenceData/data/wikisamp.xml
-wikisamp.xml :  -r 3 -o /tmp/ofile703612_4974 : '38.503', '38.171', '38.004', geomean = 38.225
-doubling : 48 : geomean of mins = 26.323, geomean of geomeans = 26.602
+wikisamp.xml :  -r 3 -o /tmp/ofile628834_410500 : '4.582', '4.889', '4.595', geomean = 4.687
+doubling : 48 : geomean of mins = 2.61, geomean of geomeans = 2.669
 
 cd benchmarks/classify/decisionTree ; make -s cleanall ; make -j 24
-g++ -DPARLAY_OPENMP -DOMP_MODE=OMP_STATIC -fopenmp -O2 -g -std=c++17 -DNDEBUG -I .  -o classifyTime.o -c ../bench/classifyTime.C
-g++ -DPARLAY_OPENMP -DOMP_MODE=OMP_STATIC -fopenmp -O2 -g -std=c++17 -DNDEBUG -I .  -c classify.C -o classify.o
+clang++ -DPARLAY_OPENMP -DOMP_MODE=OMP_STATIC -fopenmp=libomp -O2 -g -std=c++17 -DNDEBUG -I .  -o classifyTime.o -c ../bench/classifyTime.C
+clang++ -DPARLAY_OPENMP -DOMP_MODE=OMP_STATIC -fopenmp=libomp -O2 -g -std=c++17 -DNDEBUG -I .  -c classify.C -o classify.o
 cd ../bench; make -s classifyCheck
 cp ../bench/testInputs ../bench/testInputs_small .
-g++ -o classify classifyTime.o classify.o -DPARLAY_OPENMP -DOMP_MODE=OMP_STATIC -fopenmp -ldl 
+clang++ -o classify classifyTime.o classify.o -DPARLAY_OPENMP -DOMP_MODE=OMP_STATIC -fopenmp=libomp -ldl 
 cd benchmarks/classify/decisionTree ; numactl -i all ./testInputs -r 3 -p 48
 running cd ../sequenceData/data; make covtype.data
-running OMP_NUM_THREADS=48 ./classify  -r 3 -o /tmp/ofile797339_56790 ../sequenceData/data/covtype.data
-running ./../bench/classifyCheck  ../sequenceData/data/covtype.data /tmp/ofile797339_56790
-covtype.data :  -r 3 -o /tmp/ofile797339_56790 : '10.99', '10.993', '11.', geomean = 10.994
+running OMP_NUM_THREADS=48 ./classify  -r 3 -o /tmp/ofile184968_605890 ../sequenceData/data/covtype.data
+running ./../bench/classifyCheck  ../sequenceData/data/covtype.data /tmp/ofile184968_605890
+covtype.data :  -r 3 -o /tmp/ofile184968_605890 : '11.052', '11.052', '11.062', geomean = 11.055
 running cd ../sequenceData/data; make kddcup.data
-running OMP_NUM_THREADS=48 ./classify  -r 3 -o /tmp/ofile677710_628305 ../sequenceData/data/kddcup.data
-running ./../bench/classifyCheck  ../sequenceData/data/kddcup.data /tmp/ofile677710_628305
-kddcup.data :  -r 3 -o /tmp/ofile677710_628305 : '6.641', '6.643', '6.637', geomean = 6.64
-decisionTree : 48 : geomean of mins = 8.54, geomean of geomeans = 8.544
+running OMP_NUM_THREADS=48 ./classify  -r 3 -o /tmp/ofile103838_694643 ../sequenceData/data/kddcup.data
+running ./../bench/classifyCheck  ../sequenceData/data/kddcup.data /tmp/ofile103838_694643
+kddcup.data :  -r 3 -o /tmp/ofile103838_694643 : '10.937', '10.942', '10.949', geomean = 10.942
+decisionTree : 48 : geomean of mins = 10.994, geomean of geomeans = 10.999
 
 cd benchmarks/minSpanningForest/parallelFilterKruskal ; make -s cleanall ; make -j 24
-g++ -DPARLAY_OPENMP -DOMP_MODE=OMP_STATIC -fopenmp -O2 -g -std=c++17 -DNDEBUG -I .  -o MSTTime.o -c ../bench/MSTTime.C
-g++ -DPARLAY_OPENMP -DOMP_MODE=OMP_STATIC -fopenmp -O2 -g -std=c++17 -DNDEBUG -I .  -c MST.C -o MST.o
+clang++ -DPARLAY_OPENMP -DOMP_MODE=OMP_STATIC -fopenmp=libomp -O2 -g -std=c++17 -DNDEBUG -I .  -o MSTTime.o -c ../bench/MSTTime.C
+clang++ -DPARLAY_OPENMP -DOMP_MODE=OMP_STATIC -fopenmp=libomp -O2 -g -std=c++17 -DNDEBUG -I .  -c MST.C -o MST.o
 cd ../bench; make -s MSTCheck
 cp ../bench/testInputs ../bench/testInputs_small .
-g++ -o MST MSTTime.o MST.o -DPARLAY_OPENMP -DOMP_MODE=OMP_STATIC -fopenmp -ldl 
+clang++ -o MST MSTTime.o MST.o -DPARLAY_OPENMP -DOMP_MODE=OMP_STATIC -fopenmp=libomp -ldl 
 cd benchmarks/minSpanningForest/parallelFilterKruskal ; numactl -i all ./testInputs -r 3 -p 48
 running cd ../graphData/data; make randLocalGraph_WE_10_20000000
-running OMP_NUM_THREADS=48 ./MST  -r 3 -o /tmp/ofile962524_166477 ../graphData/data/randLocalGraph_WE_10_20000000
-running ./../bench/MSTCheck  ../graphData/data/randLocalGraph_WE_10_20000000 /tmp/ofile962524_166477
+running OMP_NUM_THREADS=48 ./MST  -r 3 -o /tmp/ofile339451_912622 ../graphData/data/randLocalGraph_WE_10_20000000
+running ./../bench/MSTCheck  ../graphData/data/randLocalGraph_WE_10_20000000 /tmp/ofile339451_912622
 running rm ../graphData/data/randLocalGraph_WE_10_20000000
-randLocalGraph_WE_10_20000000 :  -r 3 -o /tmp/ofile962524_166477 : '6.785', '6.789', '8.5', geomean = 7.316
+randLocalGraph_WE_10_20000000 :  -r 3 -o /tmp/ofile339451_912622 : '2.617', '2.693', '2.628', geomean = 2.646
 running cd ../graphData/data; make rMatGraph_WE_12_16000000
-running OMP_NUM_THREADS=48 ./MST  -r 3 -o /tmp/ofile42961_869418 ../graphData/data/rMatGraph_WE_12_16000000
-running ./../bench/MSTCheck  ../graphData/data/rMatGraph_WE_12_16000000 /tmp/ofile42961_869418
+running OMP_NUM_THREADS=48 ./MST  -r 3 -o /tmp/ofile117178_350541 ../graphData/data/rMatGraph_WE_12_16000000
+running ./../bench/MSTCheck  ../graphData/data/rMatGraph_WE_12_16000000 /tmp/ofile117178_350541
 running rm ../graphData/data/rMatGraph_WE_12_16000000
-rMatGraph_WE_12_16000000 :  -r 3 -o /tmp/ofile42961_869418 : '5.631', '5.749', '4.526', geomean = 5.272
+rMatGraph_WE_12_16000000 :  -r 3 -o /tmp/ofile117178_350541 : '1.729', '1.82', '1.758', geomean = 1.768
 running cd ../graphData/data; make 2Dgrid_WE_64000000
-running OMP_NUM_THREADS=48 ./MST  -r 3 -o /tmp/ofile57076_634162 ../graphData/data/2Dgrid_WE_64000000
-running ./../bench/MSTCheck  ../graphData/data/2Dgrid_WE_64000000 /tmp/ofile57076_634162
+running OMP_NUM_THREADS=48 ./MST  -r 3 -o /tmp/ofile545875_629661 ../graphData/data/2Dgrid_WE_64000000
+running ./../bench/MSTCheck  ../graphData/data/2Dgrid_WE_64000000 /tmp/ofile545875_629661
 running rm ../graphData/data/2Dgrid_WE_64000000
-2Dgrid_WE_64000000 :  -r 3 -o /tmp/ofile57076_634162 : '8.698', '8.503', '8.523', geomean = 8.574
-parallelFilterKruskal : 48 : geomean of mins = 6.392, geomean of geomeans = 6.915
+2Dgrid_WE_64000000 :  -r 3 -o /tmp/ofile545875_629661 : '4.577', '4.821', '4.696', geomean = 4.697
+parallelFilterKruskal : 48 : geomean of mins = 2.746, geomean of geomeans = 2.801
 
 cd benchmarks/spanningForest/ndST ; make -s cleanall ; make -j 24
-g++ -DPARLAY_OPENMP -DOMP_MODE=OMP_STATIC -fopenmp -O2 -g -std=c++17 -DNDEBUG -I .  -o STTime.o -c ../bench/STTime.C
-g++ -DPARLAY_OPENMP -DOMP_MODE=OMP_STATIC -fopenmp -O2 -g -std=c++17 -DNDEBUG -I .  -c ST.C -o ST.o
+clang++ -DPARLAY_OPENMP -DOMP_MODE=OMP_STATIC -fopenmp=libomp -O2 -g -std=c++17 -DNDEBUG -I .  -o STTime.o -c ../bench/STTime.C
+clang++ -DPARLAY_OPENMP -DOMP_MODE=OMP_STATIC -fopenmp=libomp -O2 -g -std=c++17 -DNDEBUG -I .  -c ST.C -o ST.o
 cd ../bench; make -s STCheck
 cp ../bench/testInputs ../bench/testInputs_small .
-g++ -o ST STTime.o ST.o -DPARLAY_OPENMP -DOMP_MODE=OMP_STATIC -fopenmp -ldl 
+clang++ -o ST STTime.o ST.o -DPARLAY_OPENMP -DOMP_MODE=OMP_STATIC -fopenmp=libomp -ldl 
 cd benchmarks/spanningForest/ndST ; numactl -i all ./testInputs -r 3 -p 48
 running cd ../graphData/data; make randLocalGraph_E_10_20000000
-running OMP_NUM_THREADS=48 ./ST  -r 3 -o /tmp/ofile708777_427191 ../graphData/data/randLocalGraph_E_10_20000000
-running ./../bench/STCheck  ../graphData/data/randLocalGraph_E_10_20000000 /tmp/ofile708777_427191
+running OMP_NUM_THREADS=48 ./ST  -r 3 -o /tmp/ofile313219_668836 ../graphData/data/randLocalGraph_E_10_20000000
+running ./../bench/STCheck  ../graphData/data/randLocalGraph_E_10_20000000 /tmp/ofile313219_668836
 running rm ../graphData/data/randLocalGraph_E_10_20000000
-randLocalGraph_E_10_20000000 :  -r 3 -o /tmp/ofile708777_427191 : '1.08', '1.072', '1.082', geomean = 1.078
+randLocalGraph_E_10_20000000 :  -r 3 -o /tmp/ofile313219_668836 : '1.106', '1.086', '1.092', geomean = 1.095
 running cd ../graphData/data; make rMatGraph_E_12_16000000
-running OMP_NUM_THREADS=48 ./ST  -r 3 -o /tmp/ofile311047_522782 ../graphData/data/rMatGraph_E_12_16000000
-running ./../bench/STCheck  ../graphData/data/rMatGraph_E_12_16000000 /tmp/ofile311047_522782
+running OMP_NUM_THREADS=48 ./ST  -r 3 -o /tmp/ofile199642_696060 ../graphData/data/rMatGraph_E_12_16000000
+running ./../bench/STCheck  ../graphData/data/rMatGraph_E_12_16000000 /tmp/ofile199642_696060
 running rm ../graphData/data/rMatGraph_E_12_16000000
-rMatGraph_E_12_16000000 :  -r 3 -o /tmp/ofile311047_522782 : '0.771', '0.768', '0.769', geomean = 0.769
+rMatGraph_E_12_16000000 :  -r 3 -o /tmp/ofile199642_696060 : '0.781', '0.781', '0.782', geomean = 0.781
 running cd ../graphData/data; make 2Dgrid_E_64000000
-running OMP_NUM_THREADS=48 ./ST  -r 3 -o /tmp/ofile89038_43861 ../graphData/data/2Dgrid_E_64000000
-running ./../bench/STCheck  ../graphData/data/2Dgrid_E_64000000 /tmp/ofile89038_43861
+running OMP_NUM_THREADS=48 ./ST  -r 3 -o /tmp/ofile249303_587942 ../graphData/data/2Dgrid_E_64000000
+running ./../bench/STCheck  ../graphData/data/2Dgrid_E_64000000 /tmp/ofile249303_587942
 running rm ../graphData/data/2Dgrid_E_64000000
-2Dgrid_E_64000000 :  -r 3 -o /tmp/ofile89038_43861 : '1.67', '1.709', '1.672', geomean = 1.683
-ndST : 48 : geomean of mins = 1.112, geomean of geomeans = 1.118
+2Dgrid_E_64000000 :  -r 3 -o /tmp/ofile249303_587942 : '1.811', '1.694', '1.584', geomean = 1.694
+ndST : 48 : geomean of mins = 1.103, geomean of geomeans = 1.131
 
 cd benchmarks/breadthFirstSearch/backForwardBFS ; make -s cleanall ; make -j 24
-g++ -DPARLAY_OPENMP -DOMP_MODE=OMP_STATIC -fopenmp -O2 -g -std=c++17 -DNDEBUG -I .  -o BFSTime.o -c ../bench/BFSTime.C
-g++ -DPARLAY_OPENMP -DOMP_MODE=OMP_STATIC -fopenmp -O2 -g -std=c++17 -DNDEBUG -I .  -c BFS.C -o BFS.o
+clang++ -DPARLAY_OPENMP -DOMP_MODE=OMP_STATIC -fopenmp=libomp -O2 -g -std=c++17 -DNDEBUG -I .  -o BFSTime.o -c ../bench/BFSTime.C
+clang++ -DPARLAY_OPENMP -DOMP_MODE=OMP_STATIC -fopenmp=libomp -O2 -g -std=c++17 -DNDEBUG -I .  -c BFS.C -o BFS.o
 cd ../bench; make -s BFSCheck
 cp ../bench/testInputs ../bench/testInputs_small .
-g++ -o BFS BFSTime.o BFS.o -DPARLAY_OPENMP -DOMP_MODE=OMP_STATIC -fopenmp -ldl 
 cd benchmarks/breadthFirstSearch/backForwardBFS ; numactl -i all ./testInputs -r 3 -p 48
 running cd ../graphData/data; make randLocalGraph_J_10_20000000
-running OMP_NUM_THREADS=48 ./BFS  -r 3 -o /tmp/ofile668836_276676 ../graphData/data/randLocalGraph_J_10_20000000
-running ./../bench/BFSCheck  ../graphData/data/randLocalGraph_J_10_20000000 /tmp/ofile668836_276676
-running rm ../graphData/data/randLocalGraph_J_10_20000000
-randLocalGraph_J_10_20000000 :  -r 3 -o /tmp/ofile668836_276676 : '0.143', '0.143', '0.143', geomean = 0.143
-running cd ../graphData/data; make rMatGraph_J_12_16000000
-running OMP_NUM_THREADS=48 ./BFS  -r 3 -o /tmp/ofile902105_937973 ../graphData/data/rMatGraph_J_12_16000000
-running ./../bench/BFSCheck  ../graphData/data/rMatGraph_J_12_16000000 /tmp/ofile902105_937973
-running rm ../graphData/data/rMatGraph_J_12_16000000
-rMatGraph_J_12_16000000 :  -r 3 -o /tmp/ofile902105_937973 : '0.217', '0.192', '0.195', geomean = 0.201
-running cd ../graphData/data; make 3Dgrid_J_64000000
-running OMP_NUM_THREADS=48 ./BFS  -r 3 -o /tmp/ofile792082_14551 ../graphData/data/3Dgrid_J_64000000
-running ./../bench/BFSCheck  ../graphData/data/3Dgrid_J_64000000 /tmp/ofile792082_14551
-running rm ../graphData/data/3Dgrid_J_64000000
-3Dgrid_J_64000000 :  -r 3 -o /tmp/ofile792082_14551 : '2.1', '1.753', '2.002', geomean = 1.946
-backForwardBFS : 48 : geomean of mins = 0.364, geomean of geomeans = 0.383
+running OMP_NUM_THREADS=48 ./BFS  -r 3 -o /tmp/ofile435960_273012 ../graphData/data/randLocalGraph_J_10_20000000
+TEST TERMINATED ABNORMALLY:
+[OMP_NUM_THREADS=48 ./BFS  -r 3 -o /tmp/ofile435960_273012 ../graphData/data/randLocalGraph_J_10_20000000
+/bin/sh: ./BFS: No such file or directory
+]
 
 cd benchmarks/maximalMatching/incrementalMatching ; make -s cleanall ; make -j 24
-g++ -DPARLAY_OPENMP -DOMP_MODE=OMP_STATIC -fopenmp -O2 -g -std=c++17 -DNDEBUG -I .  -o matchingTime.o -c ../bench/matchingTime.C
-g++ -DPARLAY_OPENMP -DOMP_MODE=OMP_STATIC -fopenmp -O2 -g -std=c++17 -DNDEBUG -I .  -c matching.C -o matching.o
+clang++ -DPARLAY_OPENMP -DOMP_MODE=OMP_STATIC -fopenmp=libomp -O2 -g -std=c++17 -DNDEBUG -I .  -o matchingTime.o -c ../bench/matchingTime.C
+clang++ -DPARLAY_OPENMP -DOMP_MODE=OMP_STATIC -fopenmp=libomp -O2 -g -std=c++17 -DNDEBUG -I .  -c matching.C -o matching.o
 cd ../bench; make -s matchingCheck
 cp ../bench/testInputs ../bench/testInputs_small .
-g++ -o matching matchingTime.o matching.o -DPARLAY_OPENMP -DOMP_MODE=OMP_STATIC -fopenmp -ldl 
+clang++ -o matching matchingTime.o matching.o -DPARLAY_OPENMP -DOMP_MODE=OMP_STATIC -fopenmp=libomp -ldl 
 cd benchmarks/maximalMatching/incrementalMatching ; numactl -i all ./testInputs -r 3 -p 48
 running cd ../graphData/data; make randLocalGraph_E_10_20000000
-running OMP_NUM_THREADS=48 ./matching  -r 3 -o /tmp/ofile947969_794592 ../graphData/data/randLocalGraph_E_10_20000000
-running ./../bench/matchingCheck  ../graphData/data/randLocalGraph_E_10_20000000 /tmp/ofile947969_794592
+running OMP_NUM_THREADS=48 ./matching  -r 3 -o /tmp/ofile122871_117779 ../graphData/data/randLocalGraph_E_10_20000000
+running ./../bench/matchingCheck  ../graphData/data/randLocalGraph_E_10_20000000 /tmp/ofile122871_117779
 running rm ../graphData/data/randLocalGraph_E_10_20000000
-randLocalGraph_E_10_20000000 :  -r 3 -o /tmp/ofile947969_794592 : '0.683', '0.711', '0.684', geomean = 0.692
+randLocalGraph_E_10_20000000 :  -r 3 -o /tmp/ofile122871_117779 : '0.616', '0.613', '0.617', geomean = 0.615
 running cd ../graphData/data; make rMatGraph_E_10_20000000
-running OMP_NUM_THREADS=48 ./matching  -r 3 -o /tmp/ofile42956_685192 ../graphData/data/rMatGraph_E_10_20000000
-running ./../bench/matchingCheck  ../graphData/data/rMatGraph_E_10_20000000 /tmp/ofile42956_685192
+running OMP_NUM_THREADS=48 ./matching  -r 3 -o /tmp/ofile793883_296041 ../graphData/data/rMatGraph_E_10_20000000
+running ./../bench/matchingCheck  ../graphData/data/rMatGraph_E_10_20000000 /tmp/ofile793883_296041
 running rm ../graphData/data/rMatGraph_E_10_20000000
-rMatGraph_E_10_20000000 :  -r 3 -o /tmp/ofile42956_685192 : '0.917', '0.909', '0.921', geomean = 0.916
+rMatGraph_E_10_20000000 :  -r 3 -o /tmp/ofile793883_296041 : '0.977', '1.046', '0.966', geomean = 0.996
 running cd ../graphData/data; make 2Dgrid_E_64000000
-running OMP_NUM_THREADS=48 ./matching  -r 3 -o /tmp/ofile103596_909149 ../graphData/data/2Dgrid_E_64000000
-running ./../bench/matchingCheck  ../graphData/data/2Dgrid_E_64000000 /tmp/ofile103596_909149
+running OMP_NUM_THREADS=48 ./matching  -r 3 -o /tmp/ofile519309_35262 ../graphData/data/2Dgrid_E_64000000
+running ./../bench/matchingCheck  ../graphData/data/2Dgrid_E_64000000 /tmp/ofile519309_35262
 running rm ../graphData/data/2Dgrid_E_64000000
-2Dgrid_E_64000000 :  -r 3 -o /tmp/ofile103596_909149 : '1.439', '1.422', '1.423', geomean = 1.428
-incrementalMatching : 48 : geomean of mins = 0.959, geomean of geomeans = 0.968
+2Dgrid_E_64000000 :  -r 3 -o /tmp/ofile519309_35262 : '1.474', '1.464', '1.467', geomean = 1.468
+incrementalMatching : 48 : geomean of mins = 0.954, geomean of geomeans = 0.966
 
 cd benchmarks/maximalIndependentSet/incrementalMIS ; make -s cleanall ; make -j 24
-g++ -DPARLAY_OPENMP -DOMP_MODE=OMP_STATIC -fopenmp -O2 -g -std=c++17 -DNDEBUG -I .  -o MISTime.o -c ../bench/MISTime.C
-g++ -DPARLAY_OPENMP -DOMP_MODE=OMP_STATIC -fopenmp -O2 -g -std=c++17 -DNDEBUG -I .  -c MIS.C -o MIS.o
+clang++ -DPARLAY_OPENMP -DOMP_MODE=OMP_STATIC -fopenmp=libomp -O2 -g -std=c++17 -DNDEBUG -I .  -o MISTime.o -c ../bench/MISTime.C
+clang++ -DPARLAY_OPENMP -DOMP_MODE=OMP_STATIC -fopenmp=libomp -O2 -g -std=c++17 -DNDEBUG -I .  -c MIS.C -o MIS.o
 cd ../bench; make -s MISCheck
 cp ../bench/testInputs ../bench/testInputs_small .
-g++ -o MIS MISTime.o MIS.o -DPARLAY_OPENMP -DOMP_MODE=OMP_STATIC -fopenmp -ldl 
+clang++ -o MIS MISTime.o MIS.o -DPARLAY_OPENMP -DOMP_MODE=OMP_STATIC -fopenmp=libomp -ldl 
 cd benchmarks/maximalIndependentSet/incrementalMIS ; numactl -i all ./testInputs -r 3 -p 48
 running cd ../graphData/data; make randLocalGraph_JR_10_20000000
-running OMP_NUM_THREADS=48 ./MIS  -r 3 -o /tmp/ofile512091_366299 ../graphData/data/randLocalGraph_JR_10_20000000
-running ./../bench/MISCheck  ../graphData/data/randLocalGraph_JR_10_20000000 /tmp/ofile512091_366299
+running OMP_NUM_THREADS=48 ./MIS  -r 3 -o /tmp/ofile707306_143927 ../graphData/data/randLocalGraph_JR_10_20000000
+running ./../bench/MISCheck  ../graphData/data/randLocalGraph_JR_10_20000000 /tmp/ofile707306_143927
 running rm ../graphData/data/randLocalGraph_JR_10_20000000
-randLocalGraph_JR_10_20000000 :  -r 3 -o /tmp/ofile512091_366299 : '0.189', '0.234', '0.224', geomean = 0.214
+randLocalGraph_JR_10_20000000 :  -r 3 -o /tmp/ofile707306_143927 : '0.18', '0.179', '0.182', geomean = 0.18
 running cd ../graphData/data; make rMatGraph_JR_12_16000000
-running OMP_NUM_THREADS=48 ./MIS  -r 3 -o /tmp/ofile899026_686643 ../graphData/data/rMatGraph_JR_12_16000000
-running ./../bench/MISCheck  ../graphData/data/rMatGraph_JR_12_16000000 /tmp/ofile899026_686643
+running OMP_NUM_THREADS=48 ./MIS  -r 3 -o /tmp/ofile472335_577799 ../graphData/data/rMatGraph_JR_12_16000000
+running ./../bench/MISCheck  ../graphData/data/rMatGraph_JR_12_16000000 /tmp/ofile472335_577799
 running rm ../graphData/data/rMatGraph_JR_12_16000000
-rMatGraph_JR_12_16000000 :  -r 3 -o /tmp/ofile899026_686643 : '0.114', '0.101', '0.122', geomean = 0.112
+rMatGraph_JR_12_16000000 :  -r 3 -o /tmp/ofile472335_577799 : '0.097', '0.117', '0.101', geomean = 0.105
 running cd ../graphData/data; make 3Dgrid_JR_64000000
-running OMP_NUM_THREADS=48 ./MIS  -r 3 -o /tmp/ofile573022_665823 ../graphData/data/3Dgrid_JR_64000000
-running ./../bench/MISCheck  ../graphData/data/3Dgrid_JR_64000000 /tmp/ofile573022_665823
+running OMP_NUM_THREADS=48 ./MIS  -r 3 -o /tmp/ofile886615_601437 ../graphData/data/3Dgrid_JR_64000000
+running ./../bench/MISCheck  ../graphData/data/3Dgrid_JR_64000000 /tmp/ofile886615_601437
 running rm ../graphData/data/3Dgrid_JR_64000000
-3Dgrid_JR_64000000 :  -r 3 -o /tmp/ofile573022_665823 : '0.463', '0.468', '0.473', geomean = 0.468
-incrementalMIS : 48 : geomean of mins = 0.207, geomean of geomeans = 0.224
+3Dgrid_JR_64000000 :  -r 3 -o /tmp/ofile886615_601437 : '0.46', '0.464', '0.46', geomean = 0.461
+incrementalMIS : 48 : geomean of mins = 0.2, geomean of geomeans = 0.206
 
 cd benchmarks/rayCast/kdTree ; make -s cleanall ; make -j 24
-g++ -DPARLAY_OPENMP -DOMP_MODE=OMP_STATIC -fopenmp -O2 -g -std=c++17 -DNDEBUG -I .  -o rayTime.o -c ../bench/rayTime.C
-g++ -DPARLAY_OPENMP -DOMP_MODE=OMP_STATIC -fopenmp -O2 -g -std=c++17 -DNDEBUG -I .  -c ray.C -o ray.o
+clang++ -DPARLAY_OPENMP -DOMP_MODE=OMP_STATIC -fopenmp=libomp -O2 -g -std=c++17 -DNDEBUG -I .  -o rayTime.o -c ../bench/rayTime.C
+clang++ -DPARLAY_OPENMP -DOMP_MODE=OMP_STATIC -fopenmp=libomp -O2 -g -std=c++17 -DNDEBUG -I .  -c ray.C -o ray.o
 cd ../bench; make -s rayCheck
 cp ../bench/testInputs ../bench/testInputs_small .
-g++ -o ray rayTime.o ray.o -DPARLAY_OPENMP -DOMP_MODE=OMP_STATIC -fopenmp -ldl 
 cd benchmarks/rayCast/kdTree ; numactl -i all ./testInputs -r 3 -p 48
 running cd ../geometryData/data; make happyTriangles happyRays
-running OMP_NUM_THREADS=48 ./ray  -r 3 -o /tmp/ofile454453_873303 ../geometryData/data/happyTriangles ../geometryData/data/happyRays
-running ./../bench/rayCheck  ../geometryData/data/happyTriangles ../geometryData/data/happyRays /tmp/ofile454453_873303
-running rm ../geometryData/data/happyTriangles ../geometryData/data/happyRays
-happyTriangles happyRays :  -r 3 -o /tmp/ofile454453_873303 : '0.663', '0.655', '0.663', geomean = 0.66
-running cd ../geometryData/data; make angelTriangles angelRays
-running OMP_NUM_THREADS=48 ./ray  -r 3 -o /tmp/ofile963468_788711 ../geometryData/data/angelTriangles ../geometryData/data/angelRays
-running ./../bench/rayCheck  ../geometryData/data/angelTriangles ../geometryData/data/angelRays /tmp/ofile963468_788711
-running rm ../geometryData/data/angelTriangles ../geometryData/data/angelRays
-angelTriangles angelRays :  -r 3 -o /tmp/ofile963468_788711 : '0.239', '0.239', '0.239', geomean = 0.239
-running cd ../geometryData/data; make dragonTriangles dragonRays
-running OMP_NUM_THREADS=48 ./ray  -r 3 -o /tmp/ofile698499_448827 ../geometryData/data/dragonTriangles ../geometryData/data/dragonRays
-running ./../bench/rayCheck  ../geometryData/data/dragonTriangles ../geometryData/data/dragonRays /tmp/ofile698499_448827
-running rm ../geometryData/data/dragonTriangles ../geometryData/data/dragonRays
-dragonTriangles dragonRays :  -r 3 -o /tmp/ofile698499_448827 : '0.469', '0.474', '0.471', geomean = 0.471
-kdTree : 48 : geomean of mins = 0.419, geomean of geomeans = 0.421
+running OMP_NUM_THREADS=48 ./ray  -r 3 -o /tmp/ofile214897_899573 ../geometryData/data/happyTriangles ../geometryData/data/happyRays
+TEST TERMINATED ABNORMALLY:
+[OMP_NUM_THREADS=48 ./ray  -r 3 -o /tmp/ofile214897_899573 ../geometryData/data/happyTriangles ../geometryData/data/happyRays
+/bin/sh: ./ray: No such file or directory
+]
 
 cd benchmarks/convexHull/quickHull ; make -s cleanall ; make -j 24
-g++ -DPARLAY_OPENMP -DOMP_MODE=OMP_STATIC -fopenmp -O2 -g -std=c++17 -DNDEBUG -I .  -o hullTime.o -c ../bench/hullTime.C
-g++ -DPARLAY_OPENMP -DOMP_MODE=OMP_STATIC -fopenmp -O2 -g -std=c++17 -DNDEBUG -I .  -c hull.C -o hull.o
+clang++ -DPARLAY_OPENMP -DOMP_MODE=OMP_STATIC -fopenmp=libomp -O2 -g -std=c++17 -DNDEBUG -I .  -o hullTime.o -c ../bench/hullTime.C
+clang++ -DPARLAY_OPENMP -DOMP_MODE=OMP_STATIC -fopenmp=libomp -O2 -g -std=c++17 -DNDEBUG -I .  -c hull.C -o hull.o
 cd ../bench; make -s hullCheck
 cp ../bench/testInputs ../bench/testInputs_small .
-g++ -o hull hullTime.o hull.o -DPARLAY_OPENMP -DOMP_MODE=OMP_STATIC -fopenmp -ldl 
 cd benchmarks/convexHull/quickHull ; numactl -i all ./testInputs -r 3 -p 48
 running cd ../geometryData/data; make 2DinSphere_100000000
-running OMP_NUM_THREADS=48 ./hull  -r 3 -o /tmp/ofile489583_204205 ../geometryData/data/2DinSphere_100000000
-running ./../bench/hullCheck  ../geometryData/data/2DinSphere_100000000 /tmp/ofile489583_204205
-CheckOut: checkHull: unexpected points in hull
-
+running OMP_NUM_THREADS=48 ./hull  -r 3 -o /tmp/ofile604745_910555 ../geometryData/data/2DinSphere_100000000
 TEST TERMINATED ABNORMALLY:
-[./../bench/hullCheck  ../geometryData/data/2DinSphere_100000000 /tmp/ofile489583_204205
-checkHull: unexpected points in hull
+[OMP_NUM_THREADS=48 ./hull  -r 3 -o /tmp/ofile604745_910555 ../geometryData/data/2DinSphere_100000000
+/bin/sh: ./hull: No such file or directory
 ]
 
 cd benchmarks/delaunayTriangulation/incrementalDelaunay ; make -s cleanall ; make -j 24
-g++ -DPARLAY_OPENMP -DOMP_MODE=OMP_STATIC -fopenmp -O2 -g -std=c++17 -DNDEBUG -I .  -o delaunayTime.o -c ../bench/delaunayTime.C
-g++ -DPARLAY_OPENMP -DOMP_MODE=OMP_STATIC -fopenmp -O2 -g -std=c++17 -DNDEBUG -I .  -c delaunay.C -o delaunay.o
+clang++ -DPARLAY_OPENMP -DOMP_MODE=OMP_STATIC -fopenmp=libomp -O2 -g -std=c++17 -DNDEBUG -I .  -o delaunayTime.o -c ../bench/delaunayTime.C
+clang++ -DPARLAY_OPENMP -DOMP_MODE=OMP_STATIC -fopenmp=libomp -O2 -g -std=c++17 -DNDEBUG -I .  -c delaunay.C -o delaunay.o
 cd ../bench; make -s delaunayCheck
 cp ../bench/testInputs ../bench/testInputs_small .
-g++ -o delaunay delaunayTime.o delaunay.o -DPARLAY_OPENMP -DOMP_MODE=OMP_STATIC -fopenmp -ldl 
 cd benchmarks/delaunayTriangulation/incrementalDelaunay ; numactl -i all ./testInputs -r 3 -p 48
 running cd ../geometryData/data; make 2DinCube_10M
-running OMP_NUM_THREADS=48 ./delaunay  -r 3 -o /tmp/ofile936359_82896 ../geometryData/data/2DinCube_10M
-running ./../bench/delaunayCheck  ../geometryData/data/2DinCube_10M /tmp/ofile936359_82896
-running rm ../geometryData/data/2DinCube_10M
-2DinCube_10M :  -r 3 -o /tmp/ofile936359_82896 : '2.848', '3.021', '3.038', geomean = 2.968
-running cd ../geometryData/data; make 2Dkuzmin_10M
-running OMP_NUM_THREADS=48 ./delaunay  -r 3 -o /tmp/ofile623777_922805 ../geometryData/data/2Dkuzmin_10M
-running ./../bench/delaunayCheck  ../geometryData/data/2Dkuzmin_10M /tmp/ofile623777_922805
-running rm ../geometryData/data/2Dkuzmin_10M
-2Dkuzmin_10M :  -r 3 -o /tmp/ofile623777_922805 : '3.091', '2.989', '3.241', geomean = 3.105
-incrementalDelaunay : 48 : geomean of mins = 2.918, geomean of geomeans = 3.036
+running OMP_NUM_THREADS=48 ./delaunay  -r 3 -o /tmp/ofile456823_305329 ../geometryData/data/2DinCube_10M
+TEST TERMINATED ABNORMALLY:
+[OMP_NUM_THREADS=48 ./delaunay  -r 3 -o /tmp/ofile456823_305329 ../geometryData/data/2DinCube_10M
+/bin/sh: ./delaunay: No such file or directory
+]
 
 cd benchmarks/delaunayRefine/incrementalRefine ; make -s cleanall ; make -j 24
-g++ -DPARLAY_OPENMP -DOMP_MODE=OMP_STATIC -fopenmp -O2 -g -std=c++17 -DNDEBUG -I .  -o refineTime.o -c ../bench/refineTime.C
-g++ -DPARLAY_OPENMP -DOMP_MODE=OMP_STATIC -fopenmp -O2 -g -std=c++17 -DNDEBUG -I .  -c refine.C -o refine.o
+clang++ -DPARLAY_OPENMP -DOMP_MODE=OMP_STATIC -fopenmp=libomp -O2 -g -std=c++17 -DNDEBUG -I .  -o refineTime.o -c ../bench/refineTime.C
+clang++ -DPARLAY_OPENMP -DOMP_MODE=OMP_STATIC -fopenmp=libomp -O2 -g -std=c++17 -DNDEBUG -I .  -c refine.C -o refine.o
 cd ../bench; make -s refineCheck
 cp ../bench/testInputs ../bench/testInputs_small .
-g++ -o refine refineTime.o refine.o -DPARLAY_OPENMP -DOMP_MODE=OMP_STATIC -fopenmp -ldl 
 cd benchmarks/delaunayRefine/incrementalRefine ; numactl -i all ./testInputs -r 3 -p 48
 running cd ../geometryData/data; make 2DinCubeDelaunay_5000000
-running OMP_NUM_THREADS=48 ./refine  -r 3 -o /tmp/ofile517535_141378 ../geometryData/data/2DinCubeDelaunay_5000000
-running ./../bench/refineCheck  ../geometryData/data/2DinCubeDelaunay_5000000 /tmp/ofile517535_141378
-running rm ../geometryData/data/2DinCubeDelaunay_5000000
-2DinCubeDelaunay_5000000 :  -r 3 -o /tmp/ofile517535_141378 : '4.869', '4.897', '4.843', geomean = 4.869
-running cd ../geometryData/data; make 2DkuzminDelaunay_5000000
-running OMP_NUM_THREADS=48 ./refine  -r 3 -o /tmp/ofile715017_582617 ../geometryData/data/2DkuzminDelaunay_5000000
-running ./../bench/refineCheck  ../geometryData/data/2DkuzminDelaunay_5000000 /tmp/ofile715017_582617
-running rm ../geometryData/data/2DkuzminDelaunay_5000000
-2DkuzminDelaunay_5000000 :  -r 3 -o /tmp/ofile715017_582617 : '4.439', '4.672', '4.432', geomean = 4.513
-incrementalRefine : 48 : geomean of mins = 4.633, geomean of geomeans = 4.688
+TEST TERMINATED ABNORMALLY:
+[cd ../geometryData/data; make 2DinCubeDelaunay_5000000
+make -s 2DinCube_5000000 
+../../../benchmarks/delaunayTriangulation/incrementalDelaunay/delaunay -o 2DinCubeDelaunay_5000000 2DinCube_5000000 
+make: ../../../benchmarks/delaunayTriangulation/incrementalDelaunay/delaunay: Command not found
+make: *** [Makefile:87: 2DinCubeDelaunay_5000000] Error 127
+]
 
 cd benchmarks/rangeQuery2d/parallelPlaneSweep ; make -s cleanall ; make -j 24
-g++ -DPARLAY_OPENMP -DOMP_MODE=OMP_STATIC -fopenmp -O2 -g -std=c++17 -DNDEBUG -I .  -o rangeTime.o -c ../bench/rangeTime.C
-g++ -DPARLAY_OPENMP -DOMP_MODE=OMP_STATIC -fopenmp -O2 -g -std=c++17 -DNDEBUG -I .  -c range.C -o range.o
+clang++ -DPARLAY_OPENMP -DOMP_MODE=OMP_STATIC -fopenmp=libomp -O2 -g -std=c++17 -DNDEBUG -I .  -o rangeTime.o -c ../bench/rangeTime.C
+clang++ -DPARLAY_OPENMP -DOMP_MODE=OMP_STATIC -fopenmp=libomp -O2 -g -std=c++17 -DNDEBUG -I .  -c range.C -o range.o
 cd ../bench; make -s rangeCheck
 cp ../bench/testInputs ../bench/testInputs_small .
-g++ -o range rangeTime.o range.o -DPARLAY_OPENMP -DOMP_MODE=OMP_STATIC -fopenmp -ldl 
 cd benchmarks/rangeQuery2d/parallelPlaneSweep ; numactl -i all ./testInputs -r 3 -p 48
 running cd ../geometryData/data; make 2DinCube_10M
-running OMP_NUM_THREADS=48 ./range  -r 3 -o /tmp/ofile99145_947096 ../geometryData/data/2DinCube_10M
-running ./../bench/rangeCheck  ../geometryData/data/2DinCube_10M /tmp/ofile99145_947096
-running rm ../geometryData/data/2DinCube_10M
-2DinCube_10M :  -r 3 -o /tmp/ofile99145_947096 : '511.461', '548.548', '543.527', geomean = 534.256
-running cd ../geometryData/data; make 2Dkuzmin_10M
-running OMP_NUM_THREADS=48 ./range  -r 3 -o /tmp/ofile162511_951029 ../geometryData/data/2Dkuzmin_10M
-running ./../bench/rangeCheck  ../geometryData/data/2Dkuzmin_10M /tmp/ofile162511_951029
-running rm ../geometryData/data/2Dkuzmin_10M
-2Dkuzmin_10M :  -r 3 -o /tmp/ofile162511_951029 : '179.394', '371.03', '491.39', geomean = 319.802
-parallelPlaneSweep : 48 : geomean of mins = 302.907, geomean of geomeans = 413.347
+running OMP_NUM_THREADS=48 ./range  -r 3 -o /tmp/ofile30594_401076 ../geometryData/data/2DinCube_10M
+TEST TERMINATED ABNORMALLY:
+[OMP_NUM_THREADS=48 ./range  -r 3 -o /tmp/ofile30594_401076 ../geometryData/data/2DinCube_10M
+/bin/sh: ./range: No such file or directory
+]
 
 cd benchmarks/nBody/parallelCK ; make -s cleanall ; make -j 24
-g++ -DPARLAY_OPENMP -DOMP_MODE=OMP_STATIC -fopenmp -O2 -g -std=c++17 -DNDEBUG -I .  -o nbodyTime.o -c ../bench/nbodyTime.C
-g++ -DPARLAY_OPENMP -DOMP_MODE=OMP_STATIC -fopenmp -O2 -g -std=c++17 -DNDEBUG -I .  -c nbody.C -o nbody.o
+clang++ -DPARLAY_OPENMP -DOMP_MODE=OMP_STATIC -fopenmp=libomp -O2 -g -std=c++17 -DNDEBUG -I .  -o nbodyTime.o -c ../bench/nbodyTime.C
+clang++ -DPARLAY_OPENMP -DOMP_MODE=OMP_STATIC -fopenmp=libomp -O2 -g -std=c++17 -DNDEBUG -I .  -c nbody.C -o nbody.o
 cd ../bench; make -s nbodyCheck
 cp ../bench/testInputs ../bench/testInputs_small .
-g++ -o nbody nbodyTime.o nbody.o -DPARLAY_OPENMP -DOMP_MODE=OMP_STATIC -fopenmp -ldl 
 cd benchmarks/nBody/parallelCK ; numactl -i all ./testInputs -r 3 -p 48
 running cd ../geometryData/data; make 3DonSphere_1000000
-running OMP_NUM_THREADS=48 ./nbody  -r 3 -o /tmp/ofile63690_551927 ../geometryData/data/3DonSphere_1000000
-running ./../bench/nbodyCheck  ../geometryData/data/3DonSphere_1000000 /tmp/ofile63690_551927
-running rm ../geometryData/data/3DonSphere_1000000
-3DonSphere_1000000 :  -r 3 -o /tmp/ofile63690_551927 : '2.075', '2.08', '2.052', geomean = 2.069
-running cd ../geometryData/data; make 3DinCube_1000000
-running OMP_NUM_THREADS=48 ./nbody  -r 3 -o /tmp/ofile526853_571750 ../geometryData/data/3DinCube_1000000
-running ./../bench/nbodyCheck  ../geometryData/data/3DinCube_1000000 /tmp/ofile526853_571750
-running rm ../geometryData/data/3DinCube_1000000
-3DinCube_1000000 :  -r 3 -o /tmp/ofile526853_571750 : '4.511', '4.47', '4.467', geomean = 4.482
-running cd ../geometryData/data; make 3Dplummer_1000000
-running OMP_NUM_THREADS=48 ./nbody  -r 3 -o /tmp/ofile725406_924200 ../geometryData/data/3Dplummer_1000000
-running ./../bench/nbodyCheck  ../geometryData/data/3Dplummer_1000000 /tmp/ofile725406_924200
-running rm ../geometryData/data/3Dplummer_1000000
-3Dplummer_1000000 :  -r 3 -o /tmp/ofile725406_924200 : '11.737', '11.729', '11.885', geomean = 11.784
-parallelCK : 48 : geomean of mins = 4.755, geomean of geomeans = 4.781
+running OMP_NUM_THREADS=48 ./nbody  -r 3 -o /tmp/ofile153469_624449 ../geometryData/data/3DonSphere_1000000
+TEST TERMINATED ABNORMALLY:
+[OMP_NUM_THREADS=48 ./nbody  -r 3 -o /tmp/ofile153469_624449 ../geometryData/data/3DonSphere_1000000
+/bin/sh: ./nbody: No such file or directory
+]

@@ -1,0 +1,54 @@
+HOSTNAME: collab1
+Parallel Only
+Forcing Compile
+running on 48 threads
+
+cd benchmarks/integerSort/parallelRadixSort ; make -s cleanall ; make -j 24
+clang++ -DPARLAY_OPENMP -DOMP_MODE=OMP_DYNAMIC_NONMONOTONIC -fopenmp=libomp -O2 -g -std=c++17 -DNDEBUG -I .  -include isort.h -o isort ../bench/isortTime.C -DPARLAY_OPENMP -DOMP_MODE=OMP_DYNAMIC_NONMONOTONIC -fopenmp=libomp -ldl 
+cp ../bench/testInputs ../bench/testInputs_small .
+cd ../bench; make isortCheck
+make[1]: Entering directory '/home/itmo_denis/pbbsbench/benchmarks/integerSort/bench'
+clang++ -DPARLAY_OPENMP -DOMP_MODE=OMP_DYNAMIC_NONMONOTONIC -fopenmp=libomp -O2 -g -std=c++17 -DNDEBUG -I . -Icommon -o isortCheck isortCheck.C -DPARLAY_OPENMP -DOMP_MODE=OMP_DYNAMIC_NONMONOTONIC -fopenmp=libomp -ldl 
+make[1]: Leaving directory '/home/itmo_denis/pbbsbench/benchmarks/integerSort/bench'
+cd benchmarks/integerSort/parallelRadixSort ; numactl -i all ./testInputs -r 3 -p 48
+running cd ../sequenceData/data; make randomSeq_100M_int
+running OMP_NUM_THREADS=48 ./isort -b 27 -r 3 -o /tmp/ofile468128_948010 ../sequenceData/data/randomSeq_100M_int
+running ./../bench/isortCheck  ../sequenceData/data/randomSeq_100M_int /tmp/ofile468128_948010
+CheckOut: ./../bench/isortCheck: in and out types don't match
+
+TEST TERMINATED ABNORMALLY:
+[./../bench/isortCheck  ../sequenceData/data/randomSeq_100M_int /tmp/ofile468128_948010
+./../bench/isortCheck: in and out types don't match
+]
+
+cd benchmarks/comparisonSort/sampleSort ; make -s cleanall ; make -j 24
+clang++ -DPARLAY_OPENMP -DOMP_MODE=OMP_DYNAMIC_NONMONOTONIC -fopenmp=libomp -O2 -g -std=c++17 -DNDEBUG -I .  -include sort.h -o sort ../bench/sortTime.C -DPARLAY_OPENMP -DOMP_MODE=OMP_DYNAMIC_NONMONOTONIC -fopenmp=libomp -ldl 
+cp ../bench/testInputs ../bench/testInputs_small .
+cd ../bench; make sortCheck
+make[1]: Entering directory '/home/itmo_denis/pbbsbench/benchmarks/comparisonSort/bench'
+clang++ -DPARLAY_OPENMP -DOMP_MODE=OMP_DYNAMIC_NONMONOTONIC -fopenmp=libomp -O2 -g -std=c++17 -DNDEBUG -I . -o sortCheck sortCheck.C -DPARLAY_OPENMP -DOMP_MODE=OMP_DYNAMIC_NONMONOTONIC -fopenmp=libomp -ldl 
+make[1]: Leaving directory '/home/itmo_denis/pbbsbench/benchmarks/comparisonSort/bench'
+cd benchmarks/comparisonSort/sampleSort ; numactl -i all ./testInputs -r 3 -p 48
+running cd ../sequenceData/data; make randomSeq_100M_double
+running OMP_NUM_THREADS=48 ./sort  -r 3 -o /tmp/ofile148369_84759 ../sequenceData/data/randomSeq_100M_double
+running ./../bench/sortCheck  ../sequenceData/data/randomSeq_100M_double /tmp/ofile148369_84759
+TEST TERMINATED ABNORMALLY:
+[./../bench/sortCheck  ../sequenceData/data/randomSeq_100M_double /tmp/ofile148369_84759
+terminate called after throwing an instance of 'std::bad_alloc'
+  what():  std::bad_alloc
+]
+
+cd benchmarks/removeDuplicates/parlayhash ; make -s cleanall ; make -j 24
+clang++ -DPARLAY_OPENMP -DOMP_MODE=OMP_DYNAMIC_NONMONOTONIC -fopenmp=libomp -O2 -g -std=c++17 -DNDEBUG -I .  -include dedup.h -o dedup ../bench/dedupTime.C -DPARLAY_OPENMP -DOMP_MODE=OMP_DYNAMIC_NONMONOTONIC -fopenmp=libomp -ldl 
+cp ../bench/testInputs ../bench/testInputs_small .
+cd ../bench; make dedupCheck
+make[1]: Entering directory '/home/itmo_denis/pbbsbench/benchmarks/removeDuplicates/bench'
+clang++ -DPARLAY_OPENMP -DOMP_MODE=OMP_DYNAMIC_NONMONOTONIC -fopenmp=libomp -O2 -g -std=c++17 -DNDEBUG -I . -o dedupCheck dedupCheck.C -DPARLAY_OPENMP -DOMP_MODE=OMP_DYNAMIC_NONMONOTONIC -fopenmp=libomp -ldl 
+make[1]: Leaving directory '/home/itmo_denis/pbbsbench/benchmarks/removeDuplicates/bench'
+cd benchmarks/removeDuplicates/parlayhash ; numactl -i all ./testInputs -r 3 -p 48
+running cd ../sequenceData/data; make randomSeq_100M_int
+running OMP_NUM_THREADS=48 ./dedup  -r 3 -o /tmp/ofile976471_731108 ../sequenceData/data/randomSeq_100M_int
+running ./../bench/dedupCheck  ../sequenceData/data/randomSeq_100M_int /tmp/ofile976471_731108
+running rm ../sequenceData/data/randomSeq_100M_int
+TEST TERMINATED ABNORMALLY:
+  cd benchmarks/removeDuplicates/parlayhash ; numactl -i all ./testInputs -r 3 -p 48
