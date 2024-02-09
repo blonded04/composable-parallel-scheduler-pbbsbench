@@ -4,101 +4,144 @@ Forcing Compile
 running on 48 threads
 
 cd benchmarks/integerSort/parallelRadixSort ; make -s cleanall ; make -j 24
-g++ -DPARLAY_EIGEN -DEIGEN_MODE=EIGEN_TIMESPAN_GRAINSIZE -pthread -O2 -g -std=c++17 -DNDEBUG -I .  -include isort.h -o isort ../bench/isortTime.C -ldl 
+g++ -DPARLAY_EIGEN -DEIGEN_MODE=EIGEN_TIMESPAN_GRAINSIZE -pthread -O2 -g -std=c++17 -DNDEBUG -I .  -include isort.h -o isort ../bench/isortTime.C -DPARLAY_EIGEN -DEIGEN_MODE=EIGEN_TIMESPAN_GRAINSIZE -pthread -ldl 
 cp ../bench/testInputs ../bench/testInputs_small .
 cd ../bench; make isortCheck
 make[1]: Entering directory '/home/itmo_denis/pbbsbench/benchmarks/integerSort/bench'
-g++ -DPARLAY_EIGEN -DEIGEN_MODE=EIGEN_TIMESPAN_GRAINSIZE -pthread -O2 -g -std=c++17 -DNDEBUG -I . -Icommon -o isortCheck isortCheck.C -ldl 
+g++ -DPARLAY_EIGEN -DEIGEN_MODE=EIGEN_TIMESPAN_GRAINSIZE -pthread -O2 -g -std=c++17 -DNDEBUG -I . -Icommon -o isortCheck isortCheck.C -DPARLAY_EIGEN -DEIGEN_MODE=EIGEN_TIMESPAN_GRAINSIZE -pthread -ldl 
 make[1]: Leaving directory '/home/itmo_denis/pbbsbench/benchmarks/integerSort/bench'
 cd benchmarks/integerSort/parallelRadixSort ; numactl -i all ./testInputs -r 3 -p 48
 running cd ../sequenceData/data; make randomSeq_100M_int
-running PARLAY_NUM_THREADS=48 ./isort -b 27 -r 3 -o /tmp/ofile881963_265732 ../sequenceData/data/randomSeq_100M_int
-running ./../bench/isortCheck  ../sequenceData/data/randomSeq_100M_int /tmp/ofile881963_265732
+running PARLAY_NUM_THREADS=48 ./isort -b 27 -r 3 -o /tmp/ofile214084_436171 ../sequenceData/data/randomSeq_100M_int
+running ./../bench/isortCheck  ../sequenceData/data/randomSeq_100M_int /tmp/ofile214084_436171
 running rm ../sequenceData/data/randomSeq_100M_int
-randomSeq_100M_int : -b 27 -r 3 -o /tmp/ofile881963_265732 : '0.723', '0.736', '0.761', geomean = 0.74
+randomSeq_100M_int : -b 27 -r 3 -o /tmp/ofile214084_436171 : '0.774', '0.75', '0.746', geomean = 0.757
 running cd ../sequenceData/data; make exptSeq_100M_int
-running PARLAY_NUM_THREADS=48 ./isort -b 27 -r 3 -o /tmp/ofile425091_122711 ../sequenceData/data/exptSeq_100M_int
-running ./../bench/isortCheck  ../sequenceData/data/exptSeq_100M_int /tmp/ofile425091_122711
+running PARLAY_NUM_THREADS=48 ./isort -b 27 -r 3 -o /tmp/ofile819655_753489 ../sequenceData/data/exptSeq_100M_int
+running ./../bench/isortCheck  ../sequenceData/data/exptSeq_100M_int /tmp/ofile819655_753489
 running rm ../sequenceData/data/exptSeq_100M_int
-exptSeq_100M_int : -b 27 -r 3 -o /tmp/ofile425091_122711 : '1.078', '0.845', '0.944', geomean = 0.951
+exptSeq_100M_int : -b 27 -r 3 -o /tmp/ofile819655_753489 : '0.868', '0.991', '1.097', geomean = 0.981
 running cd ../sequenceData/data; make randomSeq_100M_int_pair_int
-running PARLAY_NUM_THREADS=48 ./isort -b 27 -r 3 -o /tmp/ofile861029_664330 ../sequenceData/data/randomSeq_100M_int_pair_int
-running ./../bench/isortCheck  ../sequenceData/data/randomSeq_100M_int_pair_int /tmp/ofile861029_664330
+running PARLAY_NUM_THREADS=48 ./isort -b 27 -r 3 -o /tmp/ofile12963_807283 ../sequenceData/data/randomSeq_100M_int_pair_int
+running ./../bench/isortCheck  ../sequenceData/data/randomSeq_100M_int_pair_int /tmp/ofile12963_807283
 running rm ../sequenceData/data/randomSeq_100M_int_pair_int
-randomSeq_100M_int_pair_int : -b 27 -r 3 -o /tmp/ofile861029_664330 : '0.97', '0.976', '0.953', geomean = 0.966
+randomSeq_100M_int_pair_int : -b 27 -r 3 -o /tmp/ofile12963_807283 : '0.927', '1.012', '0.994', geomean = 0.977
 running cd ../sequenceData/data; make randomSeq_100M_256_int_pair_int
-running PARLAY_NUM_THREADS=48 ./isort -b 8 -r 3 -o /tmp/ofile930501_960164 ../sequenceData/data/randomSeq_100M_256_int_pair_int
-running ./../bench/isortCheck  ../sequenceData/data/randomSeq_100M_256_int_pair_int /tmp/ofile930501_960164
+running PARLAY_NUM_THREADS=48 ./isort -b 8 -r 3 -o /tmp/ofile505648_268737 ../sequenceData/data/randomSeq_100M_256_int_pair_int
+running ./../bench/isortCheck  ../sequenceData/data/randomSeq_100M_256_int_pair_int /tmp/ofile505648_268737
 running rm ../sequenceData/data/randomSeq_100M_256_int_pair_int
-randomSeq_100M_256_int_pair_int : -b 8 -r 3 -o /tmp/ofile930501_960164 : '0.08', '0.077', '0.079', geomean = 0.079
-parallelRadixSort : 48 : geomean of mins = 0.461, geomean of geomeans = 0.481
+randomSeq_100M_256_int_pair_int : -b 8 -r 3 -o /tmp/ofile505648_268737 : '0.071', '0.07', '0.071', geomean = 0.07
+parallelRadixSort : 48 : geomean of mins = 0.453, geomean of geomeans = 0.476
 
 cd benchmarks/comparisonSort/sampleSort ; make -s cleanall ; make -j 24
-g++ -DPARLAY_EIGEN -DEIGEN_MODE=EIGEN_TIMESPAN_GRAINSIZE -pthread -O2 -g -std=c++17 -DNDEBUG -I .  -include sort.h -o sort ../bench/sortTime.C -ldl 
+g++ -DPARLAY_EIGEN -DEIGEN_MODE=EIGEN_TIMESPAN_GRAINSIZE -pthread -O2 -g -std=c++17 -DNDEBUG -I .  -include sort.h -o sort ../bench/sortTime.C -DPARLAY_EIGEN -DEIGEN_MODE=EIGEN_TIMESPAN_GRAINSIZE -pthread -ldl 
 cp ../bench/testInputs ../bench/testInputs_small .
 cd ../bench; make sortCheck
 make[1]: Entering directory '/home/itmo_denis/pbbsbench/benchmarks/comparisonSort/bench'
-g++ -DPARLAY_EIGEN -DEIGEN_MODE=EIGEN_TIMESPAN_GRAINSIZE -pthread -O2 -g -std=c++17 -DNDEBUG -I . -o sortCheck sortCheck.C -ldl 
+g++ -DPARLAY_EIGEN -DEIGEN_MODE=EIGEN_TIMESPAN_GRAINSIZE -pthread -O2 -g -std=c++17 -DNDEBUG -I . -o sortCheck sortCheck.C -DPARLAY_EIGEN -DEIGEN_MODE=EIGEN_TIMESPAN_GRAINSIZE -pthread -ldl 
 make[1]: Leaving directory '/home/itmo_denis/pbbsbench/benchmarks/comparisonSort/bench'
 cd benchmarks/comparisonSort/sampleSort ; numactl -i all ./testInputs -r 3 -p 48
 running cd ../sequenceData/data; make randomSeq_100M_double
-running PARLAY_NUM_THREADS=48 ./sort  -r 3 -o /tmp/ofile372149_881748 ../sequenceData/data/randomSeq_100M_double
-running ./../bench/sortCheck  ../sequenceData/data/randomSeq_100M_double /tmp/ofile372149_881748
-TEST TERMINATED ABNORMALLY:
-[./../bench/sortCheck  ../sequenceData/data/randomSeq_100M_double /tmp/ofile372149_881748
-terminate called after throwing an instance of 'std::bad_alloc'
-  what():  std::bad_alloc
-]
+running PARLAY_NUM_THREADS=48 ./sort  -r 3 -o /tmp/ofile16369_616255 ../sequenceData/data/randomSeq_100M_double
+running ./../bench/sortCheck  ../sequenceData/data/randomSeq_100M_double /tmp/ofile16369_616255
+running rm ../sequenceData/data/randomSeq_100M_double
+randomSeq_100M_double :  -r 3 -o /tmp/ofile16369_616255 : '1.082', '1.002', '1.052', geomean = 1.045
+running cd ../sequenceData/data; make exptSeq_100M_double
+running PARLAY_NUM_THREADS=48 ./sort  -r 3 -o /tmp/ofile60735_453422 ../sequenceData/data/exptSeq_100M_double
+running ./../bench/sortCheck  ../sequenceData/data/exptSeq_100M_double /tmp/ofile60735_453422
+running rm ../sequenceData/data/exptSeq_100M_double
+exptSeq_100M_double :  -r 3 -o /tmp/ofile60735_453422 : '0.726', '0.721', '0.693', geomean = 0.713
+running cd ../sequenceData/data; make almostSortedSeq_100M_double
+running PARLAY_NUM_THREADS=48 ./sort  -r 3 -o /tmp/ofile51669_427092 ../sequenceData/data/almostSortedSeq_100M_double
+running ./../bench/sortCheck  ../sequenceData/data/almostSortedSeq_100M_double /tmp/ofile51669_427092
+running rm ../sequenceData/data/almostSortedSeq_100M_double
+almostSortedSeq_100M_double :  -r 3 -o /tmp/ofile51669_427092 : '0.744', '0.879', '0.762', geomean = 0.793
+running cd ../sequenceData/data; make randomSeq_100M_double_pair_double
+running PARLAY_NUM_THREADS=48 ./sort  -r 3 -o /tmp/ofile375544_907295 ../sequenceData/data/randomSeq_100M_double_pair_double
+running ./../bench/sortCheck  ../sequenceData/data/randomSeq_100M_double_pair_double /tmp/ofile375544_907295
+running rm ../sequenceData/data/randomSeq_100M_double_pair_double
+randomSeq_100M_double_pair_double :  -r 3 -o /tmp/ofile375544_907295 : '3.517', '3.25', '3.652', geomean = 3.469
+running cd ../sequenceData/data; make trigramSeq_100M
+running PARLAY_NUM_THREADS=48 ./sort  -r 3 -o /tmp/ofile896549_104552 ../sequenceData/data/trigramSeq_100M
+running ./../bench/sortCheck  ../sequenceData/data/trigramSeq_100M /tmp/ofile896549_104552
+running rm ../sequenceData/data/trigramSeq_100M
+trigramSeq_100M :  -r 3 -o /tmp/ofile896549_104552 : '2.841', '2.66', '2.962', geomean = 2.818
+sampleSort : 48 : geomean of mins = 1.349, geomean of geomeans = 1.42
 
 cd benchmarks/removeDuplicates/parlayhash ; make -s cleanall ; make -j 24
-g++ -DPARLAY_EIGEN -DEIGEN_MODE=EIGEN_TIMESPAN_GRAINSIZE -pthread -O2 -g -std=c++17 -DNDEBUG -I .  -include dedup.h -o dedup ../bench/dedupTime.C -ldl 
+g++ -DPARLAY_EIGEN -DEIGEN_MODE=EIGEN_TIMESPAN_GRAINSIZE -pthread -O2 -g -std=c++17 -DNDEBUG -I .  -include dedup.h -o dedup ../bench/dedupTime.C -DPARLAY_EIGEN -DEIGEN_MODE=EIGEN_TIMESPAN_GRAINSIZE -pthread -ldl 
 cp ../bench/testInputs ../bench/testInputs_small .
 cd ../bench; make dedupCheck
 make[1]: Entering directory '/home/itmo_denis/pbbsbench/benchmarks/removeDuplicates/bench'
-g++ -DPARLAY_EIGEN -DEIGEN_MODE=EIGEN_TIMESPAN_GRAINSIZE -pthread -O2 -g -std=c++17 -DNDEBUG -I . -o dedupCheck dedupCheck.C -ldl 
+g++ -DPARLAY_EIGEN -DEIGEN_MODE=EIGEN_TIMESPAN_GRAINSIZE -pthread -O2 -g -std=c++17 -DNDEBUG -I . -o dedupCheck dedupCheck.C -DPARLAY_EIGEN -DEIGEN_MODE=EIGEN_TIMESPAN_GRAINSIZE -pthread -ldl 
 make[1]: Leaving directory '/home/itmo_denis/pbbsbench/benchmarks/removeDuplicates/bench'
 cd benchmarks/removeDuplicates/parlayhash ; numactl -i all ./testInputs -r 3 -p 48
 running cd ../sequenceData/data; make randomSeq_100M_int
-running PARLAY_NUM_THREADS=48 ./dedup  -r 3 -o /tmp/ofile219534_286417 ../sequenceData/data/randomSeq_100M_int
-running ./../bench/dedupCheck  ../sequenceData/data/randomSeq_100M_int /tmp/ofile219534_286417
+running PARLAY_NUM_THREADS=48 ./dedup  -r 3 -o /tmp/ofile737626_197951 ../sequenceData/data/randomSeq_100M_int
+running ./../bench/dedupCheck  ../sequenceData/data/randomSeq_100M_int /tmp/ofile737626_197951
 running rm ../sequenceData/data/randomSeq_100M_int
-randomSeq_100M_int :  -r 3 -o /tmp/ofile219534_286417 : '0.22', '0.217', '0.224', geomean = 0.22
+randomSeq_100M_int :  -r 3 -o /tmp/ofile737626_197951 : '0.337', '0.243', '0.28', geomean = 0.284
 running cd ../sequenceData/data; make exptSeq_100M_int
-running PARLAY_NUM_THREADS=48 ./dedup  -r 3 -o /tmp/ofile523799_406914 ../sequenceData/data/exptSeq_100M_int
-running ./../bench/dedupCheck  ../sequenceData/data/exptSeq_100M_int /tmp/ofile523799_406914
+running PARLAY_NUM_THREADS=48 ./dedup  -r 3 -o /tmp/ofile984541_814484 ../sequenceData/data/exptSeq_100M_int
+running ./../bench/dedupCheck  ../sequenceData/data/exptSeq_100M_int /tmp/ofile984541_814484
 running rm ../sequenceData/data/exptSeq_100M_int
-exptSeq_100M_int :  -r 3 -o /tmp/ofile523799_406914 : '0.158', '0.182', '0.139', geomean = 0.159
+exptSeq_100M_int :  -r 3 -o /tmp/ofile984541_814484 : '0.143', '0.135', '0.199', geomean = 0.156
 running cd ../sequenceData/data; make trigramSeq_100M
-running PARLAY_NUM_THREADS=48 ./dedup  -r 3 -o /tmp/ofile527991_591285 ../sequenceData/data/trigramSeq_100M
-running ./../bench/dedupCheck  ../sequenceData/data/trigramSeq_100M /tmp/ofile527991_591285
+running PARLAY_NUM_THREADS=48 ./dedup  -r 3 -o /tmp/ofile31136_172684 ../sequenceData/data/trigramSeq_100M
+running ./../bench/dedupCheck  ../sequenceData/data/trigramSeq_100M /tmp/ofile31136_172684
 running rm ../sequenceData/data/trigramSeq_100M
-trigramSeq_100M :  -r 3 -o /tmp/ofile527991_591285 : '2.622', '2.58', '2.554', geomean = 2.585
-parlayhash : 48 : geomean of mins = 0.426, geomean of geomeans = 0.449
+trigramSeq_100M :  -r 3 -o /tmp/ofile31136_172684 : '2.562', '2.722', '2.612', geomean = 2.631
+parlayhash : 48 : geomean of mins = 0.438, geomean of geomeans = 0.489
 
 cd benchmarks/histogram/parallel ; make -s cleanall ; make -j 24
 g++ -DPARLAY_EIGEN -DEIGEN_MODE=EIGEN_TIMESPAN_GRAINSIZE -pthread -O2 -g -std=c++17 -DNDEBUG -I .  -o histogramTime.o -c ../bench/histogramTime.C
 g++ -DPARLAY_EIGEN -DEIGEN_MODE=EIGEN_TIMESPAN_GRAINSIZE -pthread -O2 -g -std=c++17 -DNDEBUG -I .  -c histogram.C -o histogram.o
 cd ../bench; make -s histogramCheck
 cp ../bench/testInputs ../bench/testInputs_small .
+g++ -o histogram histogramTime.o histogram.o -DPARLAY_EIGEN -DEIGEN_MODE=EIGEN_TIMESPAN_GRAINSIZE -pthread -ldl 
 cd benchmarks/histogram/parallel ; numactl -i all ./testInputs -r 3 -p 48
 running cd ../sequenceData/data; make randomSeq_100M_256_int
-running PARLAY_NUM_THREADS=48 ./histogram -b 256 -r 3 -o /tmp/ofile17034_305818 ../sequenceData/data/randomSeq_100M_256_int
-TEST TERMINATED ABNORMALLY:
-[PARLAY_NUM_THREADS=48 ./histogram -b 256 -r 3 -o /tmp/ofile17034_305818 ../sequenceData/data/randomSeq_100M_256_int
-/bin/sh: ./histogram: No such file or directory
-]
+running PARLAY_NUM_THREADS=48 ./histogram -b 256 -r 3 -o /tmp/ofile582399_54790 ../sequenceData/data/randomSeq_100M_256_int
+running ./../bench/histogramCheck  ../sequenceData/data/randomSeq_100M_256_int /tmp/ofile582399_54790
+running rm ../sequenceData/data/randomSeq_100M_256_int
+randomSeq_100M_256_int : -b 256 -r 3 -o /tmp/ofile582399_54790 : '0.009', '0.009', '0.009', geomean = 0.009
+running cd ../sequenceData/data; make randomSeq_100M_100K_int
+running PARLAY_NUM_THREADS=48 ./histogram -b 100000 -r 3 -o /tmp/ofile196400_379522 ../sequenceData/data/randomSeq_100M_100K_int
+running ./../bench/histogramCheck  ../sequenceData/data/randomSeq_100M_100K_int /tmp/ofile196400_379522
+running rm ../sequenceData/data/randomSeq_100M_100K_int
+randomSeq_100M_100K_int : -b 100000 -r 3 -o /tmp/ofile196400_379522 : '0.048', '0.048', '0.048', geomean = 0.048
+running cd ../sequenceData/data; make randomSeq_100M_int
+running PARLAY_NUM_THREADS=48 ./histogram -b 100000000 -r 3 -o /tmp/ofile786279_958361 ../sequenceData/data/randomSeq_100M_int
+running ./../bench/histogramCheck  ../sequenceData/data/randomSeq_100M_int /tmp/ofile786279_958361
+running rm ../sequenceData/data/randomSeq_100M_int
+randomSeq_100M_int : -b 100000000 -r 3 -o /tmp/ofile786279_958361 : '0.119', '0.119', '0.119', geomean = 0.119
+running cd ../sequenceData/data; make exptSeq_100M_int
+running PARLAY_NUM_THREADS=48 ./histogram -b 100000000 -r 3 -o /tmp/ofile253733_692616 ../sequenceData/data/exptSeq_100M_int
+running ./../bench/histogramCheck  ../sequenceData/data/exptSeq_100M_int /tmp/ofile253733_692616
+running rm ../sequenceData/data/exptSeq_100M_int
+exptSeq_100M_int : -b 100000000 -r 3 -o /tmp/ofile253733_692616 : '0.133', '0.126', '0.124', geomean = 0.128
+running cd ../sequenceData/data; make almostEqualSeq_100000000
+running PARLAY_NUM_THREADS=48 ./histogram -b 100000000 -r 3 -o /tmp/ofile350011_509789 ../sequenceData/data/almostEqualSeq_100000000
+running ./../bench/histogramCheck  ../sequenceData/data/almostEqualSeq_100000000 /tmp/ofile350011_509789
+running rm ../sequenceData/data/almostEqualSeq_100000000
+almostEqualSeq_100000000 : -b 100000000 -r 3 -o /tmp/ofile350011_509789 : '0.149', '0.141', '0.14', geomean = 0.143
+parallel : 48 : geomean of mins = 0.061, geomean of geomeans = 0.062
 
 cd benchmarks/wordCounts/histogram ; make -s cleanall ; make -j 24
 g++ -DPARLAY_EIGEN -DEIGEN_MODE=EIGEN_TIMESPAN_GRAINSIZE -pthread -O2 -g -std=c++17 -DNDEBUG -I .  -o wcTime.o -c ../bench/wcTime.C
 g++ -DPARLAY_EIGEN -DEIGEN_MODE=EIGEN_TIMESPAN_GRAINSIZE -pthread -O2 -g -std=c++17 -DNDEBUG -I .  -c wc.C -o wc.o
 cd ../bench; make -s wcCheck
 cp ../bench/testInputs ../bench/testInputs_small .
+g++ -o wc wcTime.o wc.o -DPARLAY_EIGEN -DEIGEN_MODE=EIGEN_TIMESPAN_GRAINSIZE -pthread -ldl 
 cd benchmarks/wordCounts/histogram ; numactl -i all ./testInputs -r 3 -p 48
 running cd ../sequenceData/data; make trigramString_250000000
-running PARLAY_NUM_THREADS=48 ./wc  -r 3 -o /tmp/ofile998141_321110 ../sequenceData/data/trigramString_250000000
+running PARLAY_NUM_THREADS=48 ./wc  -r 3 -o /tmp/ofile970700_337061 ../sequenceData/data/trigramString_250000000
+running ./../bench/wcCheck  ../sequenceData/data/trigramString_250000000 /tmp/ofile970700_337061
+CheckOut: Unable to open file: /tmp/ofile970700_337061
+
 TEST TERMINATED ABNORMALLY:
-[PARLAY_NUM_THREADS=48 ./wc  -r 3 -o /tmp/ofile998141_321110 ../sequenceData/data/trigramString_250000000
-/bin/sh: ./wc: No such file or directory
+[./../bench/wcCheck  ../sequenceData/data/trigramString_250000000 /tmp/ofile970700_337061
+Unable to open file: /tmp/ofile970700_337061
 ]
 
 cd benchmarks/invertedIndex/parallel ; make -s cleanall ; make -j 24
@@ -106,12 +149,16 @@ g++ -DPARLAY_EIGEN -DEIGEN_MODE=EIGEN_TIMESPAN_GRAINSIZE -pthread -O2 -g -std=c+
 g++ -DPARLAY_EIGEN -DEIGEN_MODE=EIGEN_TIMESPAN_GRAINSIZE -pthread -O2 -g -std=c++17 -DNDEBUG -I .  -c index.C -o index.o
 cd ../bench; make -s indexCheck
 cp ../bench/testInputs ../bench/testInputs_small .
+g++ -o index indexTime.o index.o -DPARLAY_EIGEN -DEIGEN_MODE=EIGEN_TIMESPAN_GRAINSIZE -pthread -ldl 
 cd benchmarks/invertedIndex/parallel ; numactl -i all ./testInputs -r 3 -p 48
 running cd ../sequenceData/data; make wikisamp.xml
-running PARLAY_NUM_THREADS=48 ./index  -r 3 -o /tmp/ofile706800_408654 ../sequenceData/data/wikisamp.xml
+running PARLAY_NUM_THREADS=48 ./index  -r 3 -o /tmp/ofile100788_372086 ../sequenceData/data/wikisamp.xml
+running ./../bench/indexCheck  ../sequenceData/data/wikisamp.xml /tmp/ofile100788_372086
+CheckOut: Unable to open file: /tmp/ofile100788_372086
+
 TEST TERMINATED ABNORMALLY:
-[PARLAY_NUM_THREADS=48 ./index  -r 3 -o /tmp/ofile706800_408654 ../sequenceData/data/wikisamp.xml
-/bin/sh: ./index: No such file or directory
+[./../bench/indexCheck  ../sequenceData/data/wikisamp.xml /tmp/ofile100788_372086
+Unable to open file: /tmp/ofile100788_372086
 ]
 
 cd benchmarks/suffixArray/parallelRange ; make -s cleanall ; make -j 24
@@ -119,13 +166,26 @@ g++ -DPARLAY_EIGEN -DEIGEN_MODE=EIGEN_TIMESPAN_GRAINSIZE -pthread -O2 -g -std=c+
 g++ -DPARLAY_EIGEN -DEIGEN_MODE=EIGEN_TIMESPAN_GRAINSIZE -pthread -O2 -g -std=c++17 -DNDEBUG -I .  -c SA.C -o SA.o
 cd ../bench; make -s SACheck
 cp ../bench/testInputs ../bench/testInputs_small .
-g++ -o SA SATime.o SA.o -ldl 
+g++ -o SA SATime.o SA.o -DPARLAY_EIGEN -DEIGEN_MODE=EIGEN_TIMESPAN_GRAINSIZE -pthread -ldl 
 cd benchmarks/suffixArray/parallelRange ; numactl -i all ./testInputs -r 3 -p 48
 running cd ../sequenceData/data; make trigramString_100000000
-running PARLAY_NUM_THREADS=48 ./SA  -r 3 -o /tmp/ofile834776_759245 ../sequenceData/data/trigramString_100000000
+running PARLAY_NUM_THREADS=48 ./SA  -r 3 -o /tmp/ofile878317_555146 ../sequenceData/data/trigramString_100000000
+running ./../bench/SACheck  ../sequenceData/data/trigramString_100000000 /tmp/ofile878317_555146
+running rm ../sequenceData/data/trigramString_100000000
+trigramString_100000000 :  -r 3 -o /tmp/ofile878317_555146 : '4.38', '4.289', '4.382', geomean = 4.35
+running cd ../sequenceData/data; make chr22.dna
+running PARLAY_NUM_THREADS=48 ./SA  -r 3 -o /tmp/ofile515920_546593 ../sequenceData/data/chr22.dna
+running ./../bench/SACheck  ../sequenceData/data/chr22.dna /tmp/ofile515920_546593
+running rm ../sequenceData/data/chr22.dna
+chr22.dna :  -r 3 -o /tmp/ofile515920_546593 : '2.816', '3.066', '2.751', geomean = 2.874
+running cd ../sequenceData/data; make etext99
+running PARLAY_NUM_THREADS=48 ./SA  -r 3 -o /tmp/ofile458975_651527 ../sequenceData/data/etext99
+running ./../bench/SACheck  ../sequenceData/data/etext99 /tmp/ofile458975_651527
+CheckOut: readIntSeqFromFile: bad input
+
 TEST TERMINATED ABNORMALLY:
-[PARLAY_NUM_THREADS=48 ./SA  -r 3 -o /tmp/ofile834776_759245 ../sequenceData/data/trigramString_100000000
-/bin/sh: ./SA: No such file or directory
+[./../bench/SACheck  ../sequenceData/data/etext99 /tmp/ofile458975_651527
+readIntSeqFromFile: bad input
 ]
 
 cd benchmarks/longestRepeatedSubstring/doubling ; make -s cleanall ; make -j 24
@@ -133,168 +193,16 @@ g++ -DPARLAY_EIGEN -DEIGEN_MODE=EIGEN_TIMESPAN_GRAINSIZE -pthread -O2 -g -std=c+
 g++ -DPARLAY_EIGEN -DEIGEN_MODE=EIGEN_TIMESPAN_GRAINSIZE -pthread -O2 -g -std=c++17 -DNDEBUG -I .  -c lrs.C -o lrs.o
 cd ../bench; make -s lrsCheck
 cp ../bench/testInputs ../bench/testInputs_small .
+g++ -o lrs lrsTime.o lrs.o -DPARLAY_EIGEN -DEIGEN_MODE=EIGEN_TIMESPAN_GRAINSIZE -pthread -ldl 
 cd benchmarks/longestRepeatedSubstring/doubling ; numactl -i all ./testInputs -r 3 -p 48
 running cd ../sequenceData/data; make chr22.dna
-running PARLAY_NUM_THREADS=48 ./lrs  -r 3 -o /tmp/ofile103779_597128 ../sequenceData/data/chr22.dna
+running PARLAY_NUM_THREADS=48 ./lrs  -r 3 -o /tmp/ofile467696_779850 ../sequenceData/data/chr22.dna
+running ./../bench/lrsCheck  ../sequenceData/data/chr22.dna /tmp/ofile467696_779850
+running rm ../sequenceData/data/chr22.dna
+chr22.dna :  -r 3 -o /tmp/ofile467696_779850 : '3.147', '3.439', '3.05', geomean = 3.208
+running cd ../sequenceData/data; make etext99
+running PARLAY_NUM_THREADS=48 ./lrs  -r 3 -o /tmp/ofile748200_108506 ../sequenceData/data/etext99
+running ./../bench/lrsCheck  ../sequenceData/data/etext99 /tmp/ofile748200_108506
+running rm ../sequenceData/data/etext99
 TEST TERMINATED ABNORMALLY:
-[PARLAY_NUM_THREADS=48 ./lrs  -r 3 -o /tmp/ofile103779_597128 ../sequenceData/data/chr22.dna
-/bin/sh: ./lrs: No such file or directory
-]
-
-cd benchmarks/classify/decisionTree ; make -s cleanall ; make -j 24
-g++ -DPARLAY_EIGEN -DEIGEN_MODE=EIGEN_TIMESPAN_GRAINSIZE -pthread -O2 -g -std=c++17 -DNDEBUG -I .  -o classifyTime.o -c ../bench/classifyTime.C
-g++ -DPARLAY_EIGEN -DEIGEN_MODE=EIGEN_TIMESPAN_GRAINSIZE -pthread -O2 -g -std=c++17 -DNDEBUG -I .  -c classify.C -o classify.o
-cd ../bench; make -s classifyCheck
-cp ../bench/testInputs ../bench/testInputs_small .
-cd benchmarks/classify/decisionTree ; numactl -i all ./testInputs -r 3 -p 48
-running cd ../sequenceData/data; make covtype.data
-running PARLAY_NUM_THREADS=48 ./classify  -r 3 -o /tmp/ofile361629_760085 ../sequenceData/data/covtype.data
-TEST TERMINATED ABNORMALLY:
-[PARLAY_NUM_THREADS=48 ./classify  -r 3 -o /tmp/ofile361629_760085 ../sequenceData/data/covtype.data
-/bin/sh: ./classify: No such file or directory
-]
-
-cd benchmarks/minSpanningForest/parallelFilterKruskal ; make -s cleanall ; make -j 24
-g++ -DPARLAY_EIGEN -DEIGEN_MODE=EIGEN_TIMESPAN_GRAINSIZE -pthread -O2 -g -std=c++17 -DNDEBUG -I .  -o MSTTime.o -c ../bench/MSTTime.C
-g++ -DPARLAY_EIGEN -DEIGEN_MODE=EIGEN_TIMESPAN_GRAINSIZE -pthread -O2 -g -std=c++17 -DNDEBUG -I .  -c MST.C -o MST.o
-cd ../bench; make -s MSTCheck
-cp ../bench/testInputs ../bench/testInputs_small .
-cd benchmarks/minSpanningForest/parallelFilterKruskal ; numactl -i all ./testInputs -r 3 -p 48
-running cd ../graphData/data; make randLocalGraph_WE_10_20000000
-running PARLAY_NUM_THREADS=48 ./MST  -r 3 -o /tmp/ofile973258_57839 ../graphData/data/randLocalGraph_WE_10_20000000
-TEST TERMINATED ABNORMALLY:
-[PARLAY_NUM_THREADS=48 ./MST  -r 3 -o /tmp/ofile973258_57839 ../graphData/data/randLocalGraph_WE_10_20000000
-/bin/sh: ./MST: No such file or directory
-]
-
-cd benchmarks/spanningForest/ndST ; make -s cleanall ; make -j 24
-g++ -DPARLAY_EIGEN -DEIGEN_MODE=EIGEN_TIMESPAN_GRAINSIZE -pthread -O2 -g -std=c++17 -DNDEBUG -I .  -o STTime.o -c ../bench/STTime.C
-g++ -DPARLAY_EIGEN -DEIGEN_MODE=EIGEN_TIMESPAN_GRAINSIZE -pthread -O2 -g -std=c++17 -DNDEBUG -I .  -c ST.C -o ST.o
-cd ../bench; make -s STCheck
-cp ../bench/testInputs ../bench/testInputs_small .
-cd benchmarks/spanningForest/ndST ; numactl -i all ./testInputs -r 3 -p 48
-running cd ../graphData/data; make randLocalGraph_E_10_20000000
-running PARLAY_NUM_THREADS=48 ./ST  -r 3 -o /tmp/ofile218222_755858 ../graphData/data/randLocalGraph_E_10_20000000
-TEST TERMINATED ABNORMALLY:
-[PARLAY_NUM_THREADS=48 ./ST  -r 3 -o /tmp/ofile218222_755858 ../graphData/data/randLocalGraph_E_10_20000000
-/bin/sh: ./ST: No such file or directory
-]
-
-cd benchmarks/breadthFirstSearch/backForwardBFS ; make -s cleanall ; make -j 24
-g++ -DPARLAY_EIGEN -DEIGEN_MODE=EIGEN_TIMESPAN_GRAINSIZE -pthread -O2 -g -std=c++17 -DNDEBUG -I .  -o BFSTime.o -c ../bench/BFSTime.C
-g++ -DPARLAY_EIGEN -DEIGEN_MODE=EIGEN_TIMESPAN_GRAINSIZE -pthread -O2 -g -std=c++17 -DNDEBUG -I .  -c BFS.C -o BFS.o
-cd ../bench; make -s BFSCheck
-cp ../bench/testInputs ../bench/testInputs_small .
-cd benchmarks/breadthFirstSearch/backForwardBFS ; numactl -i all ./testInputs -r 3 -p 48
-running cd ../graphData/data; make randLocalGraph_J_10_20000000
-running PARLAY_NUM_THREADS=48 ./BFS  -r 3 -o /tmp/ofile135819_545692 ../graphData/data/randLocalGraph_J_10_20000000
-TEST TERMINATED ABNORMALLY:
-[PARLAY_NUM_THREADS=48 ./BFS  -r 3 -o /tmp/ofile135819_545692 ../graphData/data/randLocalGraph_J_10_20000000
-/bin/sh: ./BFS: No such file or directory
-]
-
-cd benchmarks/maximalMatching/incrementalMatching ; make -s cleanall ; make -j 24
-g++ -DPARLAY_EIGEN -DEIGEN_MODE=EIGEN_TIMESPAN_GRAINSIZE -pthread -O2 -g -std=c++17 -DNDEBUG -I .  -o matchingTime.o -c ../bench/matchingTime.C
-g++ -DPARLAY_EIGEN -DEIGEN_MODE=EIGEN_TIMESPAN_GRAINSIZE -pthread -O2 -g -std=c++17 -DNDEBUG -I .  -c matching.C -o matching.o
-cd ../bench; make -s matchingCheck
-cp ../bench/testInputs ../bench/testInputs_small .
-cd benchmarks/maximalMatching/incrementalMatching ; numactl -i all ./testInputs -r 3 -p 48
-running cd ../graphData/data; make randLocalGraph_E_10_20000000
-running PARLAY_NUM_THREADS=48 ./matching  -r 3 -o /tmp/ofile932973_878617 ../graphData/data/randLocalGraph_E_10_20000000
-TEST TERMINATED ABNORMALLY:
-[PARLAY_NUM_THREADS=48 ./matching  -r 3 -o /tmp/ofile932973_878617 ../graphData/data/randLocalGraph_E_10_20000000
-/bin/sh: ./matching: No such file or directory
-]
-
-cd benchmarks/maximalIndependentSet/incrementalMIS ; make -s cleanall ; make -j 24
-g++ -DPARLAY_EIGEN -DEIGEN_MODE=EIGEN_TIMESPAN_GRAINSIZE -pthread -O2 -g -std=c++17 -DNDEBUG -I .  -o MISTime.o -c ../bench/MISTime.C
-g++ -DPARLAY_EIGEN -DEIGEN_MODE=EIGEN_TIMESPAN_GRAINSIZE -pthread -O2 -g -std=c++17 -DNDEBUG -I .  -c MIS.C -o MIS.o
-cd ../bench; make -s MISCheck
-cp ../bench/testInputs ../bench/testInputs_small .
-cd benchmarks/maximalIndependentSet/incrementalMIS ; numactl -i all ./testInputs -r 3 -p 48
-running cd ../graphData/data; make randLocalGraph_JR_10_20000000
-running PARLAY_NUM_THREADS=48 ./MIS  -r 3 -o /tmp/ofile649196_773199 ../graphData/data/randLocalGraph_JR_10_20000000
-TEST TERMINATED ABNORMALLY:
-[PARLAY_NUM_THREADS=48 ./MIS  -r 3 -o /tmp/ofile649196_773199 ../graphData/data/randLocalGraph_JR_10_20000000
-/bin/sh: ./MIS: No such file or directory
-]
-
-cd benchmarks/rayCast/kdTree ; make -s cleanall ; make -j 24
-g++ -DPARLAY_EIGEN -DEIGEN_MODE=EIGEN_TIMESPAN_GRAINSIZE -pthread -O2 -g -std=c++17 -DNDEBUG -I .  -o rayTime.o -c ../bench/rayTime.C
-g++ -DPARLAY_EIGEN -DEIGEN_MODE=EIGEN_TIMESPAN_GRAINSIZE -pthread -O2 -g -std=c++17 -DNDEBUG -I .  -c ray.C -o ray.o
-cd ../bench; make -s rayCheck
-cp ../bench/testInputs ../bench/testInputs_small .
-cd benchmarks/rayCast/kdTree ; numactl -i all ./testInputs -r 3 -p 48
-running cd ../geometryData/data; make happyTriangles happyRays
-running PARLAY_NUM_THREADS=48 ./ray  -r 3 -o /tmp/ofile617092_477456 ../geometryData/data/happyTriangles ../geometryData/data/happyRays
-TEST TERMINATED ABNORMALLY:
-[PARLAY_NUM_THREADS=48 ./ray  -r 3 -o /tmp/ofile617092_477456 ../geometryData/data/happyTriangles ../geometryData/data/happyRays
-/bin/sh: ./ray: No such file or directory
-]
-
-cd benchmarks/convexHull/quickHull ; make -s cleanall ; make -j 24
-g++ -DPARLAY_EIGEN -DEIGEN_MODE=EIGEN_TIMESPAN_GRAINSIZE -pthread -O2 -g -std=c++17 -DNDEBUG -I .  -o hullTime.o -c ../bench/hullTime.C
-g++ -DPARLAY_EIGEN -DEIGEN_MODE=EIGEN_TIMESPAN_GRAINSIZE -pthread -O2 -g -std=c++17 -DNDEBUG -I .  -c hull.C -o hull.o
-cd ../bench; make -s hullCheck
-cp ../bench/testInputs ../bench/testInputs_small .
-cd benchmarks/convexHull/quickHull ; numactl -i all ./testInputs -r 3 -p 48
-running cd ../geometryData/data; make 2DinSphere_100000000
-running PARLAY_NUM_THREADS=48 ./hull  -r 3 -o /tmp/ofile295367_988935 ../geometryData/data/2DinSphere_100000000
-TEST TERMINATED ABNORMALLY:
-[PARLAY_NUM_THREADS=48 ./hull  -r 3 -o /tmp/ofile295367_988935 ../geometryData/data/2DinSphere_100000000
-/bin/sh: ./hull: No such file or directory
-]
-
-cd benchmarks/delaunayTriangulation/incrementalDelaunay ; make -s cleanall ; make -j 24
-g++ -DPARLAY_EIGEN -DEIGEN_MODE=EIGEN_TIMESPAN_GRAINSIZE -pthread -O2 -g -std=c++17 -DNDEBUG -I .  -o delaunayTime.o -c ../bench/delaunayTime.C
-g++ -DPARLAY_EIGEN -DEIGEN_MODE=EIGEN_TIMESPAN_GRAINSIZE -pthread -O2 -g -std=c++17 -DNDEBUG -I .  -c delaunay.C -o delaunay.o
-cd ../bench; make -s delaunayCheck
-cp ../bench/testInputs ../bench/testInputs_small .
-cd benchmarks/delaunayTriangulation/incrementalDelaunay ; numactl -i all ./testInputs -r 3 -p 48
-running cd ../geometryData/data; make 2DinCube_10M
-running PARLAY_NUM_THREADS=48 ./delaunay  -r 3 -o /tmp/ofile829180_285675 ../geometryData/data/2DinCube_10M
-TEST TERMINATED ABNORMALLY:
-[PARLAY_NUM_THREADS=48 ./delaunay  -r 3 -o /tmp/ofile829180_285675 ../geometryData/data/2DinCube_10M
-/bin/sh: ./delaunay: No such file or directory
-]
-
-cd benchmarks/delaunayRefine/incrementalRefine ; make -s cleanall ; make -j 24
-g++ -DPARLAY_EIGEN -DEIGEN_MODE=EIGEN_TIMESPAN_GRAINSIZE -pthread -O2 -g -std=c++17 -DNDEBUG -I .  -o refineTime.o -c ../bench/refineTime.C
-g++ -DPARLAY_EIGEN -DEIGEN_MODE=EIGEN_TIMESPAN_GRAINSIZE -pthread -O2 -g -std=c++17 -DNDEBUG -I .  -c refine.C -o refine.o
-cd ../bench; make -s refineCheck
-cp ../bench/testInputs ../bench/testInputs_small .
-cd benchmarks/delaunayRefine/incrementalRefine ; numactl -i all ./testInputs -r 3 -p 48
-running cd ../geometryData/data; make 2DinCubeDelaunay_5000000
-TEST TERMINATED ABNORMALLY:
-[cd ../geometryData/data; make 2DinCubeDelaunay_5000000
-make -s 2DinCube_5000000 
-../../../benchmarks/delaunayTriangulation/incrementalDelaunay/delaunay -o 2DinCubeDelaunay_5000000 2DinCube_5000000 
-make: ../../../benchmarks/delaunayTriangulation/incrementalDelaunay/delaunay: Command not found
-make: *** [Makefile:87: 2DinCubeDelaunay_5000000] Error 127
-]
-
-cd benchmarks/rangeQuery2d/parallelPlaneSweep ; make -s cleanall ; make -j 24
-g++ -DPARLAY_EIGEN -DEIGEN_MODE=EIGEN_TIMESPAN_GRAINSIZE -pthread -O2 -g -std=c++17 -DNDEBUG -I .  -o rangeTime.o -c ../bench/rangeTime.C
-g++ -DPARLAY_EIGEN -DEIGEN_MODE=EIGEN_TIMESPAN_GRAINSIZE -pthread -O2 -g -std=c++17 -DNDEBUG -I .  -c range.C -o range.o
-cd ../bench; make -s rangeCheck
-cp ../bench/testInputs ../bench/testInputs_small .
-cd benchmarks/rangeQuery2d/parallelPlaneSweep ; numactl -i all ./testInputs -r 3 -p 48
-running cd ../geometryData/data; make 2DinCube_10M
-running PARLAY_NUM_THREADS=48 ./range  -r 3 -o /tmp/ofile82790_808726 ../geometryData/data/2DinCube_10M
-TEST TERMINATED ABNORMALLY:
-[PARLAY_NUM_THREADS=48 ./range  -r 3 -o /tmp/ofile82790_808726 ../geometryData/data/2DinCube_10M
-/bin/sh: ./range: No such file or directory
-]
-
-cd benchmarks/nBody/parallelCK ; make -s cleanall ; make -j 24
-g++ -DPARLAY_EIGEN -DEIGEN_MODE=EIGEN_TIMESPAN_GRAINSIZE -pthread -O2 -g -std=c++17 -DNDEBUG -I .  -o nbodyTime.o -c ../bench/nbodyTime.C
-g++ -DPARLAY_EIGEN -DEIGEN_MODE=EIGEN_TIMESPAN_GRAINSIZE -pthread -O2 -g -std=c++17 -DNDEBUG -I .  -c nbody.C -o nbody.o
-cd ../bench; make -s nbodyCheck
-cp ../bench/testInputs ../bench/testInputs_small .
-cd benchmarks/nBody/parallelCK ; numactl -i all ./testInputs -r 3 -p 48
-running cd ../geometryData/data; make 3DonSphere_1000000
-running PARLAY_NUM_THREADS=48 ./nbody  -r 3 -o /tmp/ofile583130_342930 ../geometryData/data/3DonSphere_1000000
-TEST TERMINATED ABNORMALLY:
-[PARLAY_NUM_THREADS=48 ./nbody  -r 3 -o /tmp/ofile583130_342930 ../geometryData/data/3DonSphere_1000000
-/bin/sh: ./nbody: No such file or directory
-]
+  cd benchmarks/longestRepeatedSubstring/doubling ; numactl -i all ./testInputs -r 3 -p 48
