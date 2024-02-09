@@ -1,0 +1,24 @@
+HOSTNAME: collab1
+Running only:  [['longestRepeatedSubstring/doubling', True, 0]]
+Parallel Only
+Forcing Compile
+running on 48 threads
+
+cd benchmarks/longestRepeatedSubstring/doubling ; make -s cleanall ; make -j 24
+g++ -DPARLAY_EIGEN -DEIGEN_MODE=EIGEN_SIMPLE -pthread -O2 -g -std=c++17 -DNDEBUG -I .  -o lrsTime.o -c ../bench/lrsTime.C
+g++ -DPARLAY_EIGEN -DEIGEN_MODE=EIGEN_SIMPLE -pthread -O2 -g -std=c++17 -DNDEBUG -I .  -c lrs.C -o lrs.o
+cd ../bench; make -s lrsCheck
+cp ../bench/testInputs ../bench/testInputs_small .
+g++ -o lrs lrsTime.o lrs.o -DPARLAY_EIGEN -DEIGEN_MODE=EIGEN_SIMPLE -pthread -ldl 
+cd benchmarks/longestRepeatedSubstring/doubling ; numactl -i all ./testInputs -r 3 -p 48
+running cd ../sequenceData/data; make chr22.dna
+running PARLAY_NUM_THREADS=48 ./lrs  -r 3 -o /tmp/ofile86666_529799 ../sequenceData/data/chr22.dna
+running ./../bench/lrsCheck  ../sequenceData/data/chr22.dna /tmp/ofile86666_529799
+running rm ../sequenceData/data/chr22.dna
+chr22.dna :  -r 3 -o /tmp/ofile86666_529799 : '6.477', '6.075', '6.147', geomean = 6.23
+running cd ../sequenceData/data; make etext99
+running PARLAY_NUM_THREADS=48 ./lrs  -r 3 -o /tmp/ofile817924_190145 ../sequenceData/data/etext99
+running ./../bench/lrsCheck  ../sequenceData/data/etext99 /tmp/ofile817924_190145
+running rm ../sequenceData/data/etext99
+TEST TERMINATED ABNORMALLY:
+  cd benchmarks/longestRepeatedSubstring/doubling ; numactl -i all ./testInputs -r 3 -p 48
