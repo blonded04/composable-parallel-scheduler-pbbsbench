@@ -218,11 +218,11 @@ namespace benchIO {
     file >> vert_cnt >> edge_cnt;
 
     // tags on m at the end (so n+1 total offsets)
-    auto offsets = parlay::sequence<intV>::uninitialized(vert_cnt + 1);
+    auto offsets = parlay::sequence<intE>::uninitialized(vert_cnt + 1);
     offsets.back() = edge_cnt;
     for (size_t i = 0; i < vert_cnt; ++i) {
       file >> in_part;
-      offsets[i] = parlay::internal::chars_to_int_t<intV>(make_slice(in_part));
+      offsets[i] = parlay::internal::chars_to_int_t<intE>(make_slice(in_part));
     }
     
     auto edges = parlay::sequence<intV>::uninitialized(edge_cnt);
@@ -320,11 +320,11 @@ namespace benchIO {
     file >> vert_cnt >> edge_cnt;
     
     // tags on m at the end (so n+1 total offsets)
-    auto offsets = parlay::sequence<intV>::uninitialized(vert_cnt + 1);
+    auto offsets = parlay::sequence<intE>::uninitialized(vert_cnt + 1);
     offsets.back() = edge_cnt;
     for (size_t i = 0; i < vert_cnt; ++i) {
       file >> in_part;
-      offsets[i] = parlay::internal::chars_to_int_t<intV>(make_slice(in_part));
+      offsets[i] = parlay::internal::chars_to_int_t<intE>(make_slice(in_part));
     }
 
     auto edges = parlay::sequence<intV>::uninitialized(edge_cnt);

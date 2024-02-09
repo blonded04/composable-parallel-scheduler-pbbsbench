@@ -24,6 +24,7 @@
 
 #include <iostream>
 #include <fstream>
+#include <ostream>
 #include <string>
 #include <string>
 #include <cstring>
@@ -32,6 +33,7 @@
 #include "../parlay/parallel.h"
 #include "../parlay/io.h"
 #include "../parlay/internal/get_time.h"
+#include "geometry.h"
 
 namespace benchIO {
   using namespace std;
@@ -122,10 +124,28 @@ namespace benchIO {
   inline std::ostream& writeToStream(std::ostream& os, char* a) { return os << std::string_view(a, std::strlen(a)); }
 
   template <class A, class B>
-  inline std::ostream& writeToStream(std::ostream& os, pair<A,B> a) {
+  inline std::ostream& writeToStream(std::ostream& os, pair<A,B> const &a) {
     writeToStream(os, a.first);
     os << ' ';
     writeToStream(os, a.second);
+    return os;
+  }
+
+  template <class T>
+  inline std::ostream& writeToStream(std::ostream& os, point2d<T> const &point) {
+    writeToStream(os, point.x);
+    os << ' ';
+    writeToStream(os, point.y);
+    return os;
+  }
+
+  template <class T>
+  inline std::ostream& writeToStream(std::ostream& os, point3d<T> const &point) {
+    writeToStream(os, point.x);
+    os << ' ';
+    writeToStream(os, point.y);
+    os << ' ';
+    writeToStream(os, point.z);
     return os;
   }
 

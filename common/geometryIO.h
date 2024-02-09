@@ -102,7 +102,7 @@ namespace benchIO {
   parlay::sequence<Point> readPointsFromFile(char const *fname) {
     std::ifstream file{fname, std::ios::in};
 
-    using Coord = typename Point::Coord;
+    using Coord = typename Point::coord;
     int dims = Point::dim;
     std::string header;
     file >> header;
@@ -120,7 +120,7 @@ namespace benchIO {
         file >> in_part;
         cur_point[i] = static_cast<Coord>(parlay::chars_to_float_t<double>(make_slice(in_part)));
       }
-      points.push_back(Point(cur_point));
+      points.push_back(Point(make_slice(cur_point)));
     }
     return points;
   }
