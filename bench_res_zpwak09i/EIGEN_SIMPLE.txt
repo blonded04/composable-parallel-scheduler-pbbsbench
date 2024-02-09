@@ -1,8 +1,192 @@
 HOSTNAME: collab1
-Running only:  [['longestRepeatedSubstring/doubling', True, 0]]
 Parallel Only
 Forcing Compile
 running on 48 threads
+
+cd benchmarks/integerSort/parallelRadixSort ; make -s cleanall ; make -j 24
+g++ -DPARLAY_EIGEN -DEIGEN_MODE=EIGEN_SIMPLE -pthread -O2 -g -std=c++17 -DNDEBUG -I .  -include isort.h -o isort ../bench/isortTime.C -DPARLAY_EIGEN -DEIGEN_MODE=EIGEN_SIMPLE -pthread -ldl 
+cp ../bench/testInputs ../bench/testInputs_small .
+cd ../bench; make isortCheck
+make[1]: Entering directory '/home/itmo_denis/pbbsbench/benchmarks/integerSort/bench'
+g++ -DPARLAY_EIGEN -DEIGEN_MODE=EIGEN_SIMPLE -pthread -O2 -g -std=c++17 -DNDEBUG -I . -Icommon -o isortCheck isortCheck.C -DPARLAY_EIGEN -DEIGEN_MODE=EIGEN_SIMPLE -pthread -ldl 
+make[1]: Leaving directory '/home/itmo_denis/pbbsbench/benchmarks/integerSort/bench'
+cd benchmarks/integerSort/parallelRadixSort ; numactl -i all ./testInputs -r 3 -p 48
+running cd ../sequenceData/data; make randomSeq_100M_int
+running PARLAY_NUM_THREADS=48 ./isort -b 27 -r 3 -o /tmp/ofile181941_40003 ../sequenceData/data/randomSeq_100M_int
+running ./../bench/isortCheck  ../sequenceData/data/randomSeq_100M_int /tmp/ofile181941_40003
+running rm ../sequenceData/data/randomSeq_100M_int
+randomSeq_100M_int : -b 27 -r 3 -o /tmp/ofile181941_40003 : '1.161', '1.346', '1.245', geomean = 1.248
+running cd ../sequenceData/data; make exptSeq_100M_int
+running PARLAY_NUM_THREADS=48 ./isort -b 27 -r 3 -o /tmp/ofile921902_195169 ../sequenceData/data/exptSeq_100M_int
+running ./../bench/isortCheck  ../sequenceData/data/exptSeq_100M_int /tmp/ofile921902_195169
+running rm ../sequenceData/data/exptSeq_100M_int
+exptSeq_100M_int : -b 27 -r 3 -o /tmp/ofile921902_195169 : '1.16', '1.29', '1.23', geomean = 1.226
+running cd ../sequenceData/data; make randomSeq_100M_int_pair_int
+running PARLAY_NUM_THREADS=48 ./isort -b 27 -r 3 -o /tmp/ofile78695_196896 ../sequenceData/data/randomSeq_100M_int_pair_int
+running ./../bench/isortCheck  ../sequenceData/data/randomSeq_100M_int_pair_int /tmp/ofile78695_196896
+running rm ../sequenceData/data/randomSeq_100M_int_pair_int
+randomSeq_100M_int_pair_int : -b 27 -r 3 -o /tmp/ofile78695_196896 : '1.34', '1.32', '1.24', geomean = 1.299
+running cd ../sequenceData/data; make randomSeq_100M_256_int_pair_int
+running PARLAY_NUM_THREADS=48 ./isort -b 8 -r 3 -o /tmp/ofile575987_604608 ../sequenceData/data/randomSeq_100M_256_int_pair_int
+running ./../bench/isortCheck  ../sequenceData/data/randomSeq_100M_256_int_pair_int /tmp/ofile575987_604608
+running rm ../sequenceData/data/randomSeq_100M_256_int_pair_int
+randomSeq_100M_256_int_pair_int : -b 8 -r 3 -o /tmp/ofile575987_604608 : '0.083', '0.081', '0.081', geomean = 0.081
+parallelRadixSort : 48 : geomean of mins = 0.606, geomean of geomeans = 0.635
+
+cd benchmarks/comparisonSort/sampleSort ; make -s cleanall ; make -j 24
+g++ -DPARLAY_EIGEN -DEIGEN_MODE=EIGEN_SIMPLE -pthread -O2 -g -std=c++17 -DNDEBUG -I .  -include sort.h -o sort ../bench/sortTime.C -DPARLAY_EIGEN -DEIGEN_MODE=EIGEN_SIMPLE -pthread -ldl 
+cp ../bench/testInputs ../bench/testInputs_small .
+cd ../bench; make sortCheck
+make[1]: Entering directory '/home/itmo_denis/pbbsbench/benchmarks/comparisonSort/bench'
+g++ -DPARLAY_EIGEN -DEIGEN_MODE=EIGEN_SIMPLE -pthread -O2 -g -std=c++17 -DNDEBUG -I . -o sortCheck sortCheck.C -DPARLAY_EIGEN -DEIGEN_MODE=EIGEN_SIMPLE -pthread -ldl 
+make[1]: Leaving directory '/home/itmo_denis/pbbsbench/benchmarks/comparisonSort/bench'
+cd benchmarks/comparisonSort/sampleSort ; numactl -i all ./testInputs -r 3 -p 48
+running cd ../sequenceData/data; make randomSeq_100M_double
+running PARLAY_NUM_THREADS=48 ./sort  -r 3 -o /tmp/ofile842669_832074 ../sequenceData/data/randomSeq_100M_double
+running ./../bench/sortCheck  ../sequenceData/data/randomSeq_100M_double /tmp/ofile842669_832074
+running rm ../sequenceData/data/randomSeq_100M_double
+randomSeq_100M_double :  -r 3 -o /tmp/ofile842669_832074 : '2.216', '2.129', '2.474', geomean = 2.268
+running cd ../sequenceData/data; make exptSeq_100M_double
+running PARLAY_NUM_THREADS=48 ./sort  -r 3 -o /tmp/ofile885384_900798 ../sequenceData/data/exptSeq_100M_double
+running ./../bench/sortCheck  ../sequenceData/data/exptSeq_100M_double /tmp/ofile885384_900798
+running rm ../sequenceData/data/exptSeq_100M_double
+exptSeq_100M_double :  -r 3 -o /tmp/ofile885384_900798 : '1.637', '1.627', '1.625', geomean = 1.63
+running cd ../sequenceData/data; make almostSortedSeq_100M_double
+running PARLAY_NUM_THREADS=48 ./sort  -r 3 -o /tmp/ofile126758_623152 ../sequenceData/data/almostSortedSeq_100M_double
+running ./../bench/sortCheck  ../sequenceData/data/almostSortedSeq_100M_double /tmp/ofile126758_623152
+running rm ../sequenceData/data/almostSortedSeq_100M_double
+almostSortedSeq_100M_double :  -r 3 -o /tmp/ofile126758_623152 : '2.084', '2.269', '2.381', geomean = 2.241
+running cd ../sequenceData/data; make randomSeq_100M_double_pair_double
+running PARLAY_NUM_THREADS=48 ./sort  -r 3 -o /tmp/ofile418651_171565 ../sequenceData/data/randomSeq_100M_double_pair_double
+running ./../bench/sortCheck  ../sequenceData/data/randomSeq_100M_double_pair_double /tmp/ofile418651_171565
+running rm ../sequenceData/data/randomSeq_100M_double_pair_double
+randomSeq_100M_double_pair_double :  -r 3 -o /tmp/ofile418651_171565 : '4.516', '4.515', '4.459', geomean = 4.496
+running cd ../sequenceData/data; make trigramSeq_100M
+running PARLAY_NUM_THREADS=48 ./sort  -r 3 -o /tmp/ofile286618_616757 ../sequenceData/data/trigramSeq_100M
+running ./../bench/sortCheck  ../sequenceData/data/trigramSeq_100M /tmp/ofile286618_616757
+running rm ../sequenceData/data/trigramSeq_100M
+trigramSeq_100M :  -r 3 -o /tmp/ofile286618_616757 : '3.138', '3.161', '3.182', geomean = 3.16
+sampleSort : 48 : geomean of mins = 2.516, geomean of geomeans = 2.595
+
+cd benchmarks/removeDuplicates/parlayhash ; make -s cleanall ; make -j 24
+g++ -DPARLAY_EIGEN -DEIGEN_MODE=EIGEN_SIMPLE -pthread -O2 -g -std=c++17 -DNDEBUG -I .  -include dedup.h -o dedup ../bench/dedupTime.C -DPARLAY_EIGEN -DEIGEN_MODE=EIGEN_SIMPLE -pthread -ldl 
+cp ../bench/testInputs ../bench/testInputs_small .
+cd ../bench; make dedupCheck
+make[1]: Entering directory '/home/itmo_denis/pbbsbench/benchmarks/removeDuplicates/bench'
+g++ -DPARLAY_EIGEN -DEIGEN_MODE=EIGEN_SIMPLE -pthread -O2 -g -std=c++17 -DNDEBUG -I . -o dedupCheck dedupCheck.C -DPARLAY_EIGEN -DEIGEN_MODE=EIGEN_SIMPLE -pthread -ldl 
+make[1]: Leaving directory '/home/itmo_denis/pbbsbench/benchmarks/removeDuplicates/bench'
+cd benchmarks/removeDuplicates/parlayhash ; numactl -i all ./testInputs -r 3 -p 48
+running cd ../sequenceData/data; make randomSeq_100M_int
+running PARLAY_NUM_THREADS=48 ./dedup  -r 3 -o /tmp/ofile314769_894882 ../sequenceData/data/randomSeq_100M_int
+running ./../bench/dedupCheck  ../sequenceData/data/randomSeq_100M_int /tmp/ofile314769_894882
+running rm ../sequenceData/data/randomSeq_100M_int
+randomSeq_100M_int :  -r 3 -o /tmp/ofile314769_894882 : '2.179', '2.207', '2.308', geomean = 2.23
+running cd ../sequenceData/data; make exptSeq_100M_int
+running PARLAY_NUM_THREADS=48 ./dedup  -r 3 -o /tmp/ofile316291_955390 ../sequenceData/data/exptSeq_100M_int
+running ./../bench/dedupCheck  ../sequenceData/data/exptSeq_100M_int /tmp/ofile316291_955390
+running rm ../sequenceData/data/exptSeq_100M_int
+exptSeq_100M_int :  -r 3 -o /tmp/ofile316291_955390 : '1.516', '1.443', '1.411', geomean = 1.456
+running cd ../sequenceData/data; make trigramSeq_100M
+running PARLAY_NUM_THREADS=48 ./dedup  -r 3 -o /tmp/ofile956913_314544 ../sequenceData/data/trigramSeq_100M
+running ./../bench/dedupCheck  ../sequenceData/data/trigramSeq_100M /tmp/ofile956913_314544
+running rm ../sequenceData/data/trigramSeq_100M
+trigramSeq_100M :  -r 3 -o /tmp/ofile956913_314544 : '5.776', '5.627', '5.625', geomean = 5.675
+parlayhash : 48 : geomean of mins = 2.586, geomean of geomeans = 2.642
+
+cd benchmarks/histogram/parallel ; make -s cleanall ; make -j 24
+g++ -DPARLAY_EIGEN -DEIGEN_MODE=EIGEN_SIMPLE -pthread -O2 -g -std=c++17 -DNDEBUG -I .  -o histogramTime.o -c ../bench/histogramTime.C
+g++ -DPARLAY_EIGEN -DEIGEN_MODE=EIGEN_SIMPLE -pthread -O2 -g -std=c++17 -DNDEBUG -I .  -c histogram.C -o histogram.o
+cd ../bench; make -s histogramCheck
+cp ../bench/testInputs ../bench/testInputs_small .
+g++ -o histogram histogramTime.o histogram.o -DPARLAY_EIGEN -DEIGEN_MODE=EIGEN_SIMPLE -pthread -ldl 
+cd benchmarks/histogram/parallel ; numactl -i all ./testInputs -r 3 -p 48
+running cd ../sequenceData/data; make randomSeq_100M_256_int
+running PARLAY_NUM_THREADS=48 ./histogram -b 256 -r 3 -o /tmp/ofile131266_709434 ../sequenceData/data/randomSeq_100M_256_int
+running ./../bench/histogramCheck  ../sequenceData/data/randomSeq_100M_256_int /tmp/ofile131266_709434
+running rm ../sequenceData/data/randomSeq_100M_256_int
+randomSeq_100M_256_int : -b 256 -r 3 -o /tmp/ofile131266_709434 : '0.015', '0.012', '0.014', geomean = 0.013
+running cd ../sequenceData/data; make randomSeq_100M_100K_int
+running PARLAY_NUM_THREADS=48 ./histogram -b 100000 -r 3 -o /tmp/ofile693627_425048 ../sequenceData/data/randomSeq_100M_100K_int
+running ./../bench/histogramCheck  ../sequenceData/data/randomSeq_100M_100K_int /tmp/ofile693627_425048
+running rm ../sequenceData/data/randomSeq_100M_100K_int
+randomSeq_100M_100K_int : -b 100000 -r 3 -o /tmp/ofile693627_425048 : '0.1', '0.129', '0.113', geomean = 0.113
+running cd ../sequenceData/data; make randomSeq_100M_int
+running PARLAY_NUM_THREADS=48 ./histogram -b 100000000 -r 3 -o /tmp/ofile257718_459819 ../sequenceData/data/randomSeq_100M_int
+running ./../bench/histogramCheck  ../sequenceData/data/randomSeq_100M_int /tmp/ofile257718_459819
+running rm ../sequenceData/data/randomSeq_100M_int
+randomSeq_100M_int : -b 100000000 -r 3 -o /tmp/ofile257718_459819 : '0.658', '0.673', '0.665', geomean = 0.665
+running cd ../sequenceData/data; make exptSeq_100M_int
+running PARLAY_NUM_THREADS=48 ./histogram -b 100000000 -r 3 -o /tmp/ofile297236_687654 ../sequenceData/data/exptSeq_100M_int
+running ./../bench/histogramCheck  ../sequenceData/data/exptSeq_100M_int /tmp/ofile297236_687654
+running rm ../sequenceData/data/exptSeq_100M_int
+exptSeq_100M_int : -b 100000000 -r 3 -o /tmp/ofile297236_687654 : '0.791', '0.763', '0.747', geomean = 0.767
+running cd ../sequenceData/data; make almostEqualSeq_100000000
+running PARLAY_NUM_THREADS=48 ./histogram -b 100000000 -r 3 -o /tmp/ofile344484_939523 ../sequenceData/data/almostEqualSeq_100000000
+running ./../bench/histogramCheck  ../sequenceData/data/almostEqualSeq_100000000 /tmp/ofile344484_939523
+running rm ../sequenceData/data/almostEqualSeq_100000000
+almostEqualSeq_100000000 : -b 100000000 -r 3 -o /tmp/ofile344484_939523 : '0.954', '0.871', '0.942', geomean = 0.921
+parallel : 48 : geomean of mins = 0.22, geomean of geomeans = 0.236
+
+cd benchmarks/wordCounts/histogram ; make -s cleanall ; make -j 24
+g++ -DPARLAY_EIGEN -DEIGEN_MODE=EIGEN_SIMPLE -pthread -O2 -g -std=c++17 -DNDEBUG -I .  -o wcTime.o -c ../bench/wcTime.C
+g++ -DPARLAY_EIGEN -DEIGEN_MODE=EIGEN_SIMPLE -pthread -O2 -g -std=c++17 -DNDEBUG -I .  -c wc.C -o wc.o
+cd ../bench; make -s wcCheck
+cp ../bench/testInputs ../bench/testInputs_small .
+g++ -o wc wcTime.o wc.o -DPARLAY_EIGEN -DEIGEN_MODE=EIGEN_SIMPLE -pthread -ldl 
+cd benchmarks/wordCounts/histogram ; numactl -i all ./testInputs -r 3 -p 48
+running cd ../sequenceData/data; make trigramString_250000000
+running PARLAY_NUM_THREADS=48 ./wc  -r 3 -o /tmp/ofile244255_670140 ../sequenceData/data/trigramString_250000000
+running ./../bench/wcCheck  ../sequenceData/data/trigramString_250000000 /tmp/ofile244255_670140
+CheckOut: Unable to open file: /tmp/ofile244255_670140
+
+TEST TERMINATED ABNORMALLY:
+[./../bench/wcCheck  ../sequenceData/data/trigramString_250000000 /tmp/ofile244255_670140
+Unable to open file: /tmp/ofile244255_670140
+]
+
+cd benchmarks/invertedIndex/parallel ; make -s cleanall ; make -j 24
+g++ -DPARLAY_EIGEN -DEIGEN_MODE=EIGEN_SIMPLE -pthread -O2 -g -std=c++17 -DNDEBUG -I .  -o indexTime.o -c ../bench/indexTime.C
+g++ -DPARLAY_EIGEN -DEIGEN_MODE=EIGEN_SIMPLE -pthread -O2 -g -std=c++17 -DNDEBUG -I .  -c index.C -o index.o
+cd ../bench; make -s indexCheck
+cp ../bench/testInputs ../bench/testInputs_small .
+g++ -o index indexTime.o index.o -DPARLAY_EIGEN -DEIGEN_MODE=EIGEN_SIMPLE -pthread -ldl 
+cd benchmarks/invertedIndex/parallel ; numactl -i all ./testInputs -r 3 -p 48
+running cd ../sequenceData/data; make wikisamp.xml
+running PARLAY_NUM_THREADS=48 ./index  -r 3 -o /tmp/ofile420816_225267 ../sequenceData/data/wikisamp.xml
+running ./../bench/indexCheck  ../sequenceData/data/wikisamp.xml /tmp/ofile420816_225267
+CheckOut: Unable to open file: /tmp/ofile420816_225267
+
+TEST TERMINATED ABNORMALLY:
+[./../bench/indexCheck  ../sequenceData/data/wikisamp.xml /tmp/ofile420816_225267
+Unable to open file: /tmp/ofile420816_225267
+]
+
+cd benchmarks/suffixArray/parallelRange ; make -s cleanall ; make -j 24
+g++ -DPARLAY_EIGEN -DEIGEN_MODE=EIGEN_SIMPLE -pthread -O2 -g -std=c++17 -DNDEBUG -I .  -o SATime.o -c ../bench/SATime.C
+g++ -DPARLAY_EIGEN -DEIGEN_MODE=EIGEN_SIMPLE -pthread -O2 -g -std=c++17 -DNDEBUG -I .  -c SA.C -o SA.o
+cd ../bench; make -s SACheck
+cp ../bench/testInputs ../bench/testInputs_small .
+g++ -o SA SATime.o SA.o -DPARLAY_EIGEN -DEIGEN_MODE=EIGEN_SIMPLE -pthread -ldl 
+cd benchmarks/suffixArray/parallelRange ; numactl -i all ./testInputs -r 3 -p 48
+running cd ../sequenceData/data; make trigramString_100000000
+running PARLAY_NUM_THREADS=48 ./SA  -r 3 -o /tmp/ofile80775_200559 ../sequenceData/data/trigramString_100000000
+running ./../bench/SACheck  ../sequenceData/data/trigramString_100000000 /tmp/ofile80775_200559
+running rm ../sequenceData/data/trigramString_100000000
+trigramString_100000000 :  -r 3 -o /tmp/ofile80775_200559 : '8.617', '8.203', '8.243', geomean = 8.352
+running cd ../sequenceData/data; make chr22.dna
+running PARLAY_NUM_THREADS=48 ./SA  -r 3 -o /tmp/ofile897897_128701 ../sequenceData/data/chr22.dna
+running ./../bench/SACheck  ../sequenceData/data/chr22.dna /tmp/ofile897897_128701
+running rm ../sequenceData/data/chr22.dna
+chr22.dna :  -r 3 -o /tmp/ofile897897_128701 : '4.863', '4.706', '4.592', geomean = 4.719
+running cd ../sequenceData/data; make etext99
+running PARLAY_NUM_THREADS=48 ./SA  -r 3 -o /tmp/ofile613274_578587 ../sequenceData/data/etext99
+running ./../bench/SACheck  ../sequenceData/data/etext99 /tmp/ofile613274_578587
+CheckOut: readIntSeqFromFile: bad input
+
+TEST TERMINATED ABNORMALLY:
+[./../bench/SACheck  ../sequenceData/data/etext99 /tmp/ofile613274_578587
+readIntSeqFromFile: bad input
+]
 
 cd benchmarks/longestRepeatedSubstring/doubling ; make -s cleanall ; make -j 24
 g++ -DPARLAY_EIGEN -DEIGEN_MODE=EIGEN_SIMPLE -pthread -O2 -g -std=c++17 -DNDEBUG -I .  -o lrsTime.o -c ../bench/lrsTime.C
@@ -12,13 +196,13 @@ cp ../bench/testInputs ../bench/testInputs_small .
 g++ -o lrs lrsTime.o lrs.o -DPARLAY_EIGEN -DEIGEN_MODE=EIGEN_SIMPLE -pthread -ldl 
 cd benchmarks/longestRepeatedSubstring/doubling ; numactl -i all ./testInputs -r 3 -p 48
 running cd ../sequenceData/data; make chr22.dna
-running PARLAY_NUM_THREADS=48 ./lrs  -r 3 -o /tmp/ofile86666_529799 ../sequenceData/data/chr22.dna
-running ./../bench/lrsCheck  ../sequenceData/data/chr22.dna /tmp/ofile86666_529799
+running PARLAY_NUM_THREADS=48 ./lrs  -r 3 -o /tmp/ofile388476_253849 ../sequenceData/data/chr22.dna
+running ./../bench/lrsCheck  ../sequenceData/data/chr22.dna /tmp/ofile388476_253849
 running rm ../sequenceData/data/chr22.dna
-chr22.dna :  -r 3 -o /tmp/ofile86666_529799 : '6.477', '6.075', '6.147', geomean = 6.23
+chr22.dna :  -r 3 -o /tmp/ofile388476_253849 : '6.144', '5.879', '5.916', geomean = 5.978
 running cd ../sequenceData/data; make etext99
-running PARLAY_NUM_THREADS=48 ./lrs  -r 3 -o /tmp/ofile817924_190145 ../sequenceData/data/etext99
-running ./../bench/lrsCheck  ../sequenceData/data/etext99 /tmp/ofile817924_190145
+running PARLAY_NUM_THREADS=48 ./lrs  -r 3 -o /tmp/ofile612423_93967 ../sequenceData/data/etext99
+running ./../bench/lrsCheck  ../sequenceData/data/etext99 /tmp/ofile612423_93967
 running rm ../sequenceData/data/etext99
 TEST TERMINATED ABNORMALLY:
   cd benchmarks/longestRepeatedSubstring/doubling ; numactl -i all ./testInputs -r 3 -p 48
