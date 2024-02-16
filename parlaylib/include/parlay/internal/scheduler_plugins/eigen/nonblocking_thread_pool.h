@@ -8,6 +8,9 @@
 // Public License v. 2.0. If a copy of the MPL was not distributed
 // with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
+#include <cassert>
+#include <iostream>
+#include <ostream>
 #ifndef EIGEN_CXX11_THREADPOOL_NONBLOCKING_THREAD_POOL_H
 #define EIGEN_CXX11_THREADPOOL_NONBLOCKING_THREAD_POOL_H
 #include <memory>
@@ -21,6 +24,57 @@
 #include <thread>
 
 namespace Eigen {
+
+namespace detail {
+
+constexpr std::size_t StackSize = std::size_t{16} * 1024 * 1024;
+
+inline std::uintptr_t get_stack_base(std::size_t stack_size = StackSize) {
+    // Stacks are growing top-down. Highest address is called "stack base",
+    // and the lowest is "stack limit".
+#if __TBB_USE_WINAPI
+    suppress_unused_warning(stack_size);
+    NT_TIB* pteb = (NT_TIB*)NtCurrentTeb();
+    __TBB_ASSERT(&pteb < pteb->StackBase && &pteb > pteb->StackLimit, "invalid stack info in TEB");
+    return reinterpret_cast<std::uintptr_t>(pteb->StackBase);
+#else
+    // There is no portable way to get stack base address in Posix, so we use
+    // non-portable method (on all modern Linux) or the simplified approach
+    // based on the common sense assumptions. The most important assumption
+    // is that the main thread's stack size is not less than that of other threads.
+
+    // Points to the lowest addressable byte of a stack.
+    void* stack_limit = nullptr;
+#if __linux__ && !__bg__
+    size_t np_stack_size = 0;
+    pthread_attr_t np_attr_stack;
+    if (0 == pthread_getattr_np(pthread_self(), &np_attr_stack)) {
+        if (0 == pthread_attr_getstack(&np_attr_stack, &stack_limit, &np_stack_size)) {
+            assert( &stack_limit > stack_limit && "stack size must be positive" );
+        }
+        pthread_attr_destroy(&np_attr_stack);
+    }
+#endif /* __linux__ */
+    std::uintptr_t stack_base{};
+    if (stack_limit) {
+        stack_base = reinterpret_cast<std::uintptr_t>(stack_limit) + stack_size;
+    } else {
+        // Use an anchor as a base stack address.
+        int anchor{};
+        stack_base = reinterpret_cast<std::uintptr_t>(&anchor);
+    }
+    return stack_base;
+#endif /* __TBB_USE_WINAPI */
+}
+
+inline std::uintptr_t calculate_stealing_threshold(std::uintptr_t base, std::size_t stack_size) {
+    assert(stack_size != 0 && "Stack size cannot be zero");
+    assert(base > stack_size / 2 && "Stack anchor calculation overflow");
+    return base - stack_size / 2;
+}
+
+
+}
 
 struct Task {
   virtual void operator()() = 0;
@@ -223,11 +277,12 @@ public:
     }
   }
 
-  void JoinMainThread() {
+  // returns true if processed some tasks
+  bool JoinMainThread() {
     if (CurrentThreadId() == -1) {
-      return;
+      return false;
     }
-    WorkerLoop(/* external */ true);
+    return WorkerLoop(/* external */ true);
   }
 
 private:
@@ -297,6 +352,7 @@ private:
     std::unique_ptr<Thread> thread;
     std::atomic<unsigned> steal_partition;
     Queue queue;
+    std::size_t stack_size = size_t{16} * 1024 * 1024;
 #ifdef EIGEN_POOL_RUNNEXT
     std::atomic<TaskPtr> runnext{nullptr};
     // use IDLE to indicate that the thread is idling and tasks shouldn't be
@@ -382,30 +438,42 @@ private:
   std::atomic<bool> done_;
   std::atomic<bool> cancelled_;
 
-  // Main worker thread loop.
-  void WorkerLoop(bool external = false) {
+  // Main worker thread loop. Returns true if processed some tasks
+  bool WorkerLoop(bool external = false) {
     PerThread *pt = GetPerThread();
     auto thread_id = pt->thread_id;
     auto &threadData = thread_data_[thread_id];
+
+    auto stack_base = detail::get_stack_base(threadData.stack_size);
+    auto stealing_threshold = detail::calculate_stealing_threshold(stack_base, threadData.stack_size);
+    auto can_steal = [stealing_threshold] {
+      int anchor = 0;
+      return reinterpret_cast<std::uintptr_t>(&anchor) > stealing_threshold;
+    }();
+
     threadData.ResetIdle();
+    bool processed_anything = false;
     while (!cancelled_) {
       TaskPtr t = threadData.PopFront();
-      if (!t) {
+      if (!t && (!external || can_steal)) {
         t = LocalSteal();
       }
-      if (!t) {
+      if (!t && (!external || can_steal)) {
         t = GlobalSteal();
       }
       if (!t && external && threadData.SetIdle()) {
         // external thread shouldn't wait for work, it should just exit.
-        return;
+        return processed_anything;
       }
       if (t) {
         ExecuteTask(t);
+        processed_anything = true;
       } else if (done_) {
-        return;
+        return processed_anything;
       }
     }
+
+    return processed_anything;
   }
 
   // Steal tries to steal work from other worker threads in the range [start,

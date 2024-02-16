@@ -229,6 +229,7 @@ void ParallelFor(size_t from, size_t to, F func) {
   task();
   sched.join_main_thread();
   while (IntrusivePtrLoadRef(&rootNode) != 1) {
+    while (sched.join_main_thread()) {}
     CpuRelax();
   }
 }

@@ -7,7 +7,7 @@
 #include "eigen/poor_barrier.h"
 #include "eigen/thread_index.h"
 #include "eigen/timespan_partitioner.h"
-#include "parlay/internal/scheduler_plugins/eigen/util.h"
+#include "eigen/util.h"
 
 namespace parlay {
 

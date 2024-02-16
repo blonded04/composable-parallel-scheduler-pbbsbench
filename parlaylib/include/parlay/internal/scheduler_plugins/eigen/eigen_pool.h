@@ -25,7 +25,7 @@ public:
     EigenPool.RunOnThread(Eigen::MakeTask(std::forward<F>(f)), hint);
   }
 
-  void join_main_thread() { EigenPool.JoinMainThread(); }
+  bool join_main_thread() { return EigenPool.JoinMainThread(); }
 
   void wait() {
     // TODO: implement
