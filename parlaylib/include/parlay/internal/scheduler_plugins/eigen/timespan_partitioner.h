@@ -1,4 +1,8 @@
 #pragma once
+#include "modes.h"
+// #define EIGEN_MODE EIGEN_TIMESPAN_GRAINSIZE
+
+#include "eigen_pool.h"
 #include "intrusive_ptr.h"
 #include "num_threads.h"
 #include "thread_index.h"
@@ -56,9 +60,11 @@ enum class Initial { TRUE, FALSE };
 
 enum class GrainSize { DEFAULT, AUTO };
 
-template <typename Scheduler, typename Func, Balance balance,
+template <typename Func, Balance balance,
           GrainSize grainSizeMode, Initial initial = Initial::FALSE>
 struct Task {
+  using Scheduler = EigenPoolWrapper;
+
   static inline const uint64_t INIT_TIME = [] {
   // should be calculated using timespan_tuner with EIGEN_SIMPLE
   // currently 0.99 percentile for maximums is used: 99% of iterations should
@@ -67,7 +73,8 @@ struct Task {
     if (Eigen::internal::GetNumThreads() == 48) {
       return 16500;
     }
-    return 13500;
+    // return 13500;
+    return 75000000;
 #elif defined(__aarch64__)
     return 1800;
 #else
@@ -80,9 +87,12 @@ struct Task {
   Task(Scheduler &sched, TaskNode::NodePtr node, size_t from, size_t to,
        Func func, SplitData split, ThreadId threadId)
       : Sched_(sched), CurrentNode_(std::move(node)), Current_(from), End_(to),
-        Func_(std::move(func)), Split_(split), SupposedThread_(threadId) {}
+        Func_(std::move(func)), Split_(split), SupposedThread_(threadId) {
+  }
 
-  bool IsDivisible() const { return Current_ + Split_.GrainSize < End_; }
+  bool IsDivisible() const {
+    return (Current_ + Split_.GrainSize < End_) && !is_stack_half_full();
+  }
 
   void DistributeWork() {
     if (Split_.Threads.Size() != 1 && IsDivisible()) {
@@ -115,7 +125,7 @@ struct Task {
           assert(otherData.From < dataSplit);
           assert(otherThreads.From < threadSplit);
           Sched_.run_on_thread(
-              Task<Scheduler, Func, balance, grainSizeMode, Initial::TRUE>{
+              Task<Func, balance, grainSizeMode, Initial::TRUE>{
                   Sched_, new TaskNode(CurrentNode_), otherData.From, dataSplit,
                   Func_,
                   SplitData{.Threads = {otherThreads.From, threadSplit},
@@ -135,12 +145,16 @@ struct Task {
   }
 
   void operator()() {
+    // std::cerr << "Execute task(this=" << (const void*)this << ", interval=[" << std::dec << Split_.Threads.From << ", " <<
+    //              Split_.Threads.To << "), current=[" << Current_ << ", " << End_ << "), thread=" << GetThreadIndex() << ")" << std::endl;
     if constexpr (initial == Initial::TRUE) {
       DistributeWork();
     }
     //  else if (GetThreadIndex() != SupposedThread_) {
     //   CurrentNode_->OnStolen();
     // }
+    // std::cerr << "Distributed task(this=" << (const void*)this << ", current=[" << std::dec << Current_ << ", " << End_ <<
+    //              "), thread=" << GetThreadIndex() << ")" << std::endl;
     if constexpr (balance == Balance::DELAYED) {
       // at first we are executing job for INIT_TIME
       // and then create balancing task
@@ -155,6 +169,8 @@ struct Task {
         }
       }
     }
+    // std::cerr << "Grainsized task(this=" << (const void*)this << ", current=[" << std::dec << Current_ << ", " << End_ <<
+    //              "), thread=" << GetThreadIndex() << ")" << std::endl;
 
     if constexpr (balance != Balance::OFF) {
       while (Current_ != End_ && IsDivisible()) {
@@ -167,17 +183,21 @@ struct Task {
         // CurrentNode_->SpawnChild();
         // eigen's scheduler will push task to the current thread queue,
         // then some other thread can steal this
-        Sched_.run(Task<Scheduler, Func, Balance::SIMPLE, GrainSize::DEFAULT>{
+        Sched_.run(Task<Func, Balance::SIMPLE, GrainSize::DEFAULT>{
             Sched_, new TaskNode(CurrentNode_), mid, End_, Func_,
             SplitData{.GrainSize = Split_.GrainSize, .Depth = Split_.Depth + 1},
             GetThreadIndex()});
         End_ = mid;
       }
+      // std::cerr << "Dispatched task(this=" << (const void*)this << ", current=[" << std::dec << Current_ << ", " << End_ <<
+      //            "), thread=" << GetThreadIndex() << ")" << std::endl;
     }
 
     while (Current_ != End_) {
       Execute();
     }
+    // std::cerr << "Finished task(this=" << (const void*)this << ", current=[" << std::dec << Current_ << ", " << End_ <<
+    //              "), thread=" << GetThreadIndex() << ")" << std::endl;
     CurrentNode_.Reset();
   }
 
@@ -197,11 +217,11 @@ private:
   IntrusivePtr<TaskNode> CurrentNode_;
 };
 
-template <typename Sched, Balance balance, GrainSize grainSizeMode, typename F>
-auto MakeInitialTask(Sched &sched, TaskNode::NodePtr node, size_t from,
+template <Balance balance, GrainSize grainSizeMode, typename F>
+auto MakeInitialTask(EigenPoolWrapper &sched, TaskNode::NodePtr node, size_t from,
                      size_t to, F func, size_t threadCount,
                      size_t grainSize = 1) {
-  return Task<Sched, F, balance, grainSizeMode, Initial::TRUE>{
+  return Task<F, balance, grainSizeMode, Initial::TRUE>{
       sched,
       std::move(node),
       from,
@@ -211,13 +231,13 @@ auto MakeInitialTask(Sched &sched, TaskNode::NodePtr node, size_t from,
       GetThreadIndex()};
 }
 
-template <typename Sched, Balance balance, GrainSize grainSizeMode, typename F>
+template <Balance balance, GrainSize grainSizeMode, typename F>
 void ParallelFor(size_t from, size_t to, F func) {
-  Sched sched;
+  EigenPoolWrapper sched;
   // allocating only for top-level nodes
   TaskNode rootNode;
   IntrusivePtrAddRef(&rootNode); // avoid deletion
-  Task<Sched, F, balance, grainSizeMode, Initial::TRUE> task{
+  Task<F, balance, grainSizeMode, Initial::TRUE> task{
       sched,
       IntrusivePtr<TaskNode>(&rootNode),
       from,
@@ -227,28 +247,27 @@ void ParallelFor(size_t from, size_t to, F func) {
                 .GrainSize = 1},
       GetThreadIndex()};
   task();
-  sched.join_main_thread();
   while (IntrusivePtrLoadRef(&rootNode) != 1) {
-    while (sched.join_main_thread()) {}
-    CpuRelax();
+    sched.execute_something_else();
+    // sched.join_main_thread();
   }
 }
 
 template <typename Sched, GrainSize grainSizeMode, typename F>
 void ParallelForTimespan(size_t from, size_t to, F func) {
-  ParallelFor<Sched, Balance::DELAYED, grainSizeMode, F>(from, to,
+  ParallelFor<Balance::DELAYED, grainSizeMode, F>(from, to,
                                                          std::move(func));
 }
 
 template <typename Sched, typename F>
 void ParallelForSimple(size_t from, size_t to, F func) {
-  ParallelFor<Sched, Balance::SIMPLE, GrainSize::DEFAULT, F>(from, to,
+  ParallelFor<Balance::SIMPLE, GrainSize::DEFAULT, F>(from, to,
                                                              std::move(func));
 }
 
 template <typename Sched, typename F>
 void ParallelForStatic(size_t from, size_t to, F func) {
-  ParallelFor<Sched, Balance::OFF, GrainSize::DEFAULT, F>(from, to,
+  ParallelFor<Balance::OFF, GrainSize::DEFAULT, F>(from, to,
                                                           std::move(func));
 }
 

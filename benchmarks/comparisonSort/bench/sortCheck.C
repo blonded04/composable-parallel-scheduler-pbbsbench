@@ -31,11 +31,9 @@ using namespace std;
 using namespace benchIO;
 
 template <typename T, typename LESS, typename Key>
-void check_sort(sequence<sequence<char>> In,
-		sequence<sequence<char>> Out,
+void check_sort(sequence<T> in_vals,
+		sequence<T> out_vals,
 		LESS less, Key f) {
-  sequence<T> in_vals = parseElements<T>(In.cut(1, In.size()));
-  sequence<T> out_vals = parseElements<T>(Out.cut(1, In.size()));
   size_t n = in_vals.size();
   auto sorted_in = parlay::stable_sort(in_vals, less);
   parlay::internal::quicksort(make_slice(in_vals), less);
@@ -61,28 +59,34 @@ int main(int argc, char* argv[]) {
   char* infile = fnames.first;
   char* outfile = fnames.second;
 
-  auto In = get_tokens(infile);
-  elementType in_type = elementTypeFromHeader(In[0]);
-  size_t in_n = In.size() - 1;
+  FileReader in_file{infile};
+  elementType in_type = elementTypeFromHeader(in_file.readHeader());
 
-  auto Out = get_tokens(outfile);
-  elementType out_type = elementTypeFromHeader(Out[0]);
-  size_t out_n = In.size() - 1;
+  FileReader out_file{outfile};
+  elementType out_type = elementTypeFromHeader(out_file.readHeader());
 
   if (in_type != out_type) {
     cout << "sortCheck: types don't match" << endl;
     return(1);
   }
-  if (in_n != out_n) {
-    cout << "sortCheck: lengths dont' match" << endl;
-    return(1);
-  }
 
   if (in_type == doubleT) {
-    check_sort<double>(In, Out, std::less<double>(), [&] (double x) {return x;});
+    auto In = in_file.readSeq<double>();
+    auto Out = out_file.readSeq<double>();
+    if (In.size() != Out.size()) {
+      cout << "sortCheck: lengths dont' match" << endl;
+      return 2;
+    }
+    check_sort(In, Out, std::less<double>(), [&] (double x) {return x;});
   } else if (in_type == doublePairT) {
     using dpair = pair<double,double>;
     auto less = [] (dpair a, dpair b) {return a.first < b.first;};
+    auto In = in_file.readSeq<dpair>();
+    auto Out = out_file.readSeq<dpair>();
+    if (In.size() != Out.size()) {
+      cout << "sortCheck: lengths dont' match" << endl;
+      return 2;
+    }
     check_sort<dpair>(In, Out, less, [&] (dpair x) {return x.first;});
   } else if (in_type == stringT) {
     using str = sequence<char>;
@@ -93,8 +97,20 @@ int main(int argc, char* argv[]) {
       while (sa < ea && *sa == *sb) {sa++; sb++;}
       return sa == ea ? (a.size() < b.size()) : *sa < *sb;
     };
+    auto In = in_file.readSeq<str>();
+    auto Out = out_file.readSeq<str>();
+    if (In.size() != Out.size()) {
+      cout << "sortCheck: lengths dont' match" << endl;
+      return 2;
+    }
     check_sort<str>(In, Out, strless, [&] (str x) {return x;});
   } else if (in_type == intType) {
+    auto In = in_file.readSeq<int>();
+    auto Out = out_file.readSeq<int>();
+    if (In.size() != Out.size()) {
+      cout << "sortCheck: lengths dont' match" << endl;
+      return 2;
+    }
     check_sort<int>(In, Out, std::less<int>(), [&] (int x) {return x;});
   } else {
     cout << "sortCheck: input files not of accepted type" << endl;

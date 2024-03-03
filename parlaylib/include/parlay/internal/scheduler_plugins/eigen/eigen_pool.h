@@ -1,8 +1,9 @@
 #pragma once
 #include "modes.h"
+// #define EIGEN_MODE EIGEN_TIMESPAN_GRAINSIZE
 #include "num_threads.h"
 
-#ifdef EIGEN_MODE
+// #ifdef EIGEN_MODE
 
 #define EIGEN_USE_THREADS
 #include "nonblocking_thread_pool.h"
@@ -27,9 +28,13 @@ public:
 
   bool join_main_thread() { return EigenPool.JoinMainThread(); }
 
+  bool execute_something_else() {
+    return EigenPool.TryExecuteSomething();
+  }
+
   void wait() {
     // TODO: implement
   }
 };
 
-#endif
+// #endif

@@ -8,73 +8,24 @@
 // Public License v. 2.0. If a copy of the MPL was not distributed
 // with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
-#include <cassert>
-#include <iostream>
-#include <ostream>
 #ifndef EIGEN_CXX11_THREADPOOL_NONBLOCKING_THREAD_POOL_H
 #define EIGEN_CXX11_THREADPOOL_NONBLOCKING_THREAD_POOL_H
-#include <memory>
 #define EIGEN_POOL_RUNNEXT
 
 #include "max_size_vector.h"
 #include "run_queue.h"
 #include "stl_thread_env.h"
+#include "util.h"
+
 #include <atomic>
+#include <cassert>
 #include <functional>
+#include <iostream>
+#include <memory>
+#include <ostream>
 #include <thread>
 
 namespace Eigen {
-
-namespace detail {
-
-constexpr std::size_t StackSize = std::size_t{16} * 1024 * 1024;
-
-inline std::uintptr_t get_stack_base(std::size_t stack_size = StackSize) {
-    // Stacks are growing top-down. Highest address is called "stack base",
-    // and the lowest is "stack limit".
-#if __TBB_USE_WINAPI
-    suppress_unused_warning(stack_size);
-    NT_TIB* pteb = (NT_TIB*)NtCurrentTeb();
-    __TBB_ASSERT(&pteb < pteb->StackBase && &pteb > pteb->StackLimit, "invalid stack info in TEB");
-    return reinterpret_cast<std::uintptr_t>(pteb->StackBase);
-#else
-    // There is no portable way to get stack base address in Posix, so we use
-    // non-portable method (on all modern Linux) or the simplified approach
-    // based on the common sense assumptions. The most important assumption
-    // is that the main thread's stack size is not less than that of other threads.
-
-    // Points to the lowest addressable byte of a stack.
-    void* stack_limit = nullptr;
-#if __linux__ && !__bg__
-    size_t np_stack_size = 0;
-    pthread_attr_t np_attr_stack;
-    if (0 == pthread_getattr_np(pthread_self(), &np_attr_stack)) {
-        if (0 == pthread_attr_getstack(&np_attr_stack, &stack_limit, &np_stack_size)) {
-            assert( &stack_limit > stack_limit && "stack size must be positive" );
-        }
-        pthread_attr_destroy(&np_attr_stack);
-    }
-#endif /* __linux__ */
-    std::uintptr_t stack_base{};
-    if (stack_limit) {
-        stack_base = reinterpret_cast<std::uintptr_t>(stack_limit) + stack_size;
-    } else {
-        // Use an anchor as a base stack address.
-        int anchor{};
-        stack_base = reinterpret_cast<std::uintptr_t>(&anchor);
-    }
-    return stack_base;
-#endif /* __TBB_USE_WINAPI */
-}
-
-inline std::uintptr_t calculate_stealing_threshold(std::uintptr_t base, std::size_t stack_size) {
-    assert(stack_size != 0 && "Stack size cannot be zero");
-    assert(base > stack_size / 2 && "Stack anchor calculation overflow");
-    return base - stack_size / 2;
-}
-
-
-}
 
 struct Task {
   virtual void operator()() = 0;
@@ -216,7 +167,7 @@ public:
     threadIndex = threadIndex % num_threads_;
     PerThread *pt = GetPerThread();
     if (!thread_data_[threadIndex].PushTask(
-            t, !(pt && threadIndex == pt->thread_id))) {
+            t, (pt && threadIndex == pt->thread_id))) {
       // failed to push, execute directly
       ExecuteTask(t);
     }
@@ -283,6 +234,15 @@ public:
       return false;
     }
     return WorkerLoop(/* external */ true);
+  }
+
+  bool TryExecuteSomething() {
+    if (CurrentThreadId() == -1) [[unlikely]] {
+      return false;
+    }
+    constexpr bool External = true;
+    constexpr bool JustOnce = true;
+    return WorkerLoop(External, JustOnce);
   }
 
 private:
@@ -360,21 +320,26 @@ private:
     static inline const TaskPtr IDLE = reinterpret_cast<TaskPtr>(1);
 #endif
 
-    bool PushTask(TaskPtr p, bool useRunnext) {
-#ifdef EIGEN_POOL_RUNNEXT
-      if (useRunnext && runnext.load(std::memory_order_relaxed) == nullptr) {
-        TaskPtr expected = nullptr;
-        if (runnext.compare_exchange_strong(expected, p,
-                                            std::memory_order_release)) {
-          return true;
-        }
-        return queue.PushBack(std::move(p));
+    bool PushTask(TaskPtr p, bool localThread) {
+      if (localThread) {
+        return queue.PushFront(p);
       } else {
-        return queue.PushBack(std::move(p));
+        return queue.PushBack(p);
       }
-#else
-      t = queue.PushBack(std::move(t));
-#endif
+//       if (useRunnext) {
+// #ifdef EIGEN_POOL_RUNNEXT
+//         if (runnext.load(std::memory_order_relaxed) == nullptr) {
+//           TaskPtr expected = nullptr;
+//           if (runnext.compare_exchange_strong(expected, p,
+//                                               std::memory_order_release)) {
+//             return true;
+//           }
+//         }
+// #endif
+//         return queue.PushBack(p);
+//       } else {
+//         return queue.PushFront(p);
+//       }
     }
 
     bool SetIdle() {
@@ -439,17 +404,12 @@ private:
   std::atomic<bool> cancelled_;
 
   // Main worker thread loop. Returns true if processed some tasks
-  bool WorkerLoop(bool external = false) {
+  bool WorkerLoop(bool external = false, bool once = false) {
     PerThread *pt = GetPerThread();
     auto thread_id = pt->thread_id;
     auto &threadData = thread_data_[thread_id];
 
-    auto stack_base = detail::get_stack_base(threadData.stack_size);
-    auto stealing_threshold = detail::calculate_stealing_threshold(stack_base, threadData.stack_size);
-    auto can_steal = [stealing_threshold] {
-      int anchor = 0;
-      return reinterpret_cast<std::uintptr_t>(&anchor) > stealing_threshold;
-    }();
+    auto can_steal = is_stack_half_full();
 
     threadData.ResetIdle();
     bool processed_anything = false;
@@ -470,6 +430,9 @@ private:
         processed_anything = true;
       } else if (done_) {
         return processed_anything;
+      }
+      if (once) {
+        break;
       }
     }
 

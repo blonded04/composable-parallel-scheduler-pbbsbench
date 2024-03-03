@@ -136,12 +136,12 @@ private:
 
 template <class Derived>
 size_t IntrusivePtrLoadRef(const intrusive_ref_counter<Derived> *p) noexcept {
-  return p->m_cnt.load(std::memory_order_relaxed);
+  return p->m_cnt.load(std::memory_order_acquire);
 }
 
 template <class Derived>
 void IntrusivePtrAddRef(const intrusive_ref_counter<Derived> *p) noexcept {
-  p->m_cnt.fetch_add(1, std::memory_order_relaxed);
+  p->m_cnt.fetch_add(1, std::memory_order_release);
 }
 
 template <class Derived>
