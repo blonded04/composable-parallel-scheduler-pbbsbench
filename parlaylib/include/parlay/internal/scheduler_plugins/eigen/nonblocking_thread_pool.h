@@ -322,11 +322,6 @@ private:
 
     bool PushTask(TaskPtr p, bool localThread) {
       if (localThread) {
-        return queue.PushFront(p);
-      } else {
-        return queue.PushBack(p);
-      }
-//       if (useRunnext) {
 // #ifdef EIGEN_POOL_RUNNEXT
 //         if (runnext.load(std::memory_order_relaxed) == nullptr) {
 //           TaskPtr expected = nullptr;
@@ -336,10 +331,10 @@ private:
 //           }
 //         }
 // #endif
-//         return queue.PushBack(p);
-//       } else {
-//         return queue.PushFront(p);
-//       }
+        return queue.PushFront(p);
+      } else {
+        return queue.PushBack(p);
+      }
     }
 
     bool SetIdle() {

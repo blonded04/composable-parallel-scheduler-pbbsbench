@@ -32,6 +32,35 @@ struct SplitData {
   size_t Depth = 0;
 };
 
+namespace detail {
+
+class TaskStack {
+public:
+  TaskStack() {}
+
+  void Add(TaskStack& ts) noexcept {
+    ts.prev = prev;
+    prev = &ts;
+  }
+
+  void Pop() noexcept {
+    assert(!IsEmpty());
+    prev = prev->prev;
+  }
+
+  bool IsEmpty() const noexcept {
+    return prev == nullptr;
+  }
+private:
+  TaskStack* prev = nullptr;
+};
+
+inline TaskStack& ThreadLocalTaskStack() {
+  static thread_local TaskStack stack;
+  return stack;
+}
+}
+
 struct TaskNode : intrusive_ref_counter<TaskNode> {
   using NodePtr = IntrusivePtr<TaskNode>;
 
@@ -85,9 +114,9 @@ struct Task {
   using StolenFlag = std::atomic<bool>;
 
   Task(Scheduler &sched, TaskNode::NodePtr node, size_t from, size_t to,
-       Func func, SplitData split, ThreadId threadId)
+       Func func, SplitData split)
       : Sched_(sched), CurrentNode_(std::move(node)), Current_(from), End_(to),
-        Func_(std::move(func)), Split_(split), SupposedThread_(threadId) {
+        Func_(std::move(func)), Split_(split) {
   }
 
   bool IsDivisible() const {
@@ -129,8 +158,7 @@ struct Task {
                   Sched_, new TaskNode(CurrentNode_), otherData.From, dataSplit,
                   Func_,
                   SplitData{.Threads = {otherThreads.From, threadSplit},
-                            .GrainSize = Split_.GrainSize},
-                  static_cast<ThreadId>(otherThreads.From)},
+                            .GrainSize = Split_.GrainSize}},
               otherThreads.From);
           otherThreads.From = threadSplit;
           otherData.From = dataSplit;
@@ -145,6 +173,9 @@ struct Task {
   }
 
   void operator()() {
+    detail::TaskStack ts;
+    auto& stack = detail::ThreadLocalTaskStack();
+    stack.Add(ts);
     // std::cerr << "Execute task(this=" << (const void*)this << ", interval=[" << std::dec << Split_.Threads.From << ", " <<
     //              Split_.Threads.To << "), current=[" << Current_ << ", " << End_ << "), thread=" << GetThreadIndex() << ")" << std::endl;
     if constexpr (initial == Initial::TRUE) {
@@ -185,8 +216,7 @@ struct Task {
         // then some other thread can steal this
         Sched_.run(Task<Func, Balance::SIMPLE, GrainSize::DEFAULT>{
             Sched_, new TaskNode(CurrentNode_), mid, End_, Func_,
-            SplitData{.GrainSize = Split_.GrainSize, .Depth = Split_.Depth + 1},
-            GetThreadIndex()});
+            SplitData{.GrainSize = Split_.GrainSize, .Depth = Split_.Depth + 1}});
         End_ = mid;
       }
       // std::cerr << "Dispatched task(this=" << (const void*)this << ", current=[" << std::dec << Current_ << ", " << End_ <<
@@ -199,6 +229,7 @@ struct Task {
     // std::cerr << "Finished task(this=" << (const void*)this << ", current=[" << std::dec << Current_ << ", " << End_ <<
     //              "), thread=" << GetThreadIndex() << ")" << std::endl;
     CurrentNode_.Reset();
+    stack.Pop();
   }
 
 private:
@@ -212,7 +243,7 @@ private:
   size_t End_;
   Func Func_;
   SplitData Split_;
-  ThreadId SupposedThread_;
+  // ThreadId SupposedThread_;
 
   IntrusivePtr<TaskNode> CurrentNode_;
 };
@@ -237,16 +268,28 @@ void ParallelFor(size_t from, size_t to, F func) {
   // allocating only for top-level nodes
   TaskNode rootNode;
   IntrusivePtrAddRef(&rootNode); // avoid deletion
-  Task<F, balance, grainSizeMode, Initial::TRUE> task{
-      sched,
-      IntrusivePtr<TaskNode>(&rootNode),
-      from,
-      to,
-      std::move(func),
-      SplitData{.Threads = {0, static_cast<size_t>(Eigen::internal::GetNumThreads())},
-                .GrainSize = 1},
-      GetThreadIndex()};
-  task();
+  if (detail::ThreadLocalTaskStack().IsEmpty()) {
+    Task<F, balance, grainSizeMode, Initial::TRUE> task{
+        sched,
+        IntrusivePtr<TaskNode>(&rootNode),
+        from,
+        to,
+        std::move(func),
+        SplitData{.Threads = {0, static_cast<size_t>(Eigen::internal::GetNumThreads())},
+                  .GrainSize = 1}};
+    task();
+  } else {
+    Task<F, balance, grainSizeMode, Initial::FALSE> task{
+        sched,
+        IntrusivePtr<TaskNode>(&rootNode),
+        from,
+        to,
+        std::move(func),
+        SplitData{.Threads = {0, static_cast<size_t>(Eigen::internal::GetNumThreads())},
+                  .GrainSize = 1}};
+    task();
+  }
+
   while (IntrusivePtrLoadRef(&rootNode) != 1) {
     sched.execute_something_else();
     // sched.join_main_thread();
