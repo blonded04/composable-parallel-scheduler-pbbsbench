@@ -15,7 +15,7 @@ parser.add_argument("--tbb", action="store_true", help="set if want to run with 
 parser.add_argument("--eigen", action="store_true", help="set if want to run with eigen executor")
 
 parser.add_argument("--numa", action="store_true", help="set if run on numa machine")
-parser.add_argument("--only", type=str, help="only run given test")
+parser.add_argument("--only", type=str, nargs='+', help="only run given test")
 parser.add_argument("--small", action="store_true", help="set if want to test on smaller datasets")
 parser.add_argument("--mode", type=str, help="run with specified mode")
 parser.add_help = True
@@ -106,10 +106,12 @@ for executor in executors:
         if not args.numa:
             cmd.append("-nonuma")
         if args.only:
-            cmd.extend(["-only", args.only])
+            cmd.append("-only")
+            cmd.extend(args.only)
         if args.small:
             cmd.extend(["-small"])
 
+        print("running command: ", cmd)
         process = subprocess.Popen(cmd, env=run_env, universal_newlines=True, stdout=output_file)
         rc = process.wait()
         if rc != 0:
