@@ -296,6 +296,25 @@ void ParallelFor(size_t from, size_t to, F func) {
   }
 }
 
+template <typename F1, typename F2>
+void ParallelDo(F1&& fst, F2&& sec) {
+  EigenPoolWrapper sched;
+  // allocating only for top-level nodes
+  TaskNode rootNode;
+  IntrusivePtrAddRef(&rootNode); // avoid deletion
+
+  sched.run([&fst, ref = IntrusivePtr<TaskNode>(&rootNode)]() {
+    std::forward<F1>(fst)();
+  });
+  sched.run([&sec, ref = IntrusivePtr<TaskNode>(&rootNode)]() {
+    std::forward<F2>(sec)();
+  });
+
+  while (IntrusivePtrLoadRef(&rootNode) != 1) {
+    sched.execute_something_else();
+  }
+}
+
 template <typename Sched, GrainSize grainSizeMode, typename F>
 void ParallelForTimespan(size_t from, size_t to, F func) {
   ParallelFor<Balance::DELAYED, grainSizeMode, F>(from, to,

@@ -68,13 +68,7 @@ inline void parallel_for(size_t start, size_t end, F&& f, long, bool) {
 
 template <typename Lf, typename Rf>
 inline void par_do(Lf&& left, Rf&& right, bool) {
-    internal::EigenParallelFor(0, 2, [&](size_t idx) {
-        if (idx) {
-            std::forward<Lf>(left)();
-        } else {
-            std::forward<Rf>(right)();
-        }
-    });
+  EigenPartitioner::ParallelDo(std::forward<Lf>(left), std::forward<Rf>(right));
 }
 
 inline void init_plugin_internal() {

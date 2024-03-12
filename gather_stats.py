@@ -65,15 +65,26 @@ current_bench = None
 result = {}
 
 for line in fileinput.input():
-    # bench_name = extract_bench_name(line)
-    bench_res = extract_total_res(line)
+    bench_name = extract_bench_name(line)
+    if bench_name:
+        current_bench = bench_name
 
-    if bench_res:
-        dataset, g_of_mins, g_of_g = bench_res
-
-        result[dataset] = {
-            "mins": g_of_mins,
-            "total": g_of_g,
+    tupl = extract_total_res(line)
+    if tupl:
+        last_name, mins, total = tupl
+        assert current_bench.endswith(last_name)
+        result[current_bench] = {
+            "mins": mins,
+            "total": total,
         }
+    # bench_res = extract_total_res(line)
+
+    # if bench_res:
+    #     dataset, g_of_mins, g_of_g = bench_res
+
+    #     result[dataset] = {
+    #         "mins": g_of_mins,
+    #         "total": g_of_g,
+    #     }
 
 print(json.dumps(result))
