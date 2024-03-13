@@ -1,6 +1,5 @@
 #pragma once
 
-#include "eigen_pool.h"
 #include "modes.h"
 #include "poor_barrier.h"
 #include "timespan_partitioner.h"
