@@ -319,7 +319,7 @@ void ParallelDo(F1&& fst, F2&& sec) {
   IntrusivePtrAddRef(&rootNode); // avoid deletion
 
   sched.run(detail::WrapAsTask(std::forward<F1>(fst), &rootNode));
-  sched.run(detail::WrapAsTask(std::forward<F2>(sec), &rootNode));
+  std::forward<F2>(sec)();
 
   while (IntrusivePtrLoadRef(&rootNode) != 1) {
     sched.execute_something_else();
