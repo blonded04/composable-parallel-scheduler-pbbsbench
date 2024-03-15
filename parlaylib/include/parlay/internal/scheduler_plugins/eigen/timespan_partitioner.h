@@ -173,9 +173,9 @@ struct Task {
   }
 
   void operator()() {
-    detail::TaskStack ts;
-    auto& stack = detail::ThreadLocalTaskStack();
-    stack.Add(ts);
+    // detail::TaskStack ts;
+    // auto& stack = detail::ThreadLocalTaskStack();
+    // stack.Add(ts);
     // std::cerr << "Execute task(this=" << (const void*)this << ", interval=[" << std::dec << Split_.Threads.From << ", " <<
     //              Split_.Threads.To << "), current=[" << Current_ << ", " << End_ << "), thread=" << GetThreadIndex() << ")" << std::endl;
     if constexpr (initial == Initial::TRUE) {
@@ -229,7 +229,7 @@ struct Task {
     // std::cerr << "Finished task(this=" << (const void*)this << ", current=[" << std::dec << Current_ << ", " << End_ <<
     //              "), thread=" << GetThreadIndex() << ")" << std::endl;
     CurrentNode_.Reset();
-    stack.Pop();
+    // stack.Pop();
   }
 
 private:
@@ -268,27 +268,15 @@ void ParallelFor(size_t from, size_t to, F func) {
   // allocating only for top-level nodes
   TaskNode rootNode;
   IntrusivePtrAddRef(&rootNode); // avoid deletion
-  if (detail::ThreadLocalTaskStack().IsEmpty()) {
-    Task<F, balance, grainSizeMode, Initial::TRUE> task{
-        sched,
-        IntrusivePtr<TaskNode>(&rootNode),
-        from,
-        to,
-        std::move(func),
-        SplitData{.Threads = {0, static_cast<size_t>(Eigen::internal::GetNumThreads())},
-                  .GrainSize = 1}};
-    task();
-  } else {
-    Task<F, balance, grainSizeMode, Initial::FALSE> task{
-        sched,
-        IntrusivePtr<TaskNode>(&rootNode),
-        from,
-        to,
-        std::move(func),
-        SplitData{.Threads = {0, static_cast<size_t>(Eigen::internal::GetNumThreads())},
-                  .GrainSize = 1}};
-    task();
-  }
+  Task<F, balance, grainSizeMode, Initial::TRUE> task{
+      sched,
+      IntrusivePtr<TaskNode>(&rootNode),
+      from,
+      to,
+      std::move(func),
+      SplitData{.Threads = {0, static_cast<size_t>(Eigen::internal::GetNumThreads())},
+                .GrainSize = 1}};
+  task();
 
   while (IntrusivePtrLoadRef(&rootNode) != 1) {
     sched.execute_something_else();
@@ -301,12 +289,12 @@ namespace detail {
 template <typename F>
 auto WrapAsTask(F&& func, const IntrusivePtr<TaskNode>& node) {
   return [&func, ref = node]() {
-    TaskStack ts;
-    auto& threadTaskStack = ThreadLocalTaskStack();
-    threadTaskStack.Add(ts);
+    // TaskStack ts;
+    // auto& threadTaskStack = ThreadLocalTaskStack();
+    // threadTaskStack.Add(ts);
 
     std::forward<F>(func)();
-    threadTaskStack.Pop();
+    // threadTaskStack.Pop();
   };
 }
 }
