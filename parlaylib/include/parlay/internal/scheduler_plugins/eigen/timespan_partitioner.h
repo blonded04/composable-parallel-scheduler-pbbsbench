@@ -318,7 +318,11 @@ void ParallelDo(F1&& fst, F2&& sec) {
   TaskNode rootNode;
   IntrusivePtrAddRef(&rootNode); // avoid deletion
 
-  sched.run(detail::WrapAsTask(std::forward<F1>(fst), &rootNode));
+  if (detail::ThreadLocalTaskStack().IsEmpty()) {
+    sched.run_on_thread(detail::WrapAsTask(std::forward<F1>(fst), &rootNode), GetThreadIndex() + 1);
+  } else {
+    sched.run(detail::WrapAsTask(std::forward<F1>(fst), &rootNode));
+  }
   std::forward<F2>(sec)();
 
   while (IntrusivePtrLoadRef(&rootNode) != 1) {
