@@ -44,8 +44,28 @@ template <typename F> struct UniqueTask : Task {
   std::decay_t<F> f;
 };
 
+struct ProxyTask : Task {
+  ProxyTask(Task* task) : InnerTask_{task} {}
+
+  void operator()() override {
+    Task* task = InnerTask_.load(std::memory_order_acquire);
+    if (task && InnerTask_.compare_exchange_strong(task, nullptr)) {
+      (*task)();
+    } else {
+      // proxy should only exist between 2 threads, thus the second thread deletes it
+      delete this;
+    }
+  }
+
+  std::atomic<Task*> InnerTask_;
+};
+
 template <typename F> Task *MakeTask(F &&f) {
   return new UniqueTask<decltype(std::forward<F>(f))>{std::forward<F>(f)};
+}
+
+template <typename F> Task *MakeProxyTask(F &&f) {
+  return new ProxyTask{new UniqueTask{std::forward<F>(f)}};
 }
 
 // This defines an interface that ThreadPoolDevice can take to use

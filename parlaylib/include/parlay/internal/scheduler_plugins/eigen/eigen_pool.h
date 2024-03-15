@@ -23,7 +23,9 @@ public:
   }
 
   template <typename F> void run_on_thread(F &&f, size_t hint) {
-    EigenPool.RunOnThread(Eigen::MakeTask(std::forward<F>(f)), hint);
+    auto task = Eigen::MakeProxyTask(std::forward<F>(f));
+    EigenPool.RunOnThread(task, hint);
+    EigenPool.Schedule(task); // might push twice to the same thread, OK for now
   }
 
   bool join_main_thread() { return EigenPool.JoinMainThread(); }
