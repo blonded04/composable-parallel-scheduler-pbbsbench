@@ -1,0 +1,481 @@
+HOSTNAME: collab1
+Parallel Only
+Forcing Compile
+running on 48 threads
+
+cd benchmarks/integerSort/parallelRadixSort ; make -s cleanall ; make -j 24
+g++ -DPARLAY_EIGEN -DEIGEN_MODE=EIGEN_TIMESPAN_GRAINSIZE -pthread -O2 -g -std=c++17 -DNDEBUG -I .  -include isort.h -o isort ../bench/isortTime.C -DPARLAY_EIGEN -DEIGEN_MODE=EIGEN_TIMESPAN_GRAINSIZE -pthread -ldl 
+cp ../bench/testInputs ../bench/testInputs_small .
+cd ../bench; make isortCheck
+make[1]: Entering directory '/home/itmo_denis/pbbsbench/benchmarks/integerSort/bench'
+g++ -DPARLAY_EIGEN -DEIGEN_MODE=EIGEN_TIMESPAN_GRAINSIZE -pthread -O2 -g -std=c++17 -DNDEBUG -I . -Icommon -o isortCheck isortCheck.C -DPARLAY_EIGEN -DEIGEN_MODE=EIGEN_TIMESPAN_GRAINSIZE -pthread -ldl 
+make[1]: Leaving directory '/home/itmo_denis/pbbsbench/benchmarks/integerSort/bench'
+cd benchmarks/integerSort/parallelRadixSort ; numactl -i all ./testInputs -r 3 -p 48
+running cd ../sequenceData/data; make randomSeq_100M_int
+running PARLAY_NUM_THREADS=48 ./isort -b 27 -r 3 -o /tmp/ofile933420_819518 ../sequenceData/data/randomSeq_100M_int
+running ./../bench/isortCheck  ../sequenceData/data/randomSeq_100M_int /tmp/ofile933420_819518
+running rm ../sequenceData/data/randomSeq_100M_int
+randomSeq_100M_int : -b 27 -r 3 -o /tmp/ofile933420_819518 : '0.08', '0.08', '0.08', geomean = 0.08
+running cd ../sequenceData/data; make exptSeq_100M_int
+running PARLAY_NUM_THREADS=48 ./isort -b 27 -r 3 -o /tmp/ofile984034_876910 ../sequenceData/data/exptSeq_100M_int
+running ./../bench/isortCheck  ../sequenceData/data/exptSeq_100M_int /tmp/ofile984034_876910
+running rm ../sequenceData/data/exptSeq_100M_int
+exptSeq_100M_int : -b 27 -r 3 -o /tmp/ofile984034_876910 : '0.086', '0.086', '0.086', geomean = 0.086
+running cd ../sequenceData/data; make randomSeq_100M_int_pair_int
+running PARLAY_NUM_THREADS=48 ./isort -b 27 -r 3 -o /tmp/ofile28287_566419 ../sequenceData/data/randomSeq_100M_int_pair_int
+running ./../bench/isortCheck  ../sequenceData/data/randomSeq_100M_int_pair_int /tmp/ofile28287_566419
+running rm ../sequenceData/data/randomSeq_100M_int_pair_int
+randomSeq_100M_int_pair_int : -b 27 -r 3 -o /tmp/ofile28287_566419 : '0.136', '0.135', '0.135', geomean = 0.135
+running cd ../sequenceData/data; make randomSeq_100M_256_int_pair_int
+running PARLAY_NUM_THREADS=48 ./isort -b 8 -r 3 -o /tmp/ofile501420_724944 ../sequenceData/data/randomSeq_100M_256_int_pair_int
+running ./../bench/isortCheck  ../sequenceData/data/randomSeq_100M_256_int_pair_int /tmp/ofile501420_724944
+running rm ../sequenceData/data/randomSeq_100M_256_int_pair_int
+randomSeq_100M_256_int_pair_int : -b 8 -r 3 -o /tmp/ofile501420_724944 : '0.048', '0.049', '0.048', geomean = 0.048
+parallelRadixSort : 48 : geomean of mins = 0.081, geomean of geomeans = 0.082
+
+cd benchmarks/comparisonSort/sampleSort ; make -s cleanall ; make -j 24
+g++ -DPARLAY_EIGEN -DEIGEN_MODE=EIGEN_TIMESPAN_GRAINSIZE -pthread -O2 -g -std=c++17 -DNDEBUG -I .  -include sort.h -o sort ../bench/sortTime.C -DPARLAY_EIGEN -DEIGEN_MODE=EIGEN_TIMESPAN_GRAINSIZE -pthread -ldl 
+cp ../bench/testInputs ../bench/testInputs_small .
+cd ../bench; make sortCheck
+make[1]: Entering directory '/home/itmo_denis/pbbsbench/benchmarks/comparisonSort/bench'
+g++ -DPARLAY_EIGEN -DEIGEN_MODE=EIGEN_TIMESPAN_GRAINSIZE -pthread -O2 -g -std=c++17 -DNDEBUG -I . -o sortCheck sortCheck.C -DPARLAY_EIGEN -DEIGEN_MODE=EIGEN_TIMESPAN_GRAINSIZE -pthread -ldl 
+make[1]: Leaving directory '/home/itmo_denis/pbbsbench/benchmarks/comparisonSort/bench'
+cd benchmarks/comparisonSort/sampleSort ; numactl -i all ./testInputs -r 3 -p 48
+running cd ../sequenceData/data; make randomSeq_100M_double
+running PARLAY_NUM_THREADS=48 ./sort  -r 3 -o /tmp/ofile978923_664863 ../sequenceData/data/randomSeq_100M_double
+running ./../bench/sortCheck  ../sequenceData/data/randomSeq_100M_double /tmp/ofile978923_664863
+running rm ../sequenceData/data/randomSeq_100M_double
+randomSeq_100M_double :  -r 3 -o /tmp/ofile978923_664863 : '0.26', '0.259', '0.258', geomean = 0.259
+running cd ../sequenceData/data; make exptSeq_100M_double
+running PARLAY_NUM_THREADS=48 ./sort  -r 3 -o /tmp/ofile16813_16462 ../sequenceData/data/exptSeq_100M_double
+running ./../bench/sortCheck  ../sequenceData/data/exptSeq_100M_double /tmp/ofile16813_16462
+running rm ../sequenceData/data/exptSeq_100M_double
+exptSeq_100M_double :  -r 3 -o /tmp/ofile16813_16462 : '0.217', '0.217', '0.216', geomean = 0.216
+running cd ../sequenceData/data; make almostSortedSeq_100M_double
+running PARLAY_NUM_THREADS=48 ./sort  -r 3 -o /tmp/ofile346521_795087 ../sequenceData/data/almostSortedSeq_100M_double
+running ./../bench/sortCheck  ../sequenceData/data/almostSortedSeq_100M_double /tmp/ofile346521_795087
+running rm ../sequenceData/data/almostSortedSeq_100M_double
+almostSortedSeq_100M_double :  -r 3 -o /tmp/ofile346521_795087 : '0.202', '0.202', '0.202', geomean = 0.202
+running cd ../sequenceData/data; make randomSeq_100M_double_pair_double
+running PARLAY_NUM_THREADS=48 ./sort  -r 3 -o /tmp/ofile43054_831376 ../sequenceData/data/randomSeq_100M_double_pair_double
+running ./../bench/sortCheck  ../sequenceData/data/randomSeq_100M_double_pair_double /tmp/ofile43054_831376
+running rm ../sequenceData/data/randomSeq_100M_double_pair_double
+randomSeq_100M_double_pair_double :  -r 3 -o /tmp/ofile43054_831376 : '0.355', '0.352', '0.341', geomean = 0.349
+running cd ../sequenceData/data; make trigramSeq_100M
+running PARLAY_NUM_THREADS=48 ./sort  -r 3 -o /tmp/ofile133723_917120 ../sequenceData/data/trigramSeq_100M
+running ./../bench/sortCheck  ../sequenceData/data/trigramSeq_100M /tmp/ofile133723_917120
+running rm ../sequenceData/data/trigramSeq_100M
+trigramSeq_100M :  -r 3 -o /tmp/ofile133723_917120 : '0.638', '0.641', '0.649', geomean = 0.642
+sampleSort : 48 : geomean of mins = 0.3, geomean of geomeans = 0.303
+
+cd benchmarks/removeDuplicates/parlayhash ; make -s cleanall ; make -j 24
+g++ -DPARLAY_EIGEN -DEIGEN_MODE=EIGEN_TIMESPAN_GRAINSIZE -pthread -O2 -g -std=c++17 -DNDEBUG -I .  -include dedup.h -o dedup ../bench/dedupTime.C -DPARLAY_EIGEN -DEIGEN_MODE=EIGEN_TIMESPAN_GRAINSIZE -pthread -ldl 
+cp ../bench/testInputs ../bench/testInputs_small .
+cd ../bench; make dedupCheck
+make[1]: Entering directory '/home/itmo_denis/pbbsbench/benchmarks/removeDuplicates/bench'
+g++ -DPARLAY_EIGEN -DEIGEN_MODE=EIGEN_TIMESPAN_GRAINSIZE -pthread -O2 -g -std=c++17 -DNDEBUG -I . -o dedupCheck dedupCheck.C -DPARLAY_EIGEN -DEIGEN_MODE=EIGEN_TIMESPAN_GRAINSIZE -pthread -ldl 
+make[1]: Leaving directory '/home/itmo_denis/pbbsbench/benchmarks/removeDuplicates/bench'
+cd benchmarks/removeDuplicates/parlayhash ; numactl -i all ./testInputs -r 3 -p 48
+running cd ../sequenceData/data; make randomSeq_100M_int
+running PARLAY_NUM_THREADS=48 ./dedup  -r 3 -o /tmp/ofile696846_530847 ../sequenceData/data/randomSeq_100M_int
+running ./../bench/dedupCheck  ../sequenceData/data/randomSeq_100M_int /tmp/ofile696846_530847
+running rm ../sequenceData/data/randomSeq_100M_int
+randomSeq_100M_int :  -r 3 -o /tmp/ofile696846_530847 : '0.1', '0.097', '0.098', geomean = 0.098
+running cd ../sequenceData/data; make exptSeq_100M_int
+running PARLAY_NUM_THREADS=48 ./dedup  -r 3 -o /tmp/ofile991318_616362 ../sequenceData/data/exptSeq_100M_int
+running ./../bench/dedupCheck  ../sequenceData/data/exptSeq_100M_int /tmp/ofile991318_616362
+running rm ../sequenceData/data/exptSeq_100M_int
+exptSeq_100M_int :  -r 3 -o /tmp/ofile991318_616362 : '0.073', '0.075', '0.076', geomean = 0.074
+running cd ../sequenceData/data; make trigramSeq_100M
+running PARLAY_NUM_THREADS=48 ./dedup  -r 3 -o /tmp/ofile816977_265665 ../sequenceData/data/trigramSeq_100M
+running ./../bench/dedupCheck  ../sequenceData/data/trigramSeq_100M /tmp/ofile816977_265665
+running rm ../sequenceData/data/trigramSeq_100M
+trigramSeq_100M :  -r 3 -o /tmp/ofile816977_265665 : '0.272', '0.283', '0.275', geomean = 0.277
+parlayhash : 48 : geomean of mins = 0.124, geomean of geomeans = 0.127
+
+cd benchmarks/histogram/parallel ; make -s cleanall ; make -j 24
+g++ -DPARLAY_EIGEN -DEIGEN_MODE=EIGEN_TIMESPAN_GRAINSIZE -pthread -O2 -g -std=c++17 -DNDEBUG -I .  -o histogramTime.o -c ../bench/histogramTime.C
+g++ -DPARLAY_EIGEN -DEIGEN_MODE=EIGEN_TIMESPAN_GRAINSIZE -pthread -O2 -g -std=c++17 -DNDEBUG -I .  -c histogram.C -o histogram.o
+cd ../bench; make -s histogramCheck
+cp ../bench/testInputs ../bench/testInputs_small .
+g++ -o histogram histogramTime.o histogram.o -DPARLAY_EIGEN -DEIGEN_MODE=EIGEN_TIMESPAN_GRAINSIZE -pthread -ldl 
+cd benchmarks/histogram/parallel ; numactl -i all ./testInputs -r 3 -p 48
+running cd ../sequenceData/data; make randomSeq_100M_256_int
+running PARLAY_NUM_THREADS=48 ./histogram -b 256 -r 3 -o /tmp/ofile62723_37190 ../sequenceData/data/randomSeq_100M_256_int
+running ./../bench/histogramCheck  ../sequenceData/data/randomSeq_100M_256_int /tmp/ofile62723_37190
+running rm ../sequenceData/data/randomSeq_100M_256_int
+randomSeq_100M_256_int : -b 256 -r 3 -o /tmp/ofile62723_37190 : '0.007', '0.007', '0.006', geomean = 0.006
+running cd ../sequenceData/data; make randomSeq_100M_100K_int
+running PARLAY_NUM_THREADS=48 ./histogram -b 100000 -r 3 -o /tmp/ofile363084_303574 ../sequenceData/data/randomSeq_100M_100K_int
+running ./../bench/histogramCheck  ../sequenceData/data/randomSeq_100M_100K_int /tmp/ofile363084_303574
+running rm ../sequenceData/data/randomSeq_100M_100K_int
+randomSeq_100M_100K_int : -b 100000 -r 3 -o /tmp/ofile363084_303574 : '0.041', '0.041', '0.041', geomean = 0.041
+running cd ../sequenceData/data; make randomSeq_100M_int
+running PARLAY_NUM_THREADS=48 ./histogram -b 100000000 -r 3 -o /tmp/ofile965478_308652 ../sequenceData/data/randomSeq_100M_int
+running ./../bench/histogramCheck  ../sequenceData/data/randomSeq_100M_int /tmp/ofile965478_308652
+running rm ../sequenceData/data/randomSeq_100M_int
+randomSeq_100M_int : -b 100000000 -r 3 -o /tmp/ofile965478_308652 : '0.111', '0.112', '0.112', geomean = 0.112
+running cd ../sequenceData/data; make exptSeq_100M_int
+running PARLAY_NUM_THREADS=48 ./histogram -b 100000000 -r 3 -o /tmp/ofile244164_754564 ../sequenceData/data/exptSeq_100M_int
+running ./../bench/histogramCheck  ../sequenceData/data/exptSeq_100M_int /tmp/ofile244164_754564
+running rm ../sequenceData/data/exptSeq_100M_int
+exptSeq_100M_int : -b 100000000 -r 3 -o /tmp/ofile244164_754564 : '0.106', '0.106', '0.106', geomean = 0.106
+running cd ../sequenceData/data; make almostEqualSeq_100000000
+running PARLAY_NUM_THREADS=48 ./histogram -b 100000000 -r 3 -o /tmp/ofile74814_109860 ../sequenceData/data/almostEqualSeq_100000000
+running ./../bench/histogramCheck  ../sequenceData/data/almostEqualSeq_100000000 /tmp/ofile74814_109860
+running rm ../sequenceData/data/almostEqualSeq_100000000
+almostEqualSeq_100000000 : -b 100000000 -r 3 -o /tmp/ofile74814_109860 : '0.114', '0.099', '0.118', geomean = 0.11
+parallel : 48 : geomean of mins = 0.05, geomean of geomeans = 0.051
+
+cd benchmarks/wordCounts/histogram ; make -s cleanall ; make -j 24
+g++ -DPARLAY_EIGEN -DEIGEN_MODE=EIGEN_TIMESPAN_GRAINSIZE -pthread -O2 -g -std=c++17 -DNDEBUG -I .  -o wcTime.o -c ../bench/wcTime.C
+g++ -DPARLAY_EIGEN -DEIGEN_MODE=EIGEN_TIMESPAN_GRAINSIZE -pthread -O2 -g -std=c++17 -DNDEBUG -I .  -c wc.C -o wc.o
+cd ../bench; make -s wcCheck
+cp ../bench/testInputs ../bench/testInputs_small .
+g++ -o wc wcTime.o wc.o -DPARLAY_EIGEN -DEIGEN_MODE=EIGEN_TIMESPAN_GRAINSIZE -pthread -ldl 
+cd benchmarks/wordCounts/histogram ; numactl -i all ./testInputs -r 3 -p 48
+running cd ../sequenceData/data; make trigramString_250000000
+running PARLAY_NUM_THREADS=48 ./wc  -r 3 -o /tmp/ofile194941_399691 ../sequenceData/data/trigramString_250000000
+running ./../bench/wcCheck  ../sequenceData/data/trigramString_250000000 /tmp/ofile194941_399691
+running rm ../sequenceData/data/trigramString_250000000
+trigramString_250000000 :  -r 3 -o /tmp/ofile194941_399691 : '0.385', '0.386', '0.384', geomean = 0.385
+running cd ../sequenceData/data; make etext99
+running PARLAY_NUM_THREADS=48 ./wc  -r 3 -o /tmp/ofile138398_522820 ../sequenceData/data/etext99
+running ./../bench/wcCheck  ../sequenceData/data/etext99 /tmp/ofile138398_522820
+running rm ../sequenceData/data/etext99
+etext99 :  -r 3 -o /tmp/ofile138398_522820 : '0.147', '0.155', '0.147', geomean = 0.15
+running cd ../sequenceData/data; make wikipedia250M.txt
+running PARLAY_NUM_THREADS=48 ./wc  -r 3 -o /tmp/ofile454535_968894 ../sequenceData/data/wikipedia250M.txt
+running ./../bench/wcCheck  ../sequenceData/data/wikipedia250M.txt /tmp/ofile454535_968894
+running rm ../sequenceData/data/wikipedia250M.txt
+wikipedia250M.txt :  -r 3 -o /tmp/ofile454535_968894 : '0.327', '0.327', '0.328', geomean = 0.327
+histogram : 48 : geomean of mins = 0.264, geomean of geomeans = 0.266
+
+cd benchmarks/invertedIndex/parallel ; make -s cleanall ; make -j 24
+g++ -DPARLAY_EIGEN -DEIGEN_MODE=EIGEN_TIMESPAN_GRAINSIZE -pthread -O2 -g -std=c++17 -DNDEBUG -I .  -o indexTime.o -c ../bench/indexTime.C
+g++ -DPARLAY_EIGEN -DEIGEN_MODE=EIGEN_TIMESPAN_GRAINSIZE -pthread -O2 -g -std=c++17 -DNDEBUG -I .  -c index.C -o index.o
+cd ../bench; make -s indexCheck
+cp ../bench/testInputs ../bench/testInputs_small .
+g++ -o index indexTime.o index.o -DPARLAY_EIGEN -DEIGEN_MODE=EIGEN_TIMESPAN_GRAINSIZE -pthread -ldl 
+cd benchmarks/invertedIndex/parallel ; numactl -i all ./testInputs -r 3 -p 48
+running cd ../sequenceData/data; make wikisamp.xml
+running PARLAY_NUM_THREADS=48 ./index  -r 3 -o /tmp/ofile593521_386981 ../sequenceData/data/wikisamp.xml
+running ./../bench/indexCheck  ../sequenceData/data/wikisamp.xml /tmp/ofile593521_386981
+running rm ../sequenceData/data/wikisamp.xml
+wikisamp.xml :  -r 3 -o /tmp/ofile593521_386981 : '0.182', '0.187', '0.188', geomean = 0.186
+running cd ../sequenceData/data; make wikipedia250M.txt
+running PARLAY_NUM_THREADS=48 ./index  -r 3 -o /tmp/ofile803560_610335 ../sequenceData/data/wikipedia250M.txt
+running ./../bench/indexCheck  ../sequenceData/data/wikipedia250M.txt /tmp/ofile803560_610335
+running rm ../sequenceData/data/wikipedia250M.txt
+wikipedia250M.txt :  -r 3 -o /tmp/ofile803560_610335 : '0.685', '0.692', '0.687', geomean = 0.688
+parallel : 48 : geomean of mins = 0.353, geomean of geomeans = 0.358
+
+cd benchmarks/suffixArray/parallelRange ; make -s cleanall ; make -j 24
+g++ -DPARLAY_EIGEN -DEIGEN_MODE=EIGEN_TIMESPAN_GRAINSIZE -pthread -O2 -g -std=c++17 -DNDEBUG -I .  -o SATime.o -c ../bench/SATime.C
+g++ -DPARLAY_EIGEN -DEIGEN_MODE=EIGEN_TIMESPAN_GRAINSIZE -pthread -O2 -g -std=c++17 -DNDEBUG -I .  -c SA.C -o SA.o
+cd ../bench; make -s SACheck
+cp ../bench/testInputs ../bench/testInputs_small .
+g++ -o SA SATime.o SA.o -DPARLAY_EIGEN -DEIGEN_MODE=EIGEN_TIMESPAN_GRAINSIZE -pthread -ldl 
+cd benchmarks/suffixArray/parallelRange ; numactl -i all ./testInputs -r 3 -p 48
+running cd ../sequenceData/data; make trigramString_100000000
+running PARLAY_NUM_THREADS=48 ./SA  -r 3 -o /tmp/ofile106883_60626 ../sequenceData/data/trigramString_100000000
+running ./../bench/SACheck  ../sequenceData/data/trigramString_100000000 /tmp/ofile106883_60626
+running rm ../sequenceData/data/trigramString_100000000
+trigramString_100000000 :  -r 3 -o /tmp/ofile106883_60626 : '0.974', '0.976', '0.966', geomean = 0.972
+running cd ../sequenceData/data; make chr22.dna
+running PARLAY_NUM_THREADS=48 ./SA  -r 3 -o /tmp/ofile785207_449467 ../sequenceData/data/chr22.dna
+running ./../bench/SACheck  ../sequenceData/data/chr22.dna /tmp/ofile785207_449467
+running rm ../sequenceData/data/chr22.dna
+chr22.dna :  -r 3 -o /tmp/ofile785207_449467 : '0.451', '0.45', '0.442', geomean = 0.448
+running cd ../sequenceData/data; make etext99
+running PARLAY_NUM_THREADS=48 ./SA  -r 3 -o /tmp/ofile274901_872968 ../sequenceData/data/etext99
+running ./../bench/SACheck  ../sequenceData/data/etext99 /tmp/ofile274901_872968
+running rm ../sequenceData/data/etext99
+etext99 :  -r 3 -o /tmp/ofile274901_872968 : '2.136', '2.142', '2.129', geomean = 2.136
+running cd ../sequenceData/data; make wikisamp.xml
+running PARLAY_NUM_THREADS=48 ./SA  -r 3 -o /tmp/ofile112573_21604 ../sequenceData/data/wikisamp.xml
+running ./../bench/SACheck  ../sequenceData/data/wikisamp.xml /tmp/ofile112573_21604
+running rm ../sequenceData/data/wikisamp.xml
+wikisamp.xml :  -r 3 -o /tmp/ofile112573_21604 : '2.903', '2.332', '2.291', geomean = 2.494
+parallelRange : 48 : geomean of mins = 1.201, geomean of geomeans = 1.234
+
+cd benchmarks/longestRepeatedSubstring/doubling ; make -s cleanall ; make -j 24
+g++ -DPARLAY_EIGEN -DEIGEN_MODE=EIGEN_TIMESPAN_GRAINSIZE -pthread -O2 -g -std=c++17 -DNDEBUG -I .  -o lrsTime.o -c ../bench/lrsTime.C
+g++ -DPARLAY_EIGEN -DEIGEN_MODE=EIGEN_TIMESPAN_GRAINSIZE -pthread -O2 -g -std=c++17 -DNDEBUG -I .  -c lrs.C -o lrs.o
+cd ../bench; make -s lrsCheck
+cp ../bench/testInputs ../bench/testInputs_small .
+g++ -o lrs lrsTime.o lrs.o -DPARLAY_EIGEN -DEIGEN_MODE=EIGEN_TIMESPAN_GRAINSIZE -pthread -ldl 
+cd benchmarks/longestRepeatedSubstring/doubling ; numactl -i all ./testInputs -r 3 -p 48
+running cd ../sequenceData/data; make chr22.dna
+running PARLAY_NUM_THREADS=48 ./lrs  -r 3 -o /tmp/ofile825656_630447 ../sequenceData/data/chr22.dna
+running ./../bench/lrsCheck  ../sequenceData/data/chr22.dna /tmp/ofile825656_630447
+running rm ../sequenceData/data/chr22.dna
+chr22.dna :  -r 3 -o /tmp/ofile825656_630447 : '0.713', '0.714', '0.716', geomean = 0.714
+running cd ../sequenceData/data; make etext99
+running PARLAY_NUM_THREADS=48 ./lrs  -r 3 -o /tmp/ofile567784_310313 ../sequenceData/data/etext99
+running ./../bench/lrsCheck  ../sequenceData/data/etext99 /tmp/ofile567784_310313
+running rm ../sequenceData/data/etext99
+etext99 :  -r 3 -o /tmp/ofile567784_310313 : '3.695', '3.892', '3.351', geomean = 3.639
+running cd ../sequenceData/data; make wikisamp.xml
+running PARLAY_NUM_THREADS=48 ./lrs  -r 3 -o /tmp/ofile314565_886233 ../sequenceData/data/wikisamp.xml
+running ./../bench/lrsCheck  ../sequenceData/data/wikisamp.xml /tmp/ofile314565_886233
+running rm ../sequenceData/data/wikisamp.xml
+wikisamp.xml :  -r 3 -o /tmp/ofile314565_886233 : '3.758', '4.242', '3.742', geomean = 3.907
+doubling : 48 : geomean of mins = 2.076, geomean of geomeans = 2.166
+
+cd benchmarks/classify/decisionTree ; make -s cleanall ; make -j 24
+g++ -DPARLAY_EIGEN -DEIGEN_MODE=EIGEN_TIMESPAN_GRAINSIZE -pthread -O2 -g -std=c++17 -DNDEBUG -I .  -o classifyTime.o -c ../bench/classifyTime.C
+g++ -DPARLAY_EIGEN -DEIGEN_MODE=EIGEN_TIMESPAN_GRAINSIZE -pthread -O2 -g -std=c++17 -DNDEBUG -I .  -c classify.C -o classify.o
+cd ../bench; make -s classifyCheck
+cp ../bench/testInputs ../bench/testInputs_small .
+g++ -o classify classifyTime.o classify.o -DPARLAY_EIGEN -DEIGEN_MODE=EIGEN_TIMESPAN_GRAINSIZE -pthread -ldl 
+cd benchmarks/classify/decisionTree ; numactl -i all ./testInputs -r 3 -p 48
+running cd ../sequenceData/data; make covtype.data
+running PARLAY_NUM_THREADS=48 ./classify  -r 3 -o /tmp/ofile967421_512201 ../sequenceData/data/covtype.data
+running ./../bench/classifyCheck  ../sequenceData/data/covtype.data /tmp/ofile967421_512201
+covtype.data :  -r 3 -o /tmp/ofile967421_512201 : '4.658', '4.497', '4.495', geomean = 4.549
+running cd ../sequenceData/data; make kddcup.data
+running PARLAY_NUM_THREADS=48 ./classify  -r 3 -o /tmp/ofile369621_994951 ../sequenceData/data/kddcup.data
+running ./../bench/classifyCheck  ../sequenceData/data/kddcup.data /tmp/ofile369621_994951
+kddcup.data :  -r 3 -o /tmp/ofile369621_994951 : '0.484', '0.48', '0.483', geomean = 0.482
+decisionTree : 48 : geomean of mins = 1.469, geomean of geomeans = 1.482
+
+cd benchmarks/minSpanningForest/parallelFilterKruskal ; make -s cleanall ; make -j 24
+g++ -DPARLAY_EIGEN -DEIGEN_MODE=EIGEN_TIMESPAN_GRAINSIZE -pthread -O2 -g -std=c++17 -DNDEBUG -I .  -o MSTTime.o -c ../bench/MSTTime.C
+g++ -DPARLAY_EIGEN -DEIGEN_MODE=EIGEN_TIMESPAN_GRAINSIZE -pthread -O2 -g -std=c++17 -DNDEBUG -I .  -c MST.C -o MST.o
+cd ../bench; make -s MSTCheck
+cp ../bench/testInputs ../bench/testInputs_small .
+g++ -o MST MSTTime.o MST.o -DPARLAY_EIGEN -DEIGEN_MODE=EIGEN_TIMESPAN_GRAINSIZE -pthread -ldl 
+cd benchmarks/minSpanningForest/parallelFilterKruskal ; numactl -i all ./testInputs -r 3 -p 48
+running cd ../graphData/data; make randLocalGraph_WE_10_20000000
+running PARLAY_NUM_THREADS=48 ./MST  -r 3 -o /tmp/ofile75399_258158 ../graphData/data/randLocalGraph_WE_10_20000000
+running ./../bench/MSTCheck  ../graphData/data/randLocalGraph_WE_10_20000000 /tmp/ofile75399_258158
+running rm ../graphData/data/randLocalGraph_WE_10_20000000
+randLocalGraph_WE_10_20000000 :  -r 3 -o /tmp/ofile75399_258158 : '2.41', '2.432', '2.407', geomean = 2.416
+running cd ../graphData/data; make rMatGraph_WE_12_16000000
+running PARLAY_NUM_THREADS=48 ./MST  -r 3 -o /tmp/ofile256620_738492 ../graphData/data/rMatGraph_WE_12_16000000
+running ./../bench/MSTCheck  ../graphData/data/rMatGraph_WE_12_16000000 /tmp/ofile256620_738492
+running rm ../graphData/data/rMatGraph_WE_12_16000000
+rMatGraph_WE_12_16000000 :  -r 3 -o /tmp/ofile256620_738492 : '1.815', '1.598', '1.597', geomean = 1.667
+running cd ../graphData/data; make 2Dgrid_WE_64000000
+running PARLAY_NUM_THREADS=48 ./MST  -r 3 -o /tmp/ofile860602_52667 ../graphData/data/2Dgrid_WE_64000000
+running ./../bench/MSTCheck  ../graphData/data/2Dgrid_WE_64000000 /tmp/ofile860602_52667
+running rm ../graphData/data/2Dgrid_WE_64000000
+2Dgrid_WE_64000000 :  -r 3 -o /tmp/ofile860602_52667 : '3.93', '3.654', '2.838', geomean = 3.441
+parallelFilterKruskal : 48 : geomean of mins = 2.218, geomean of geomeans = 2.402
+
+cd benchmarks/spanningForest/ndST ; make -s cleanall ; make -j 24
+g++ -DPARLAY_EIGEN -DEIGEN_MODE=EIGEN_TIMESPAN_GRAINSIZE -pthread -O2 -g -std=c++17 -DNDEBUG -I .  -o STTime.o -c ../bench/STTime.C
+g++ -DPARLAY_EIGEN -DEIGEN_MODE=EIGEN_TIMESPAN_GRAINSIZE -pthread -O2 -g -std=c++17 -DNDEBUG -I .  -c ST.C -o ST.o
+cd ../bench; make -s STCheck
+cp ../bench/testInputs ../bench/testInputs_small .
+g++ -o ST STTime.o ST.o -DPARLAY_EIGEN -DEIGEN_MODE=EIGEN_TIMESPAN_GRAINSIZE -pthread -ldl 
+cd benchmarks/spanningForest/ndST ; numactl -i all ./testInputs -r 3 -p 48
+running cd ../graphData/data; make randLocalGraph_E_10_20000000
+running PARLAY_NUM_THREADS=48 ./ST  -r 3 -o /tmp/ofile414595_825338 ../graphData/data/randLocalGraph_E_10_20000000
+running ./../bench/STCheck  ../graphData/data/randLocalGraph_E_10_20000000 /tmp/ofile414595_825338
+running rm ../graphData/data/randLocalGraph_E_10_20000000
+randLocalGraph_E_10_20000000 :  -r 3 -o /tmp/ofile414595_825338 : '1.126', '1.12', '1.091', geomean = 1.112
+running cd ../graphData/data; make rMatGraph_E_12_16000000
+running PARLAY_NUM_THREADS=48 ./ST  -r 3 -o /tmp/ofile482900_743581 ../graphData/data/rMatGraph_E_12_16000000
+running ./../bench/STCheck  ../graphData/data/rMatGraph_E_12_16000000 /tmp/ofile482900_743581
+running rm ../graphData/data/rMatGraph_E_12_16000000
+rMatGraph_E_12_16000000 :  -r 3 -o /tmp/ofile482900_743581 : '0.793', '0.792', '0.789', geomean = 0.791
+running cd ../graphData/data; make 2Dgrid_E_64000000
+running PARLAY_NUM_THREADS=48 ./ST  -r 3 -o /tmp/ofile937837_376808 ../graphData/data/2Dgrid_E_64000000
+running ./../bench/STCheck  ../graphData/data/2Dgrid_E_64000000 /tmp/ofile937837_376808
+running rm ../graphData/data/2Dgrid_E_64000000
+2Dgrid_E_64000000 :  -r 3 -o /tmp/ofile937837_376808 : '1.593', '1.296', '1.291', geomean = 1.387
+ndST : 48 : geomean of mins = 1.036, geomean of geomeans = 1.069
+
+cd benchmarks/breadthFirstSearch/backForwardBFS ; make -s cleanall ; make -j 24
+g++ -DPARLAY_EIGEN -DEIGEN_MODE=EIGEN_TIMESPAN_GRAINSIZE -pthread -O2 -g -std=c++17 -DNDEBUG -I .  -o BFSTime.o -c ../bench/BFSTime.C
+g++ -DPARLAY_EIGEN -DEIGEN_MODE=EIGEN_TIMESPAN_GRAINSIZE -pthread -O2 -g -std=c++17 -DNDEBUG -I .  -c BFS.C -o BFS.o
+cd ../bench; make -s BFSCheck
+cp ../bench/testInputs ../bench/testInputs_small .
+g++ -o BFS BFSTime.o BFS.o -DPARLAY_EIGEN -DEIGEN_MODE=EIGEN_TIMESPAN_GRAINSIZE -pthread -ldl 
+cd benchmarks/breadthFirstSearch/backForwardBFS ; numactl -i all ./testInputs -r 3 -p 48
+running cd ../graphData/data; make randLocalGraph_J_10_20000000
+running PARLAY_NUM_THREADS=48 ./BFS  -r 3 -o /tmp/ofile908227_547304 ../graphData/data/randLocalGraph_J_10_20000000
+running ./../bench/BFSCheck  ../graphData/data/randLocalGraph_J_10_20000000 /tmp/ofile908227_547304
+running rm ../graphData/data/randLocalGraph_J_10_20000000
+randLocalGraph_J_10_20000000 :  -r 3 -o /tmp/ofile908227_547304 : '0.123', '0.133', '0.121', geomean = 0.126
+running cd ../graphData/data; make rMatGraph_J_12_16000000
+running PARLAY_NUM_THREADS=48 ./BFS  -r 3 -o /tmp/ofile364331_598696 ../graphData/data/rMatGraph_J_12_16000000
+running ./../bench/BFSCheck  ../graphData/data/rMatGraph_J_12_16000000 /tmp/ofile364331_598696
+CheckOut: readIntSeqFromFile: bad input
+
+TEST TERMINATED ABNORMALLY:
+[./../bench/BFSCheck  ../graphData/data/rMatGraph_J_12_16000000 /tmp/ofile364331_598696
+readIntSeqFromFile: bad input
+]
+
+cd benchmarks/maximalMatching/incrementalMatching ; make -s cleanall ; make -j 24
+g++ -DPARLAY_EIGEN -DEIGEN_MODE=EIGEN_TIMESPAN_GRAINSIZE -pthread -O2 -g -std=c++17 -DNDEBUG -I .  -o matchingTime.o -c ../bench/matchingTime.C
+g++ -DPARLAY_EIGEN -DEIGEN_MODE=EIGEN_TIMESPAN_GRAINSIZE -pthread -O2 -g -std=c++17 -DNDEBUG -I .  -c matching.C -o matching.o
+cd ../bench; make -s matchingCheck
+cp ../bench/testInputs ../bench/testInputs_small .
+g++ -o matching matchingTime.o matching.o -DPARLAY_EIGEN -DEIGEN_MODE=EIGEN_TIMESPAN_GRAINSIZE -pthread -ldl 
+cd benchmarks/maximalMatching/incrementalMatching ; numactl -i all ./testInputs -r 3 -p 48
+running cd ../graphData/data; make randLocalGraph_E_10_20000000
+running PARLAY_NUM_THREADS=48 ./matching  -r 3 -o /tmp/ofile760660_22403 ../graphData/data/randLocalGraph_E_10_20000000
+running ./../bench/matchingCheck  ../graphData/data/randLocalGraph_E_10_20000000 /tmp/ofile760660_22403
+running rm ../graphData/data/randLocalGraph_E_10_20000000
+randLocalGraph_E_10_20000000 :  -r 3 -o /tmp/ofile760660_22403 : '0.547', '0.548', '0.548', geomean = 0.548
+running cd ../graphData/data; make rMatGraph_E_10_20000000
+running PARLAY_NUM_THREADS=48 ./matching  -r 3 -o /tmp/ofile650572_375558 ../graphData/data/rMatGraph_E_10_20000000
+running ./../bench/matchingCheck  ../graphData/data/rMatGraph_E_10_20000000 /tmp/ofile650572_375558
+running rm ../graphData/data/rMatGraph_E_10_20000000
+rMatGraph_E_10_20000000 :  -r 3 -o /tmp/ofile650572_375558 : '0.757', '0.756', '0.756', geomean = 0.756
+running cd ../graphData/data; make 2Dgrid_E_64000000
+running PARLAY_NUM_THREADS=48 ./matching  -r 3 -o /tmp/ofile643269_219871 ../graphData/data/2Dgrid_E_64000000
+running ./../bench/matchingCheck  ../graphData/data/2Dgrid_E_64000000 /tmp/ofile643269_219871
+running rm ../graphData/data/2Dgrid_E_64000000
+2Dgrid_E_64000000 :  -r 3 -o /tmp/ofile643269_219871 : '1.393', '1.392', '1.397', geomean = 1.394
+incrementalMatching : 48 : geomean of mins = 0.832, geomean of geomeans = 0.833
+
+cd benchmarks/maximalIndependentSet/incrementalMIS ; make -s cleanall ; make -j 24
+g++ -DPARLAY_EIGEN -DEIGEN_MODE=EIGEN_TIMESPAN_GRAINSIZE -pthread -O2 -g -std=c++17 -DNDEBUG -I .  -o MISTime.o -c ../bench/MISTime.C
+g++ -DPARLAY_EIGEN -DEIGEN_MODE=EIGEN_TIMESPAN_GRAINSIZE -pthread -O2 -g -std=c++17 -DNDEBUG -I .  -c MIS.C -o MIS.o
+cd ../bench; make -s MISCheck
+cp ../bench/testInputs ../bench/testInputs_small .
+g++ -o MIS MISTime.o MIS.o -DPARLAY_EIGEN -DEIGEN_MODE=EIGEN_TIMESPAN_GRAINSIZE -pthread -ldl 
+cd benchmarks/maximalIndependentSet/incrementalMIS ; numactl -i all ./testInputs -r 3 -p 48
+running cd ../graphData/data; make randLocalGraph_JR_10_20000000
+running PARLAY_NUM_THREADS=48 ./MIS  -r 3 -o /tmp/ofile59764_824037 ../graphData/data/randLocalGraph_JR_10_20000000
+running ./../bench/MISCheck  ../graphData/data/randLocalGraph_JR_10_20000000 /tmp/ofile59764_824037
+running rm ../graphData/data/randLocalGraph_JR_10_20000000
+randLocalGraph_JR_10_20000000 :  -r 3 -o /tmp/ofile59764_824037 : '0.102', '0.099', '0.103', geomean = 0.101
+running cd ../graphData/data; make rMatGraph_JR_12_16000000
+running PARLAY_NUM_THREADS=48 ./MIS  -r 3 -o /tmp/ofile116410_140576 ../graphData/data/rMatGraph_JR_12_16000000
+running ./../bench/MISCheck  ../graphData/data/rMatGraph_JR_12_16000000 /tmp/ofile116410_140576
+running rm ../graphData/data/rMatGraph_JR_12_16000000
+rMatGraph_JR_12_16000000 :  -r 3 -o /tmp/ofile116410_140576 : '0.069', '0.069', '0.069', geomean = 0.069
+running cd ../graphData/data; make 3Dgrid_JR_64000000
+running PARLAY_NUM_THREADS=48 ./MIS  -r 3 -o /tmp/ofile695563_668990 ../graphData/data/3Dgrid_JR_64000000
+running ./../bench/MISCheck  ../graphData/data/3Dgrid_JR_64000000 /tmp/ofile695563_668990
+running rm ../graphData/data/3Dgrid_JR_64000000
+3Dgrid_JR_64000000 :  -r 3 -o /tmp/ofile695563_668990 : '0.321', '0.322', '0.322', geomean = 0.322
+incrementalMIS : 48 : geomean of mins = 0.13, geomean of geomeans = 0.131
+
+cd benchmarks/rayCast/kdTree ; make -s cleanall ; make -j 24
+g++ -DPARLAY_EIGEN -DEIGEN_MODE=EIGEN_TIMESPAN_GRAINSIZE -pthread -O2 -g -std=c++17 -DNDEBUG -I .  -o rayTime.o -c ../bench/rayTime.C
+g++ -DPARLAY_EIGEN -DEIGEN_MODE=EIGEN_TIMESPAN_GRAINSIZE -pthread -O2 -g -std=c++17 -DNDEBUG -I .  -c ray.C -o ray.o
+cd ../bench; make -s rayCheck
+cp ../bench/testInputs ../bench/testInputs_small .
+g++ -o ray rayTime.o ray.o -DPARLAY_EIGEN -DEIGEN_MODE=EIGEN_TIMESPAN_GRAINSIZE -pthread -ldl 
+cd benchmarks/rayCast/kdTree ; numactl -i all ./testInputs -r 3 -p 48
+running cd ../geometryData/data; make happyTriangles happyRays
+running PARLAY_NUM_THREADS=48 ./ray  -r 3 -o /tmp/ofile419015_371377 ../geometryData/data/happyTriangles ../geometryData/data/happyRays
+running ./../bench/rayCheck  ../geometryData/data/happyTriangles ../geometryData/data/happyRays /tmp/ofile419015_371377
+running rm ../geometryData/data/happyTriangles ../geometryData/data/happyRays
+happyTriangles happyRays :  -r 3 -o /tmp/ofile419015_371377 : '0.343', '0.353', '0.342', geomean = 0.346
+running cd ../geometryData/data; make angelTriangles angelRays
+running PARLAY_NUM_THREADS=48 ./ray  -r 3 -o /tmp/ofile916466_91976 ../geometryData/data/angelTriangles ../geometryData/data/angelRays
+running ./../bench/rayCheck  ../geometryData/data/angelTriangles ../geometryData/data/angelRays /tmp/ofile916466_91976
+running rm ../geometryData/data/angelTriangles ../geometryData/data/angelRays
+angelTriangles angelRays :  -r 3 -o /tmp/ofile916466_91976 : '0.121', '0.115', '0.116', geomean = 0.117
+running cd ../geometryData/data; make dragonTriangles dragonRays
+running PARLAY_NUM_THREADS=48 ./ray  -r 3 -o /tmp/ofile459275_519179 ../geometryData/data/dragonTriangles ../geometryData/data/dragonRays
+running ./../bench/rayCheck  ../geometryData/data/dragonTriangles ../geometryData/data/dragonRays /tmp/ofile459275_519179
+running rm ../geometryData/data/dragonTriangles ../geometryData/data/dragonRays
+dragonTriangles dragonRays :  -r 3 -o /tmp/ofile459275_519179 : '0.234', '0.23', '0.236', geomean = 0.233
+kdTree : 48 : geomean of mins = 0.208, geomean of geomeans = 0.212
+
+cd benchmarks/convexHull/quickHull ; make -s cleanall ; make -j 24
+g++ -DPARLAY_EIGEN -DEIGEN_MODE=EIGEN_TIMESPAN_GRAINSIZE -pthread -O2 -g -std=c++17 -DNDEBUG -I .  -o hullTime.o -c ../bench/hullTime.C
+g++ -DPARLAY_EIGEN -DEIGEN_MODE=EIGEN_TIMESPAN_GRAINSIZE -pthread -O2 -g -std=c++17 -DNDEBUG -I .  -c hull.C -o hull.o
+cd ../bench; make -s hullCheck
+cp ../bench/testInputs ../bench/testInputs_small .
+g++ -o hull hullTime.o hull.o -DPARLAY_EIGEN -DEIGEN_MODE=EIGEN_TIMESPAN_GRAINSIZE -pthread -ldl 
+cd benchmarks/convexHull/quickHull ; numactl -i all ./testInputs -r 3 -p 48
+running cd ../geometryData/data; make 2DinSphere_100000000
+running PARLAY_NUM_THREADS=48 ./hull  -r 3 -o /tmp/ofile910631_581877 ../geometryData/data/2DinSphere_100000000
+running ./../bench/hullCheck  ../geometryData/data/2DinSphere_100000000 /tmp/ofile910631_581877
+CheckOut: checkHull: unexpected points in hull
+
+TEST TERMINATED ABNORMALLY:
+[./../bench/hullCheck  ../geometryData/data/2DinSphere_100000000 /tmp/ofile910631_581877
+checkHull: unexpected points in hull
+]
+
+cd benchmarks/delaunayTriangulation/incrementalDelaunay ; make -s cleanall ; make -j 24
+g++ -DPARLAY_EIGEN -DEIGEN_MODE=EIGEN_TIMESPAN_GRAINSIZE -pthread -O2 -g -std=c++17 -DNDEBUG -I .  -o delaunayTime.o -c ../bench/delaunayTime.C
+g++ -DPARLAY_EIGEN -DEIGEN_MODE=EIGEN_TIMESPAN_GRAINSIZE -pthread -O2 -g -std=c++17 -DNDEBUG -I .  -c delaunay.C -o delaunay.o
+cd ../bench; make -s delaunayCheck
+cp ../bench/testInputs ../bench/testInputs_small .
+g++ -o delaunay delaunayTime.o delaunay.o -DPARLAY_EIGEN -DEIGEN_MODE=EIGEN_TIMESPAN_GRAINSIZE -pthread -ldl 
+cd benchmarks/delaunayTriangulation/incrementalDelaunay ; numactl -i all ./testInputs -r 3 -p 48
+running cd ../geometryData/data; make 2DinCube_10M
+running PARLAY_NUM_THREADS=48 ./delaunay  -r 3 -o /tmp/ofile576691_714407 ../geometryData/data/2DinCube_10M
+running ./../bench/delaunayCheck  ../geometryData/data/2DinCube_10M /tmp/ofile576691_714407
+running rm ../geometryData/data/2DinCube_10M
+2DinCube_10M :  -r 3 -o /tmp/ofile576691_714407 : '2.977', '2.967', '2.606', geomean = 2.845
+running cd ../geometryData/data; make 2Dkuzmin_10M
+running PARLAY_NUM_THREADS=48 ./delaunay  -r 3 -o /tmp/ofile454999_740992 ../geometryData/data/2Dkuzmin_10M
+running ./../bench/delaunayCheck  ../geometryData/data/2Dkuzmin_10M /tmp/ofile454999_740992
+running rm ../geometryData/data/2Dkuzmin_10M
+2Dkuzmin_10M :  -r 3 -o /tmp/ofile454999_740992 : '3.062', '3.077', '3.092', geomean = 3.077
+incrementalDelaunay : 48 : geomean of mins = 2.825, geomean of geomeans = 2.958
+
+cd benchmarks/delaunayRefine/incrementalRefine ; make -s cleanall ; make -j 24
+g++ -DPARLAY_EIGEN -DEIGEN_MODE=EIGEN_TIMESPAN_GRAINSIZE -pthread -O2 -g -std=c++17 -DNDEBUG -I .  -o refineTime.o -c ../bench/refineTime.C
+g++ -DPARLAY_EIGEN -DEIGEN_MODE=EIGEN_TIMESPAN_GRAINSIZE -pthread -O2 -g -std=c++17 -DNDEBUG -I .  -c refine.C -o refine.o
+cd ../bench; make -s refineCheck
+cp ../bench/testInputs ../bench/testInputs_small .
+g++ -o refine refineTime.o refine.o -DPARLAY_EIGEN -DEIGEN_MODE=EIGEN_TIMESPAN_GRAINSIZE -pthread -ldl 
+cd benchmarks/delaunayRefine/incrementalRefine ; numactl -i all ./testInputs -r 3 -p 48
+running cd ../geometryData/data; make 2DinCubeDelaunay_5000000
+running PARLAY_NUM_THREADS=48 ./refine  -r 3 -o /tmp/ofile170292_449526 ../geometryData/data/2DinCubeDelaunay_5000000
+running ./../bench/refineCheck  ../geometryData/data/2DinCubeDelaunay_5000000 /tmp/ofile170292_449526
+running rm ../geometryData/data/2DinCubeDelaunay_5000000
+2DinCubeDelaunay_5000000 :  -r 3 -o /tmp/ofile170292_449526 : '4.232', '4.109', '4.178', geomean = 4.173
+running cd ../geometryData/data; make 2DkuzminDelaunay_5000000
+running PARLAY_NUM_THREADS=48 ./refine  -r 3 -o /tmp/ofile721083_772522 ../geometryData/data/2DkuzminDelaunay_5000000
+running ./../bench/refineCheck  ../geometryData/data/2DkuzminDelaunay_5000000 /tmp/ofile721083_772522
+running rm ../geometryData/data/2DkuzminDelaunay_5000000
+2DkuzminDelaunay_5000000 :  -r 3 -o /tmp/ofile721083_772522 : '4.179', '4.025', '4.087', geomean = 4.096
+incrementalRefine : 48 : geomean of mins = 4.067, geomean of geomeans = 4.134
+
+cd benchmarks/rangeQuery2d/parallelPlaneSweep ; make -s cleanall ; make -j 24
+g++ -DPARLAY_EIGEN -DEIGEN_MODE=EIGEN_TIMESPAN_GRAINSIZE -pthread -O2 -g -std=c++17 -DNDEBUG -I .  -o rangeTime.o -c ../bench/rangeTime.C
+g++ -DPARLAY_EIGEN -DEIGEN_MODE=EIGEN_TIMESPAN_GRAINSIZE -pthread -O2 -g -std=c++17 -DNDEBUG -I .  -c range.C -o range.o
+cd ../bench; make -s rangeCheck
+cp ../bench/testInputs ../bench/testInputs_small .
+g++ -o range rangeTime.o range.o -DPARLAY_EIGEN -DEIGEN_MODE=EIGEN_TIMESPAN_GRAINSIZE -pthread -ldl 
+cd benchmarks/rangeQuery2d/parallelPlaneSweep ; numactl -i all ./testInputs -r 3 -p 48
+running cd ../geometryData/data; make 2DinCube_10M
+running PARLAY_NUM_THREADS=48 ./range  -r 3 -o /tmp/ofile553271_426294 ../geometryData/data/2DinCube_10M
+running ./../bench/rangeCheck  ../geometryData/data/2DinCube_10M /tmp/ofile553271_426294
+running rm ../geometryData/data/2DinCube_10M
+2DinCube_10M :  -r 3 -o /tmp/ofile553271_426294 : '2.516', '2.461', '2.464', geomean = 2.48
+running cd ../geometryData/data; make 2Dkuzmin_10M
+running PARLAY_NUM_THREADS=48 ./range  -r 3 -o /tmp/ofile518994_761789 ../geometryData/data/2Dkuzmin_10M
+running ./../bench/rangeCheck  ../geometryData/data/2Dkuzmin_10M /tmp/ofile518994_761789
+running rm ../geometryData/data/2Dkuzmin_10M
+2Dkuzmin_10M :  -r 3 -o /tmp/ofile518994_761789 : '2.9', '2.796', '2.743', geomean = 2.812
+parallelPlaneSweep : 48 : geomean of mins = 2.598, geomean of geomeans = 2.641
+
+cd benchmarks/nBody/parallelCK ; make -s cleanall ; make -j 24
+g++ -DPARLAY_EIGEN -DEIGEN_MODE=EIGEN_TIMESPAN_GRAINSIZE -pthread -O2 -g -std=c++17 -DNDEBUG -I .  -o nbodyTime.o -c ../bench/nbodyTime.C
+g++ -DPARLAY_EIGEN -DEIGEN_MODE=EIGEN_TIMESPAN_GRAINSIZE -pthread -O2 -g -std=c++17 -DNDEBUG -I .  -c nbody.C -o nbody.o
+cd ../bench; make -s nbodyCheck
+cp ../bench/testInputs ../bench/testInputs_small .
+g++ -o nbody nbodyTime.o nbody.o -DPARLAY_EIGEN -DEIGEN_MODE=EIGEN_TIMESPAN_GRAINSIZE -pthread -ldl 
+cd benchmarks/nBody/parallelCK ; numactl -i all ./testInputs -r 3 -p 48
+running cd ../geometryData/data; make 3DonSphere_1000000
+running PARLAY_NUM_THREADS=48 ./nbody  -r 3 -o /tmp/ofile40485_516542 ../geometryData/data/3DonSphere_1000000
+running ./../bench/nbodyCheck  ../geometryData/data/3DonSphere_1000000 /tmp/ofile40485_516542
+running rm ../geometryData/data/3DonSphere_1000000
+3DonSphere_1000000 :  -r 3 -o /tmp/ofile40485_516542 : '1.868', '1.84', '1.833', geomean = 1.847
+running cd ../geometryData/data; make 3DinCube_1000000
+running PARLAY_NUM_THREADS=48 ./nbody  -r 3 -o /tmp/ofile843526_482329 ../geometryData/data/3DinCube_1000000
+running ./../bench/nbodyCheck  ../geometryData/data/3DinCube_1000000 /tmp/ofile843526_482329
+running rm ../geometryData/data/3DinCube_1000000
+3DinCube_1000000 :  -r 3 -o /tmp/ofile843526_482329 : '3.913', '3.764', '3.771', geomean = 3.815
+running cd ../geometryData/data; make 3Dplummer_1000000
+running PARLAY_NUM_THREADS=48 ./nbody  -r 3 -o /tmp/ofile955626_981438 ../geometryData/data/3Dplummer_1000000
+running ./../bench/nbodyCheck  ../geometryData/data/3Dplummer_1000000 /tmp/ofile955626_981438
+running rm ../geometryData/data/3Dplummer_1000000
+3Dplummer_1000000 :  -r 3 -o /tmp/ofile955626_981438 : '8.858', '8.591', '8.192', geomean = 8.543
+parallelCK : 48 : geomean of mins = 3.838, geomean of geomeans = 3.919
