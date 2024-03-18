@@ -8,6 +8,8 @@
 // Public License v. 2.0. If a copy of the MPL was not distributed
 // with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
+#include "mpmc_queue.h"
+#include "tracing.h"
 #ifndef EIGEN_CXX11_THREADPOOL_NONBLOCKING_THREAD_POOL_H
 #define EIGEN_CXX11_THREADPOOL_NONBLOCKING_THREAD_POOL_H
 #define EIGEN_POOL_RUNNEXT
@@ -155,7 +157,7 @@ public:
       // Since we were cancelled, there might be entries in the queues.
       // Empty them to prevent their destructor from asserting.
       for (size_t i = 0; i < thread_data_.size(); i++) {
-        thread_data_[i].queue.Flush();
+        thread_data_[i].Flush();
       }
     }
     // Join threads explicitly (by destroying) to avoid destruction order within
@@ -198,8 +200,7 @@ public:
     bool pushed = false;
     if (pt->pool == this) {
       // Worker thread of this pool, push onto the thread's queue.
-      Queue &q = thread_data_[pt->thread_id].queue;
-      if (q.PushFront(t)) {
+      if (thread_data_[pt->thread_id].PushTask(t, true)) {
         return;
       }
     } else {
@@ -210,8 +211,8 @@ public:
       int num_queues = limit - start;
       int rnd = Rand(&pt->rand) % num_queues;
       assert(start + rnd < limit);
-      Queue &q = thread_data_[start + rnd].queue;
-      if (q.PushBack(t)) {
+      const bool localThread = (start + rnd) == pt->thread_id;
+      if (thread_data_[start + rnd].PushTask(t, localThread)) {
         return;
       }
     }
@@ -328,10 +329,11 @@ private:
   };
 
   struct ThreadData {
-    constexpr ThreadData() : thread(), steal_partition(0), queue() {}
+    constexpr ThreadData() : thread(), steal_partition(0), local_tasks(), mailbox(1024) {}
     std::unique_ptr<Thread> thread;
     std::atomic<unsigned> steal_partition;
-    Queue queue;
+    Queue local_tasks;
+    rigtorp::mpmc::Queue<TaskPtr> mailbox;
     std::size_t stack_size = size_t{16} * 1024 * 1024;
 #ifdef EIGEN_POOL_RUNNEXT
     std::atomic<TaskPtr> runnext{nullptr};
@@ -351,9 +353,9 @@ private:
 //           }
 //         }
 // #endif
-        return queue.PushFront(p);
+        return local_tasks.PushFront(p);
       } else {
-        return queue.PushBack(p);
+        return mailbox.try_push(p);
       }
     }
 
@@ -380,10 +382,32 @@ private:
         return p;
       }
 #endif
-      return queue.PopFront();
+      if (auto p = local_tasks.PopFront()) {
+        return p;
+      }
+      TaskPtr task = nullptr;
+      mailbox.try_pop(task);
+      return task;
     }
 
-    TaskPtr PopBack() { return queue.PopBack(); }
+    TaskPtr PopBack(bool force) {
+      TaskPtr task = nullptr;
+      mailbox.try_pop(task);
+      if (!task && force) {
+        task = local_tasks.PopBack();
+      }
+      return task;
+    }
+
+    void Flush() {
+      while (!mailbox.empty()) {
+        TaskPtr task = nullptr;
+        mailbox.pop(task);
+      }
+      while (!local_tasks.Empty()) {
+        local_tasks.PopFront();
+      }
+    }
 
 #ifdef EIGEN_POOL_RUNNEXT
     TaskPtr PopRunnext() {
@@ -428,13 +452,20 @@ private:
 
     threadData.ResetIdle();
     bool processed_anything = false;
+    bool all_empty = false;
     while (!cancelled_) {
       TaskPtr t = threadData.PopFront();
       if (!t && (!external || can_steal)) {
-        t = LocalSteal();
+        t = LocalSteal(all_empty);
+        if (t) {
+          Tracing::TaskStolen();
+        }
       }
       if (!t && (!external || can_steal)) {
-        t = GlobalSteal();
+        t = GlobalSteal(all_empty);
+        if (t) {
+          Tracing::TaskStolen();
+        }
       }
       if (!t && external && threadData.SetIdle()) {
         // external thread shouldn't wait for work, it should just exit.
@@ -443,8 +474,11 @@ private:
       if (t) {
         ExecuteTask(t);
         processed_anything = true;
+        all_empty = false;
       } else if (done_) {
         return processed_anything;
+      } else {
+        all_empty = true;
       }
       if (once) {
         break;
@@ -456,7 +490,7 @@ private:
 
   // Steal tries to steal work from other worker threads in the range [start,
   // limit) in best-effort manner.
-  TaskPtr Steal(unsigned start, unsigned limit) {
+  TaskPtr Steal(unsigned start, unsigned limit, bool force) {
     PerThread *pt = GetPerThread();
     const size_t size = limit - start;
     unsigned r = Rand(&pt->rand);
@@ -470,7 +504,7 @@ private:
 
     for (unsigned i = 0; i < size; i++) {
       assert(start + victim < limit);
-      TaskPtr t = thread_data_[start + victim].PopBack();
+      TaskPtr t = thread_data_[start + victim].PopBack(force);
       if (t) {
         return t;
       }
@@ -483,7 +517,7 @@ private:
   }
 
   // Steals work within threads belonging to the partition.
-  TaskPtr LocalSteal() {
+  TaskPtr LocalSteal(bool force) {
     PerThread *pt = GetPerThread();
     unsigned partition = GetStealPartition(pt->thread_id);
     // If thread steal partition is the same as global partition, there is no
@@ -494,11 +528,11 @@ private:
     DecodePartition(partition, &start, &limit);
     AssertBounds(start, limit);
 
-    return Steal(start, limit);
+    return Steal(start, limit, force);
   }
 
   // Steals work from any other thread in the pool.
-  TaskPtr GlobalSteal() { return Steal(0, num_threads_); }
+  TaskPtr GlobalSteal(bool force) { return Steal(0, num_threads_, force); }
 
   int NonEmptyQueueIndex() {
     PerThread *pt = GetPerThread();

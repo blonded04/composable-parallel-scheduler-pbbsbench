@@ -2,6 +2,7 @@
 #include "modes.h"
 // #define EIGEN_MODE EIGEN_TIMESPAN_GRAINSIZE
 #include "num_threads.h"
+#include "tracing.h"
 
 // #ifdef EIGEN_MODE
 
@@ -24,6 +25,7 @@ public:
 
   template <typename F> void run_on_thread(F &&f, size_t hint) {
     auto task = Eigen::MakeProxyTask(std::forward<F>(f));
+    Eigen::Tracing::TaskShared();
     EigenPool.RunOnThread(task, hint);
     EigenPool.Schedule(task); // might push twice to the same thread, OK for now
   }

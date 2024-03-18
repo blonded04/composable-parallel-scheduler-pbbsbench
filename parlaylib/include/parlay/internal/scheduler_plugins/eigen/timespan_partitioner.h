@@ -176,16 +176,10 @@ struct Task {
     detail::TaskStack ts;
     auto& stack = detail::ThreadLocalTaskStack();
     stack.Add(ts);
-    // std::cerr << "Execute task(this=" << (const void*)this << ", interval=[" << std::dec << Split_.Threads.From << ", " <<
-    //              Split_.Threads.To << "), current=[" << Current_ << ", " << End_ << "), thread=" << GetThreadIndex() << ")" << std::endl;
     if constexpr (initial == Initial::TRUE) {
       DistributeWork();
     }
-    //  else if (GetThreadIndex() != SupposedThread_) {
-    //   CurrentNode_->OnStolen();
-    // }
-    // std::cerr << "Distributed task(this=" << (const void*)this << ", current=[" << std::dec << Current_ << ", " << End_ <<
-    //              "), thread=" << GetThreadIndex() << ")" << std::endl;
+
     if constexpr (balance == Balance::DELAYED) {
       // at first we are executing job for INIT_TIME
       // and then create balancing task
@@ -200,8 +194,6 @@ struct Task {
         }
       }
     }
-    // std::cerr << "Grainsized task(this=" << (const void*)this << ", current=[" << std::dec << Current_ << ", " << End_ <<
-    //              "), thread=" << GetThreadIndex() << ")" << std::endl;
 
     if constexpr (balance != Balance::OFF) {
       while (Current_ != End_ && IsDivisible()) {
@@ -219,15 +211,11 @@ struct Task {
             SplitData{.GrainSize = Split_.GrainSize, .Depth = Split_.Depth + 1}});
         End_ = mid;
       }
-      // std::cerr << "Dispatched task(this=" << (const void*)this << ", current=[" << std::dec << Current_ << ", " << End_ <<
-      //            "), thread=" << GetThreadIndex() << ")" << std::endl;
     }
 
     while (Current_ != End_) {
       Execute();
     }
-    // std::cerr << "Finished task(this=" << (const void*)this << ", current=[" << std::dec << Current_ << ", " << End_ <<
-    //              "), thread=" << GetThreadIndex() << ")" << std::endl;
     CurrentNode_.Reset();
     stack.Pop();
   }
