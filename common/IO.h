@@ -34,6 +34,7 @@
 #include "../parlay/io.h"
 #include "../parlay/internal/get_time.h"
 #include "geometry.h"
+#include "graph.h"
 
 namespace benchIO {
   using namespace std;
@@ -122,6 +123,19 @@ namespace benchIO {
   inline std::ostream& writeToStream(std::ostream& os, int a) { return os << a; }
   inline std::ostream& writeToStream(std::ostream& os, double a) { return os << a; }
   inline std::ostream& writeToStream(std::ostream& os, char* a) { return os << std::string_view(a, std::strlen(a)); }
+
+  template <class intV>
+  std::ostream& writeToStream(std::ostream& os, edge<intV> edge) {
+    writeToStream(os, edge.u) << ' ';
+    return writeToStream(os, edge.v);
+  }
+
+  template <class intV, class Weight>
+  std::ostream& writeToStream(std::ostream& os, const wghEdge<intV, Weight>& edge) {
+    writeToStream(os, edge.u) << ' ';
+    writeToStream(os, edge.v) << ' ';
+    return writeToStream(os, edge.weight);
+  }
 
   template <class A, class B>
   inline std::ostream& writeToStream(std::ostream& os, pair<A,B> const &a) {
