@@ -100,6 +100,31 @@ public:
   virtual ~ThreadPoolInterface() {}
 };
 
+namespace internal {
+
+struct alignas(64) CacheLine {
+  char data[64];
+};
+}
+
+class RapidGroup {
+public:
+  void Subscribe(int thread_id) noexcept {
+    GroupMask_.fetch_or(uint64_t{1} << thread_id);
+  }
+
+  bool IsSubscribed(int thread_id) const noexcept {
+    return GroupMask_.load(std::memory_order_acquire) | (uint64_t{1} << thread_id);
+  }
+
+private:
+  std::atomic<Task*> Task_ = nullptr;
+  std::atomic<uint64_t> GroupMask_ = 0;
+  std::atomic<uint64_t> RunMask_ = 0;
+  std::atomic<uint64_t> FinishMask_ = 0;
+  std::atomic<uint64_t> Epoch_ = 0;
+};
+
 template <typename Environment>
 class ThreadPoolTempl : public Eigen::ThreadPoolInterface {
 public:
@@ -344,15 +369,15 @@ private:
 
     bool PushTask(TaskPtr p, bool localThread) {
       if (localThread) {
-// #ifdef EIGEN_POOL_RUNNEXT
-//         if (runnext.load(std::memory_order_relaxed) == nullptr) {
-//           TaskPtr expected = nullptr;
-//           if (runnext.compare_exchange_strong(expected, p,
-//                                               std::memory_order_release)) {
-//             return true;
-//           }
-//         }
-// #endif
+#ifdef EIGEN_POOL_RUNNEXT
+        if (runnext.load(std::memory_order_relaxed) == nullptr) {
+          TaskPtr expected = nullptr;
+          if (runnext.compare_exchange_strong(expected, p,
+                                              std::memory_order_release)) {
+            return true;
+          }
+        }
+#endif
         return local_tasks.PushFront(p);
       } else {
         return mailbox.try_push(p);
@@ -396,6 +421,11 @@ private:
       if (!task && force) {
         task = local_tasks.PopBack();
       }
+#ifdef EIGEN_POOL_RUNNEXT
+      if (!task) {
+        task = PopRunnext();
+      }
+#endif
       return task;
     }
 

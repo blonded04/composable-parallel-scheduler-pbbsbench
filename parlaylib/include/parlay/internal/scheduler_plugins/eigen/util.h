@@ -132,8 +132,6 @@ inline bool is_stack_half_full() {
   auto stack_half = stack_base.calculate_stack_half();
   int anchor = 0;
   auto anchor_ptr = reinterpret_cast<std::uintptr_t>(&anchor);
-  // std::cerr << "stack size: " << std::dec << ((stack_base.base_ - anchor_ptr) / 1024) << "KB"\
-  //           << ", anchor: " << std::hex << anchor_ptr << ", base: " << stack_base.base_ << ", half: " << stack_half << std::endl;
   return anchor_ptr < stack_half;
 }
 
