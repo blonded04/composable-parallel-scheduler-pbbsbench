@@ -251,7 +251,9 @@ auto MakeInitialTask(EigenPoolWrapper &sched, TaskNode::NodePtr node, size_t fro
 }
 
 template <Balance balance, GrainSize grainSizeMode, typename F>
-void ParallelFor(size_t from, size_t to, F func) {
+void ParallelFor(size_t from, size_t to, F func, long grainSize) {
+  grainSize = std::max<long>(grainSize, 1);
+
   EigenPoolWrapper sched;
   // allocating only for top-level nodes
   TaskNode rootNode;
@@ -264,7 +266,7 @@ void ParallelFor(size_t from, size_t to, F func) {
         to,
         std::move(func),
         SplitData{.Threads = {0, static_cast<size_t>(Eigen::internal::GetNumThreads())},
-                  .GrainSize = 1}};
+                  .GrainSize = static_cast<size_t>(grainSize)}};
     task();
   } else {
     Task<F, balance, grainSizeMode, Initial::FALSE> task{
@@ -274,7 +276,7 @@ void ParallelFor(size_t from, size_t to, F func) {
         to,
         std::move(func),
         SplitData{.Threads = {0, static_cast<size_t>(Eigen::internal::GetNumThreads())},
-                  .GrainSize = 1}};
+                  .GrainSize = static_cast<size_t>(grainSize)}};
     task();
   }
 
@@ -314,22 +316,19 @@ void ParallelDo(F1&& fst, F2&& sec) {
   }
 }
 
-template <typename Sched, GrainSize grainSizeMode, typename F>
-void ParallelForTimespan(size_t from, size_t to, F func) {
-  ParallelFor<Balance::DELAYED, grainSizeMode, F>(from, to,
-                                                         std::move(func));
+template <GrainSize grainSizeMode, typename F>
+void ParallelForTimespan(size_t from, size_t to, F func, int64_t grainsize) {
+  ParallelFor<Balance::DELAYED, grainSizeMode, F>(from, to, std::move(func), grainsize);
 }
 
-template <typename Sched, typename F>
-void ParallelForSimple(size_t from, size_t to, F func) {
-  ParallelFor<Balance::SIMPLE, GrainSize::DEFAULT, F>(from, to,
-                                                             std::move(func));
+template <typename F>
+void ParallelForSimple(size_t from, size_t to, F func, int64_t grainsize) {
+  ParallelFor<Balance::SIMPLE, GrainSize::DEFAULT, F>(from, to, std::move(func), grainsize);
 }
 
-template <typename Sched, typename F>
-void ParallelForStatic(size_t from, size_t to, F func) {
-  ParallelFor<Balance::OFF, GrainSize::DEFAULT, F>(from, to,
-                                                          std::move(func));
+template <typename F>
+void ParallelForStatic(size_t from, size_t to, F func, int64_t grainsize) {
+  ParallelFor<Balance::OFF, GrainSize::DEFAULT, F>(from, to, std::move(func), grainsize);
 }
 
 } // namespace EigenPartitioner

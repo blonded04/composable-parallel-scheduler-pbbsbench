@@ -344,15 +344,15 @@ private:
 
     bool PushTask(TaskPtr p, bool localThread) {
       if (localThread) {
-// #ifdef EIGEN_POOL_RUNNEXT
-//         if (runnext.load(std::memory_order_relaxed) == nullptr) {
-//           TaskPtr expected = nullptr;
-//           if (runnext.compare_exchange_strong(expected, p,
-//                                               std::memory_order_release)) {
-//             return true;
-//           }
-//         }
-// #endif
+#ifdef EIGEN_POOL_RUNNEXT
+        if (runnext.load(std::memory_order_relaxed) == nullptr) {
+          TaskPtr expected = nullptr;
+          if (runnext.compare_exchange_strong(expected, p,
+                                              std::memory_order_release)) {
+            return true;
+          }
+        }
+#endif
         return local_tasks.PushFront(p);
       } else {
         return mailbox.try_push(p);
@@ -396,6 +396,13 @@ private:
       if (!task && force) {
         task = local_tasks.PopBack();
       }
+// #ifdef EIGEN_POOL_RUNNEXT
+//       if (!task && force) {
+//         if (auto p = PopRunnext(); p && p != IDLE) {
+//           return p;
+//         }
+//       }
+// #endif
       return task;
     }
 
