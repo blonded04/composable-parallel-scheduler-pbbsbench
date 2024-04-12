@@ -12,6 +12,7 @@
 #include <cassert>
 #include <chrono>
 #include <cstddef>
+#include <cstdint>
 #include <memory>
 #include <string>
 #include <utility>
@@ -59,6 +60,37 @@ inline TaskStack& ThreadLocalTaskStack() {
   static thread_local TaskStack stack;
   return stack;
 }
+}
+
+namespace RapidStart {
+
+class DistributionFunc {
+  virtual ~DistributionFunc() noexcept = default;
+
+  virtual void operator()(size_t from, size_t to) = 0;
+  void Distribute(int threadId, uint64_t mask) {
+    //
+  }
+};
+
+constexpr size_t CacheLine = 64;
+
+// class alignas(CacheLine) Distributor {
+// public:
+//   bool TryDistribute(DistributionFunc* func) {
+//     uint64_t epoch = Epoch_;
+//     // something
+//     // func->Distribute(ThreadIdx)
+//   }
+
+// private:
+//   alignas(CacheLine) std::atomic_uint64_t StartMask_ = 0;
+//   alignas(CacheLine) std::atomic_uint64_t FinishMask_ = 0;
+//   alignas(CacheLine) std::atomic_uint64_t RunMask_ = 0;
+//   alignas(CacheLine) std::atomic<DistributionFunc*> Func_ = nullptr;
+//   std::atomic_uint64_t Epoch_ = 0;
+//   volatile int Mode_ = 0; // 0 - stopping, 1 - rebalance, 2 - trapped
+// };
 }
 
 struct TaskNode : intrusive_ref_counter<TaskNode> {
@@ -129,7 +161,7 @@ struct Task {
       Range otherData{Current_ + (End_ - Current_ + Split_.Threads.Size() - 1) /
                                      Split_.Threads.Size(),
                       End_};
-      if (otherData.From < otherData.To) {
+      if (otherData.From + Split_.GrainSize < otherData.To) {
         End_ = otherData.From;
         Range otherThreads{Split_.Threads.From + 1, Split_.Threads.To};
         size_t parts = std::min(std::min(Split_.K_SPLIT, otherThreads.Size()),
@@ -209,6 +241,7 @@ struct Task {
         Sched_.run(Task<Func, Balance::SIMPLE, GrainSize::DEFAULT>{
             Sched_, new TaskNode(CurrentNode_), mid, End_, Func_,
             SplitData{.GrainSize = Split_.GrainSize, .Depth = Split_.Depth + 1}});
+        Eigen::Tracing::TaskSplit();
         End_ = mid;
       }
     }
@@ -250,22 +283,86 @@ auto MakeInitialTask(EigenPoolWrapper &sched, TaskNode::NodePtr node, size_t fro
       GetThreadIndex()};
 }
 
+template <Balance Balance, GrainSize GrainSizeMode, typename Func>
+class RapidStartTask : public Eigen::RapidStart::Task {
+public:
+  RapidStartTask(Func&& func, EigenPoolWrapper& scheduler, size_t from, size_t to, IntrusivePtr<TaskNode> node)
+    : Scheduler_{scheduler}
+    , Func_(std::forward<Func>(func))
+    , From_{from}
+    , To_{to}
+    , CurrentNode_{std::move(node)}
+  {
+    // std::cout << "RapidStartTask(this=" << (const void*)this << ")" << std::endl;
+  }
+
+  // ~RapidStartTask() override {
+  //   std::cout << "~RapidStartTask(this=" << (const void*)this << ")" << std::endl;
+  // }
+
+  void operator()(int part, int totalParts) override {
+    // std::cout << "RapidStartTask()(this=" << (const void*)this << ",part=" << part
+    //           << ", totalParts=" << totalParts << ")" << std::endl;
+    const size_t range = To_ - From_;
+    const size_t step = range / totalParts;
+    const size_t remainder = range % totalParts;
+    const size_t from = From_ + part * step + std::min(remainder, static_cast<size_t>(part));
+    part++;
+    const size_t to = From_ + part * step + std::min(remainder, static_cast<size_t>(part));
+
+    if (from == to) {
+      return;
+    }
+
+    // std::cout << "in [" << From_ << ", " << To_ << ") for " << part << " / " << totalParts
+    //           << " got [" << from << ", " << to << ")" << std::endl;
+
+    for (size_t i = from; i < to; ++i) {
+      Func_(i);
+    }
+
+    // IntoTask<Initial::FALSE>(from, to)();
+  }
+
+  template <Initial Initial>
+  EigenPartitioner::Task<Func, Balance, GrainSizeMode, Initial> IntoTask(size_t from, size_t to) {
+    return EigenPartitioner::Task<Func, Balance, GrainSizeMode, Initial>{
+      Scheduler_,
+      CurrentNode_,
+      from,
+      to,
+      Func_,
+      SplitData{.Threads = {.From = 0, .To = 1}}
+    };
+  }
+
+  Func& TakeFunc() {
+    return std::move(Func_);
+  }
+
+private:
+  EigenPoolWrapper& Scheduler_;
+  Func Func_;
+  size_t From_ = 0;
+  size_t To_ = 0;
+
+  IntrusivePtr<TaskNode> CurrentNode_;
+};
+
 template <Balance balance, GrainSize grainSizeMode, typename F>
-void ParallelFor(size_t from, size_t to, F func) {
+void ParallelFor(size_t from, size_t to, F func, int64_t grainSize) {
+  grainSize = std::max<int64_t>(grainSize, 1);
   EigenPoolWrapper sched;
   // allocating only for top-level nodes
   TaskNode rootNode;
   IntrusivePtrAddRef(&rootNode); // avoid deletion
   if (detail::ThreadLocalTaskStack().IsEmpty()) {
-    Task<F, balance, grainSizeMode, Initial::TRUE> task{
-        sched,
-        IntrusivePtr<TaskNode>(&rootNode),
-        from,
-        to,
-        std::move(func),
-        SplitData{.Threads = {0, static_cast<size_t>(Eigen::internal::GetNumThreads())},
-                  .GrainSize = 1}};
-    task();
+    using RapidTask = RapidStartTask<balance, grainSizeMode, F>;
+    auto rapid_task = std::make_unique<RapidTask>(std::move(func), sched, from, to, &rootNode);
+    if (auto rejected = sched.try_run_rapid(std::move(rapid_task)); rejected) {
+      auto& rejected_rapid = static_cast<RapidTask&>(*rejected);
+      rejected_rapid.template IntoTask<Initial::TRUE>(from, to)();
+    }
   } else {
     Task<F, balance, grainSizeMode, Initial::FALSE> task{
         sched,
@@ -274,7 +371,7 @@ void ParallelFor(size_t from, size_t to, F func) {
         to,
         std::move(func),
         SplitData{.Threads = {0, static_cast<size_t>(Eigen::internal::GetNumThreads())},
-                  .GrainSize = 1}};
+                  .GrainSize = static_cast<size_t>(grainSize)}};
     task();
   }
 
@@ -314,22 +411,19 @@ void ParallelDo(F1&& fst, F2&& sec) {
   }
 }
 
-template <typename Sched, GrainSize grainSizeMode, typename F>
-void ParallelForTimespan(size_t from, size_t to, F func) {
-  ParallelFor<Balance::DELAYED, grainSizeMode, F>(from, to,
-                                                         std::move(func));
+template <GrainSize grainSizeMode, typename F>
+void ParallelForTimespan(size_t from, size_t to, F func, int64_t grainsize) {
+  ParallelFor<Balance::DELAYED, grainSizeMode, F>(from, to, std::move(func), grainsize);
 }
 
-template <typename Sched, typename F>
-void ParallelForSimple(size_t from, size_t to, F func) {
-  ParallelFor<Balance::SIMPLE, GrainSize::DEFAULT, F>(from, to,
-                                                             std::move(func));
+template <typename F>
+void ParallelForSimple(size_t from, size_t to, F func, int64_t grainsize) {
+  ParallelFor<Balance::SIMPLE, GrainSize::DEFAULT, F>(from, to, std::move(func), grainsize);
 }
 
-template <typename Sched, typename F>
-void ParallelForStatic(size_t from, size_t to, F func) {
-  ParallelFor<Balance::OFF, GrainSize::DEFAULT, F>(from, to,
-                                                          std::move(func));
+template <typename F>
+void ParallelForStatic(size_t from, size_t to, F func, int64_t grainsize) {
+  ParallelFor<Balance::OFF, GrainSize::DEFAULT, F>(from, to, std::move(func), grainsize);
 }
 
 } // namespace EigenPartitioner

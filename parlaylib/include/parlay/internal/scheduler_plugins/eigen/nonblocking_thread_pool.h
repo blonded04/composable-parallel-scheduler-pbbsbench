@@ -8,11 +8,14 @@
 // Public License v. 2.0. If a copy of the MPL was not distributed
 // with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
+#include <cstdint>
 #include "mpmc_queue.h"
 #include "tracing.h"
 #ifndef EIGEN_CXX11_THREADPOOL_NONBLOCKING_THREAD_POOL_H
 #define EIGEN_CXX11_THREADPOOL_NONBLOCKING_THREAD_POOL_H
-#define EIGEN_POOL_RUNNEXT
+#ifdef EIGEN_POOL_RUNNEXT
+#undef EIGEN_POOL_RUNNEXT
+#endif
 
 #include "max_size_vector.h"
 #include "run_queue.h"
@@ -107,23 +110,156 @@ struct alignas(64) CacheLine {
 };
 }
 
+namespace RapidStart {
+
+class Task {
+public:
+  virtual ~Task() noexcept = default;
+
+  virtual void operator()(int part, int parts) = 0;
+};
+
+class Subscriber;
+
 class RapidGroup {
 public:
+  friend class Subscriber;
+
   void Subscribe(int thread_id) noexcept {
     GroupMask_.fetch_or(uint64_t{1} << thread_id);
+  }
+
+  void Unsubscribe(int threadId) noexcept {
+    GroupMask_.fetch_and(~(uint64_t{1} << threadId));
   }
 
   bool IsSubscribed(int thread_id) const noexcept {
     return GroupMask_.load(std::memory_order_acquire) | (uint64_t{1} << thread_id);
   }
 
+  std::unique_ptr<Task> TryPushTask(std::unique_ptr<Task> task, int threadId) {
+    threadId = std::max(threadId, 0);
+    bool locked = false;
+    if (!Locked_.compare_exchange_strong(locked, true, std::memory_order_seq_cst)) {
+      return task;
+    }
+
+    uint64_t epoch = Epoch_;
+    RunMask_.store(0, std::memory_order_relaxed);
+    Task_ = std::move(task);
+    Epoch_.store(epoch + 1, std::memory_order_release);
+    std::atomic_thread_fence(std::memory_order_seq_cst);
+
+    auto mask = uint64_t{1} << threadId;
+    CaughtMask_ = GroupMask_.load(std::memory_order_acquire) | mask;
+    FinishMask_.store(0, std::memory_order_relaxed);
+    RunMask_.store(CaughtMask_, std::memory_order_release);
+
+    Run(mask);
+    return nullptr;
+  }
+
 private:
-  std::atomic<Task*> Task_ = nullptr;
-  std::atomic<uint64_t> GroupMask_ = 0;
-  std::atomic<uint64_t> RunMask_ = 0;
-  std::atomic<uint64_t> FinishMask_ = 0;
+  void Run(uint64_t mask) {
+    int parts = __builtin_popcountl(CaughtMask_);
+    auto left_mask = mask;
+    left_mask |= left_mask << 1;
+    left_mask |= left_mask << 2;
+    left_mask |= left_mask << 4;
+    left_mask |= left_mask << 8;
+    left_mask |= left_mask << 16;
+    left_mask |= left_mask << 32;
+
+    auto cleaned_mask = CaughtMask_ & ~left_mask;
+    int part = __builtin_popcountl(cleaned_mask);
+
+    (*Task_)(part, parts);
+
+    auto curr_finish = FinishMask_.fetch_or(mask) | mask;
+    if (curr_finish == CaughtMask_) {
+      Task_ = nullptr;
+      Locked_.store(false);
+    }
+  }
+  alignas(internal::CacheLine) std::atomic<bool> Locked_ = false;
+  alignas(internal::CacheLine) std::atomic<uint64_t> GroupMask_ = 0;
+  alignas(internal::CacheLine) std::atomic<uint64_t> FinishMask_ = 0;
+  alignas(internal::CacheLine) std::atomic<uint64_t> RunMask_ = 0;
+  std::unique_ptr<Task> Task_ = nullptr;
   std::atomic<uint64_t> Epoch_ = 0;
+  uint64_t CaughtMask_ = 0;
 };
+
+class Subscriber {
+public:
+  Subscriber(int threadId = 0) noexcept
+    : ThreadId_(threadId)
+  {}
+
+  void SubscribeTo(RapidGroup& group) noexcept {
+    group.Subscribe(ThreadId_);
+    Owner_ = &group;
+  }
+
+  bool Unsubscribe() noexcept {
+    if (IsRunning_) {
+      return true;
+    }
+    Owner_->Unsubscribe(ThreadId_);
+    UpdateObligation();
+    return !HasObligation_;
+  }
+
+  bool IsSubscribed() const noexcept {
+    return !IsRunning_ && (HasObligation_ || (Owner_ && Owner_->IsSubscribed(ThreadId_)));
+  }
+
+  bool RunIfAvailable() {
+    if (IsRunning_) {
+      return false;
+    }
+    UpdateObligation();
+    if (HasObligation_) {
+      Run();
+      return true;
+    }
+    return false;
+  }
+
+private:
+  void UpdateObligation() noexcept {
+    if (HasObligation_ || !IsSubscribed()) {
+      return;
+    }
+    auto mask = uint64_t{1} << ThreadId_;
+    SeenEpoch_ = Owner_->Epoch_.load(std::memory_order_relaxed);
+    if (SeenEpoch_ <= ExecutedEpoch_) {
+      return;
+    }
+
+    auto runMask = Owner_->RunMask_.load(std::memory_order_acquire);
+    if (runMask & mask) {
+      HasObligation_ = true;
+    }
+  }
+
+  void Run() {
+    ExecutedEpoch_ = SeenEpoch_;
+    HasObligation_ = false;
+    IsRunning_ = true;
+    Owner_->Run(uint64_t{1} << ThreadId_);
+    IsRunning_ = false;
+  }
+
+private:
+  RapidGroup* Owner_ = nullptr;
+  int ThreadId_ = 0;
+  bool HasObligation_ = false;
+  bool IsRunning_ = false;
+  uint64_t ExecutedEpoch_ = 0;
+  uint64_t SeenEpoch_ = 0;
+};
+}
 
 template <typename Environment>
 class ThreadPoolTempl : public Eigen::ThreadPoolInterface {
@@ -160,12 +296,14 @@ public:
         pt->pool = this;
         pt->rand = GlobalThreadIdHash();
         pt->thread_id = i;
+        pt->rapid_subscriber = RapidStart::Subscriber(i);
       } else {
         thread_data_[i].thread.reset(env_.CreateThread([this, i]() {
           PerThread *pt = GetPerThread();
           pt->pool = this;
           pt->rand = GlobalThreadIdHash();
           pt->thread_id = i;
+          pt->rapid_subscriber = RapidStart::Subscriber(i);
           WorkerLoop();
         }));
       }
@@ -291,6 +429,10 @@ public:
     return WorkerLoop(External, JustOnce);
   }
 
+  std::unique_ptr<RapidStart::Task> TryScheduleRapid(std::unique_ptr<RapidStart::Task>&& task) {
+    return rapid_group_.TryPushTask(std::move(task), GetPerThread()->thread_id);
+  }
+
 private:
   // Create a single atomic<int> that encodes start and limit information for
   // each thread.
@@ -350,16 +492,15 @@ private:
     constexpr PerThread() : pool(NULL), rand(0), thread_id(-1) {}
     ThreadPoolTempl *pool; // Parent pool, or null for normal threads.
     uint64_t rand;         // Random generator state.
+    RapidStart::Subscriber rapid_subscriber;
     int thread_id;         // Worker thread index in pool.
   };
 
   struct ThreadData {
-    constexpr ThreadData() : thread(), steal_partition(0), local_tasks(), mailbox(1024) {}
+    constexpr ThreadData() : thread(), steal_partition(0), local_tasks() {}
     std::unique_ptr<Thread> thread;
     std::atomic<unsigned> steal_partition;
     Queue local_tasks;
-    rigtorp::mpmc::Queue<TaskPtr> mailbox;
-    std::size_t stack_size = size_t{16} * 1024 * 1024;
 #ifdef EIGEN_POOL_RUNNEXT
     std::atomic<TaskPtr> runnext{nullptr};
     // use IDLE to indicate that the thread is idling and tasks shouldn't be
@@ -373,54 +514,54 @@ private:
         if (runnext.load(std::memory_order_relaxed) == nullptr) {
           TaskPtr expected = nullptr;
           if (runnext.compare_exchange_strong(expected, p,
-                                              std::memory_order_release)) {
+                                              std::memory_order_seq_cst)) {
             return true;
           }
         }
 #endif
         return local_tasks.PushFront(p);
       } else {
-        return mailbox.try_push(p);
+        return local_tasks.PushBack(p);
       }
     }
 
     bool SetIdle() {
-      auto current = runnext.load(std::memory_order_relaxed);
+    #ifdef EIGEN_POOL_RUNNEXT
+      auto current = runnext.load(std::memory_order_acquire);
       if (current == nullptr) {
         return runnext.compare_exchange_strong(current, IDLE,
-                                               std::memory_order_relaxed);
+                                               std::memory_order_seq_cst);
       }
       return current == IDLE;
+    #endif
+      return true;
     }
 
     void ResetIdle() {
-      auto current = runnext.load(std::memory_order_relaxed);
+    #ifdef EIGEN_POOL_RUNNEXT
+      auto current = runnext.load(std::memory_order_acquire);
       if (current == IDLE) {
         runnext.compare_exchange_strong(current, nullptr,
-                                        std::memory_order_relaxed);
+                                        std::memory_order_seq_cst);
       }
+    #endif
     }
 
     TaskPtr PopFront() {
 #ifdef EIGEN_POOL_RUNNEXT
-      if (auto p = PopRunnext(); p && p != IDLE) {
+      if (auto p = PopRunnext()) {
         return p;
       }
 #endif
       if (auto p = local_tasks.PopFront()) {
         return p;
       }
-      TaskPtr task = nullptr;
-      mailbox.try_pop(task);
-      return task;
+      return nullptr;
     }
 
-    TaskPtr PopBack(bool force) {
+    TaskPtr PopBack(bool) {
       TaskPtr task = nullptr;
-      mailbox.try_pop(task);
-      if (!task && force) {
-        task = local_tasks.PopBack();
-      }
+      task = local_tasks.PopBack();
 #ifdef EIGEN_POOL_RUNNEXT
       if (!task) {
         task = PopRunnext();
@@ -430,10 +571,6 @@ private:
     }
 
     void Flush() {
-      while (!mailbox.empty()) {
-        TaskPtr task = nullptr;
-        mailbox.pop(task);
-      }
       while (!local_tasks.Empty()) {
         local_tasks.PopFront();
       }
@@ -441,9 +578,9 @@ private:
 
 #ifdef EIGEN_POOL_RUNNEXT
     TaskPtr PopRunnext() {
-      if (auto p = runnext.load(std::memory_order_relaxed); p) {
+      if (auto p = runnext.load(std::memory_order_acquire); p && p != IDLE) {
         auto success = runnext.compare_exchange_strong(
-            p, nullptr, std::memory_order_acquire);
+            p, nullptr, std::memory_order_seq_cst);
         if (success) {
           return p;
         }
@@ -466,6 +603,7 @@ private:
   const bool allow_spinning_;
   MaxSizeVector<ThreadData> thread_data_;
   MaxSizeVector<MaxSizeVector<unsigned>> all_coprimes_;
+  RapidStart::RapidGroup rapid_group_;
   unsigned global_steal_partition_;
   std::atomic<unsigned> blocked_;
   std::atomic<bool> spinning_;
@@ -476,34 +614,54 @@ private:
   bool WorkerLoop(bool external = false, bool once = false) {
     PerThread *pt = GetPerThread();
     auto thread_id = pt->thread_id;
-    auto &threadData = thread_data_[thread_id];
+    auto &thread_data = thread_data_[thread_id];
 
-    auto can_steal = is_stack_half_full();
+    auto can_steal = !external && !is_stack_half_full();
+    constexpr uint32_t StaleLimit = 10;
+    uint32_t current_stale = 0;
 
-    threadData.ResetIdle();
+    thread_data.ResetIdle();
     bool processed_anything = false;
     bool all_empty = false;
     while (!cancelled_) {
-      TaskPtr t = threadData.PopFront();
-      if (!t && (!external || can_steal)) {
-        t = LocalSteal(all_empty);
-        if (t) {
-          Tracing::TaskStolen();
+      if (pt->rapid_subscriber.RunIfAvailable()) {
+        // std::cout << "thread " << pt->thread_id << ", run rapid, had stale " << current_stale << std::endl;
+        Tracing::GotRapidTask();
+        current_stale = 0;
+        continue;
+      }
+
+      TaskPtr t = thread_data.PopFront();
+      if (t && !(t = RescheduleOnRapidObligation(t, *pt))) {
+        continue;
+      }
+      if (!t && can_steal) {
+        if (t = LocalSteal(all_empty); t) {
+          if (t = RescheduleOnRapidObligation(t, *pt); t) {
+            Tracing::TaskStolen();
+          } else {
+            continue;
+          }
         }
       }
-      if (!t && (!external || can_steal)) {
-        t = GlobalSteal(all_empty);
-        if (t) {
-          Tracing::TaskStolen();
+      if (!t && can_steal) {
+        if (t = GlobalSteal(all_empty); t) {
+          if (t = RescheduleOnRapidObligation(t, *pt); t) {
+            Tracing::TaskStolen();
+          } else {
+            continue;
+          }
         }
       }
-      if (!t && external && threadData.SetIdle()) {
+      if (!t && external && thread_data.SetIdle()) {
         // external thread shouldn't wait for work, it should just exit.
         return processed_anything;
       }
       if (t) {
         ExecuteTask(t);
         processed_anything = true;
+        // std::cout << "thread " << pt->thread_id << ", had stale " << current_stale << std::endl;
+        current_stale = 0;
         all_empty = false;
       } else if (done_) {
         return processed_anything;
@@ -513,9 +671,20 @@ private:
       if (once) {
         break;
       }
+      if (all_empty && (++current_stale == StaleLimit)) {
+        pt->rapid_subscriber.SubscribeTo(rapid_group_);
+      }
     }
 
     return processed_anything;
+  }
+
+  Task* RescheduleOnRapidObligation(Task* task, PerThread& pt) {
+    if (!pt.rapid_subscriber.IsSubscribed() || pt.rapid_subscriber.Unsubscribe()) {
+      return task;
+    }
+    thread_data_[pt.thread_id].PushTask(task, true);
+    return nullptr;
   }
 
   // Steal tries to steal work from other worker threads in the range [start,

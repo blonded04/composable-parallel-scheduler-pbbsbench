@@ -85,6 +85,8 @@ struct Metrics {
     uint64_t tasks_stolen = 0;
     uint64_t tasks_shared = 0;
     uint64_t tasks_undivided = 0;
+    uint64_t tasks_split = 0;
+    uint64_t got_rapid_tasks = 0;
 
     static Metrics& this_thread();
 
@@ -106,6 +108,8 @@ struct Metrics {
         tasks_stolen += rhs.tasks_stolen;
         tasks_shared += rhs.tasks_shared;
         tasks_undivided += rhs.tasks_undivided;
+        tasks_split += rhs.tasks_split;
+        got_rapid_tasks += rhs.got_rapid_tasks;
         return *this;
     }
 };
@@ -120,6 +124,8 @@ inline std::ostream& operator<<(std::ostream& strm, const Metrics& metrics) {
     PRINT_FIELD(tasks_stolen)
     PRINT_FIELD(tasks_shared)
     PRINT_FIELD(tasks_undivided)
+    PRINT_FIELD(tasks_split)
+    PRINT_FIELD(got_rapid_tasks)
 #undef PRINT_FIELD
     strm << "}";
     return strm;
@@ -152,10 +158,11 @@ public:
         }
 
         Metrics total;
+        std::ofstream ofile{out_dir_ / "metrics.json"};
         for (const auto& metrics : metrics_) {
+            ofile << *metrics << '\n';
             total += *metrics;
         }
-        std::ofstream ofile{out_dir_ / "metrics.json"};
         ofile << total << '\n';
     }
 
@@ -274,6 +281,14 @@ inline void TaskShared() {
 
 inline void TaskStolen() {
     Metrics::this_thread().tasks_stolen++;
+}
+
+inline void TaskSplit() {
+    Metrics::this_thread().tasks_split++;
+}
+
+inline void GotRapidTask() {
+    Metrics::this_thread().got_rapid_tasks++;
 }
 
 inline void TaskUndivided() {
