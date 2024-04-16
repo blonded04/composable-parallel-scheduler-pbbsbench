@@ -16,15 +16,15 @@ namespace internal {
 template <typename F>
 inline void EigenParallelFor(size_t from, size_t to, F &&func, long grain_size) {
 #if EIGEN_MODE == EIGEN_SIMPLE
-  EigenPartitioner::ParallelForSimple(from, to, std::forward<F>(func), grain_size);
+  Eigen::Partitioner::ParallelForSimple(from, to, std::forward<F>(func), grain_size);
 #elif EIGEN_MODE == EIGEN_TIMESPAN
-  EigenPartitioner::ParallelForTimespan<EigenPartitioner::GrainSize::DEFAULT>(
+  Eigen::Partitioner::ParallelForTimespan<Eigen::Partitioner::GrainSize::DEFAULT>(
       from, to, std::forward<F>(func), grain_size);
 #elif EIGEN_MODE == EIGEN_TIMESPAN_GRAINSIZE
-  EigenPartitioner::ParallelForTimespan<EigenPartitioner::GrainSize::AUTO>(
+  Eigen::Partitioner::ParallelForTimespan<Eigen::Partitioner::GrainSize::AUTO>(
       from, to, std::forward<F>(func), grain_size);
 #elif EIGEN_MODE == EIGEN_STATIC
-  EigenPartitioner::ParallelForStatic(from, to, std::forward<F>(func), grain_size);
+  Eigen::Partitioner::ParallelForStatic(from, to, std::forward<F>(func), grain_size);
 #elif EIGEN_MODE == EIGEN_RAPID
   RapidGroup.parallel_ranges(from, to, [&func](auto from, auto to, auto part) {
     for (size_t i = from; i != to; ++i) {
@@ -64,7 +64,7 @@ inline void parallel_for(size_t start, size_t end, F&& f, long grain_size, bool)
 
 template <typename Lf, typename Rf>
 inline void par_do(Lf&& left, Rf&& right, bool) {
-  EigenPartitioner::ParallelDo(std::forward<Lf>(left), std::forward<Rf>(right));
+  Eigen::Partitioner::ParallelDo(std::forward<Lf>(left), std::forward<Rf>(right));
 }
 
 inline void init_plugin_internal() {

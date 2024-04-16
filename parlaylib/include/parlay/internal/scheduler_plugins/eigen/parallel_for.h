@@ -38,18 +38,18 @@ struct InitOnce {
 template <typename F>
 inline void EigenParallelFor(size_t from, size_t to, F &&func) {
 #if EIGEN_MODE == EIGEN_SIMPLE
-  EigenPartitioner::ParallelForSimple<EigenPoolWrapper>(from, to,
+  Eigen::Partitioner::ParallelForSimple<EigenPoolWrapper>(from, to,
                                                         std::forward<F>(func));
 #elif EIGEN_MODE == EIGEN_TIMESPAN
-  EigenPartitioner::ParallelForTimespan<EigenPoolWrapper,
-                                        EigenPartitioner::GrainSize::DEFAULT>(
+  Eigen::Partitioner::ParallelForTimespan<EigenPoolWrapper,
+                                        Eigen::Partitioner::GrainSize::DEFAULT>(
       from, to, std::forward<F>(func));
 #elif EIGEN_MODE == EIGEN_TIMESPAN_GRAINSIZE
-  EigenPartitioner::ParallelForTimespan<EigenPoolWrapper,
-                                        EigenPartitioner::GrainSize::AUTO>(
+  Eigen::Partitioner::ParallelForTimespan<EigenPoolWrapper,
+                                        Eigen::Partitioner::GrainSize::AUTO>(
       from, to, std::forward<F>(func));
 #elif EIGEN_MODE == EIGEN_STATIC
-  EigenPartitioner::ParallelForStatic<EigenPoolWrapper>(from, to,
+  Eigen::Partitioner::ParallelForStatic<EigenPoolWrapper>(from, to,
                                                         std::forward<F>(func));
 #elif EIGEN_MODE == EIGEN_RAPID
   RapidGroup.parallel_ranges(from, to, [&func](auto from, auto to, auto part) {

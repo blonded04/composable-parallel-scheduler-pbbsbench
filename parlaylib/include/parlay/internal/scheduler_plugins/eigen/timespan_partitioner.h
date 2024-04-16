@@ -17,7 +17,7 @@
 #include <string>
 #include <utility>
 
-namespace EigenPartitioner {
+namespace Eigen::Partitioner {
 
 struct Range {
   size_t From;
@@ -60,37 +60,6 @@ inline TaskStack& ThreadLocalTaskStack() {
   static thread_local TaskStack stack;
   return stack;
 }
-}
-
-namespace RapidStart {
-
-class DistributionFunc {
-  virtual ~DistributionFunc() noexcept = default;
-
-  virtual void operator()(size_t from, size_t to) = 0;
-  void Distribute(int threadId, uint64_t mask) {
-    //
-  }
-};
-
-constexpr size_t CacheLine = 64;
-
-// class alignas(CacheLine) Distributor {
-// public:
-//   bool TryDistribute(DistributionFunc* func) {
-//     uint64_t epoch = Epoch_;
-//     // something
-//     // func->Distribute(ThreadIdx)
-//   }
-
-// private:
-//   alignas(CacheLine) std::atomic_uint64_t StartMask_ = 0;
-//   alignas(CacheLine) std::atomic_uint64_t FinishMask_ = 0;
-//   alignas(CacheLine) std::atomic_uint64_t RunMask_ = 0;
-//   alignas(CacheLine) std::atomic<DistributionFunc*> Func_ = nullptr;
-//   std::atomic_uint64_t Epoch_ = 0;
-//   volatile int Mode_ = 0; // 0 - stopping, 1 - rebalance, 2 - trapped
-// };
 }
 
 struct TaskNode : intrusive_ref_counter<TaskNode> {
@@ -152,7 +121,7 @@ struct Task {
   }
 
   bool IsDivisible() const {
-    return (Current_ + Split_.GrainSize < End_) && !is_stack_half_full();
+    return (Current_ + Split_.GrainSize < End_) && !Util::is_stack_half_full();
   }
 
   void DistributeWork() {
@@ -192,6 +161,7 @@ struct Task {
                   SplitData{.Threads = {otherThreads.From, threadSplit},
                             .GrainSize = Split_.GrainSize}},
               otherThreads.From);
+          Tracing::TaskShared();
           otherThreads.From = threadSplit;
           otherData.From = dataSplit;
         }
@@ -292,17 +262,9 @@ public:
     , From_{from}
     , To_{to}
     , CurrentNode_{std::move(node)}
-  {
-    // std::cout << "RapidStartTask(this=" << (const void*)this << ")" << std::endl;
-  }
-
-  // ~RapidStartTask() override {
-  //   std::cout << "~RapidStartTask(this=" << (const void*)this << ")" << std::endl;
-  // }
+  {}
 
   void operator()(int part, int totalParts) override {
-    // std::cout << "RapidStartTask()(this=" << (const void*)this << ",part=" << part
-    //           << ", totalParts=" << totalParts << ")" << std::endl;
     const size_t range = To_ - From_;
     const size_t step = range / totalParts;
     const size_t remainder = range % totalParts;
@@ -314,19 +276,18 @@ public:
       return;
     }
 
-    // std::cout << "in [" << From_ << ", " << To_ << ") for " << part << " / " << totalParts
-    //           << " got [" << from << ", " << to << ")" << std::endl;
+    // I switch between loop and IntoTask(). Currently IntoTask() performs better on benchmarks
 
-    for (size_t i = from; i < to; ++i) {
-      Func_(i);
-    }
+    // for (size_t i = from; i < to; ++i) {
+    //   Func_(i);
+    // }
 
-    // IntoTask<Initial::FALSE>(from, to)();
+    IntoTask<Initial::FALSE>(from, to)();
   }
 
   template <Initial Initial>
-  EigenPartitioner::Task<Func, Balance, GrainSizeMode, Initial> IntoTask(size_t from, size_t to) {
-    return EigenPartitioner::Task<Func, Balance, GrainSizeMode, Initial>{
+  Eigen::Partitioner::Task<Func, Balance, GrainSizeMode, Initial> IntoTask(size_t from, size_t to) {
+    return Eigen::Partitioner::Task<Func, Balance, GrainSizeMode, Initial>{
       Scheduler_,
       CurrentNode_,
       from,
@@ -334,10 +295,6 @@ public:
       Func_,
       SplitData{.Threads = {.From = 0, .To = 1}}
     };
-  }
-
-  Func& TakeFunc() {
-    return std::move(Func_);
   }
 
 private:
@@ -356,28 +313,28 @@ void ParallelFor(size_t from, size_t to, F func, int64_t grainSize) {
   // allocating only for top-level nodes
   TaskNode rootNode;
   IntrusivePtrAddRef(&rootNode); // avoid deletion
-  if (detail::ThreadLocalTaskStack().IsEmpty()) {
-    using RapidTask = RapidStartTask<balance, grainSizeMode, F>;
-    auto rapid_task = std::make_unique<RapidTask>(std::move(func), sched, from, to, &rootNode);
-    if (auto rejected = sched.try_run_rapid(std::move(rapid_task)); rejected) {
-      auto& rejected_rapid = static_cast<RapidTask&>(*rejected);
-      rejected_rapid.template IntoTask<Initial::TRUE>(from, to)();
+
+  using RapidTask = RapidStartTask<balance, grainSizeMode, F>;
+  auto rapid_task = new RapidTask(std::move(func), sched, from, to, &rootNode);
+  if (!sched.try_run_rapid(rapid_task)) {
+    if (detail::ThreadLocalTaskStack().IsEmpty()) {
+      rapid_task->template IntoTask<Initial::TRUE>(from, to)();
+    } else {
+      Task<F, balance, grainSizeMode, Initial::FALSE> task{
+          sched,
+          IntrusivePtr<TaskNode>(&rootNode),
+          from,
+          to,
+          std::move(func),
+          SplitData{.Threads = {0, static_cast<size_t>(Eigen::internal::GetNumThreads())},
+                    .GrainSize = static_cast<size_t>(grainSize)}};
+      task();
     }
-  } else {
-    Task<F, balance, grainSizeMode, Initial::FALSE> task{
-        sched,
-        IntrusivePtr<TaskNode>(&rootNode),
-        from,
-        to,
-        std::move(func),
-        SplitData{.Threads = {0, static_cast<size_t>(Eigen::internal::GetNumThreads())},
-                  .GrainSize = static_cast<size_t>(grainSize)}};
-    task();
+    delete rapid_task;
   }
 
   while (IntrusivePtrLoadRef(&rootNode) != 1) {
     sched.execute_something_else();
-    // sched.join_main_thread();
   }
 }
 
@@ -426,4 +383,4 @@ void ParallelForStatic(size_t from, size_t to, F func, int64_t grainsize) {
   ParallelFor<Balance::OFF, GrainSize::DEFAULT, F>(from, to, std::move(func), grainsize);
 }
 
-} // namespace EigenPartitioner
+} // namespace Eigen::Partitioner

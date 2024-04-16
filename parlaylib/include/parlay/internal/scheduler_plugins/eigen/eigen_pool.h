@@ -23,8 +23,8 @@ public:
     EigenPool.Schedule(Eigen::MakeTask(std::forward<F>(f)));
   }
 
-  std::unique_ptr<Eigen::RapidStart::Task> try_run_rapid(std::unique_ptr<Eigen::RapidStart::Task> task) {
-    return EigenPool.TryScheduleRapid(std::move(task));
+  bool try_run_rapid(Eigen::RapidStart::Task* task) {
+    return EigenPool.TryScheduleRapid(task);
   }
 
   template <typename F> void run_on_thread(F &&f, size_t hint) {

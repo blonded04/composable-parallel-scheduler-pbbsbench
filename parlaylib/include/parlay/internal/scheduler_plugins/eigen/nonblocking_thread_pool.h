@@ -8,6 +8,7 @@
 // Public License v. 2.0. If a copy of the MPL was not distributed
 // with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
+#include <emmintrin.h>
 #include <cstdint>
 #include "mpmc_queue.h"
 #include "tracing.h"
@@ -121,42 +122,54 @@ public:
 
 class Subscriber;
 
+constexpr inline uint64_t DISTRIBUTING = ~uint64_t{0};
+
 class RapidGroup {
 public:
   friend class Subscriber;
 
-  void Subscribe(int thread_id) noexcept {
-    GroupMask_.fetch_or(uint64_t{1} << thread_id);
+  void Subscribe(uint64_t mask) noexcept {
+    GroupMask_.fetch_or(mask, std::memory_order_release);
   }
 
-  void Unsubscribe(int threadId) noexcept {
-    GroupMask_.fetch_and(~(uint64_t{1} << threadId));
+  void Unsubscribe(uint64_t mask) noexcept {
+    GroupMask_.fetch_and(~mask, std::memory_order_release);
   }
 
-  bool IsSubscribed(int thread_id) const noexcept {
-    return GroupMask_.load(std::memory_order_acquire) | (uint64_t{1} << thread_id);
+  bool IsSubscribed(uint64_t mask) const noexcept {
+    return GroupMask_.load(std::memory_order_acquire) & mask;
   }
 
-  std::unique_ptr<Task> TryPushTask(std::unique_ptr<Task> task, int threadId) {
-    threadId = std::max(threadId, 0);
+  bool TryPushTask(Task* task, uint64_t mask) {
     bool locked = false;
-    if (!Locked_.compare_exchange_strong(locked, true, std::memory_order_seq_cst)) {
-      return task;
+    if (!Locked_.compare_exchange_strong(locked, true, std::memory_order_acq_rel)) {
+      return false;
     }
 
     uint64_t epoch = Epoch_;
-    RunMask_.store(0, std::memory_order_relaxed);
-    Task_ = std::move(task);
+    RunMask_.store(DISTRIBUTING, std::memory_order_relaxed);
+    Task_ = task;
     Epoch_.store(epoch + 1, std::memory_order_release);
     std::atomic_thread_fence(std::memory_order_seq_cst);
 
-    auto mask = uint64_t{1} << threadId;
     CaughtMask_ = GroupMask_.load(std::memory_order_acquire) | mask;
     FinishMask_.store(0, std::memory_order_relaxed);
     RunMask_.store(CaughtMask_, std::memory_order_release);
 
-    Run(mask);
-    return nullptr;
+    return true;
+  }
+
+  void WaitAndClean() noexcept {
+    // I switch between this and cleanup in Run(). Usually the latter goes together with IntoTask() instead of loop
+    // Currently the latter gives beter results in benches
+
+    // while (CaughtMask_ != FinishMask_.load(std::memory_order_acquire)) {
+    //   _mm_pause();
+    // }
+
+    // delete Task_;
+    // Task_ = nullptr;
+    // Locked_.store(false, std::memory_order_release);
   }
 
 private:
@@ -175,89 +188,119 @@ private:
 
     (*Task_)(part, parts);
 
-    auto curr_finish = FinishMask_.fetch_or(mask) | mask;
+    auto curr_finish = FinishMask_.fetch_or(mask, std::memory_order_release) | mask;
     if (curr_finish == CaughtMask_) {
+      delete Task_;
       Task_ = nullptr;
-      Locked_.store(false);
+      Locked_.store(false, std::memory_order_release);
     }
   }
   alignas(internal::CacheLine) std::atomic<bool> Locked_ = false;
   alignas(internal::CacheLine) std::atomic<uint64_t> GroupMask_ = 0;
   alignas(internal::CacheLine) std::atomic<uint64_t> FinishMask_ = 0;
   alignas(internal::CacheLine) std::atomic<uint64_t> RunMask_ = 0;
-  std::unique_ptr<Task> Task_ = nullptr;
+  Task* Task_ = nullptr;
   std::atomic<uint64_t> Epoch_ = 0;
   uint64_t CaughtMask_ = 0;
 };
 
 class Subscriber {
 public:
-  Subscriber(int threadId = 0) noexcept
-    : ThreadId_(threadId)
+  Subscriber(RapidGroup* owner = nullptr, int threadId = 0) noexcept
+    : Owner_{owner}
+    , Mask_(uint64_t{1} << static_cast<uint64_t>(threadId))
   {}
 
-  void SubscribeTo(RapidGroup& group) noexcept {
-    group.Subscribe(ThreadId_);
-    Owner_ = &group;
-  }
-
-  bool Unsubscribe() noexcept {
-    if (IsRunning_) {
-      return true;
+  bool TryPushTask(Task* task) {
+    if (!Owner_->TryPushTask(task, Mask_)) {
+      return false;
     }
-    Owner_->Unsubscribe(ThreadId_);
-    UpdateObligation();
-    return !HasObligation_;
+
+    ExecutedEpoch_ = SeenEpoch_ = Owner_->Epoch_.load(std::memory_order_relaxed);
+    IsRunning_ = true;
+    Owner_->Run(Mask_);
+    IsRunning_ = false;
+
+    Owner_->WaitAndClean();
+    return true;
   }
 
-  bool IsSubscribed() const noexcept {
-    return !IsRunning_ && (HasObligation_ || (Owner_ && Owner_->IsSubscribed(ThreadId_)));
+  bool SubscribeTo(RapidGroup& group) noexcept {
+    if (!IsRunning_) {
+      group.Subscribe(Mask_);
+    }
+    return !IsRunning_;
   }
 
-  bool RunIfAvailable() {
+  // returns true if there is work subscriber must do after unsubscribing
+  bool Unsubscribe(uint64_t mask) noexcept {
+    assert(mask == Mask_);
     if (IsRunning_) {
       return false;
     }
-    UpdateObligation();
-    if (HasObligation_) {
-      Run();
+    Owner_->Unsubscribe(mask);
+    return UpdateObligation(mask);
+  }
+
+  bool IsSubscribed(uint64_t mask) const noexcept {
+    assert(Mask_ == mask);
+    assert(Owner_);
+    return !IsRunning_ && Owner_->IsSubscribed(mask);
+  }
+
+  bool IsRunning() const noexcept {
+    return IsRunning_;
+  }
+
+  bool RunIfAvailable(uint64_t mask) {
+    assert(mask == Mask_);
+    if (IsRunning_) {
+      return false;
+    }
+    Owner_->Unsubscribe(mask);
+    if (UpdateObligation(mask)) {
+      Run(mask);
       return true;
     }
+    Owner_->Subscribe(mask);
     return false;
   }
 
-private:
-  void UpdateObligation() noexcept {
-    if (HasObligation_ || !IsSubscribed()) {
-      return;
-    }
-    auto mask = uint64_t{1} << ThreadId_;
-    SeenEpoch_ = Owner_->Epoch_.load(std::memory_order_relaxed);
-    if (SeenEpoch_ <= ExecutedEpoch_) {
-      return;
-    }
-
-    auto runMask = Owner_->RunMask_.load(std::memory_order_acquire);
-    if (runMask & mask) {
-      HasObligation_ = true;
-    }
+  void RunSureAvailable(uint64_t mask) {
+    Run(mask);
   }
 
-  void Run() {
+private:
+  [[nodiscard]] bool UpdateObligation(uint64_t mask) noexcept {
+    assert(mask == Mask_);
+    SeenEpoch_ = Owner_->Epoch_.load(std::memory_order_acquire);
+    if (SeenEpoch_ <= ExecutedEpoch_) {
+      return false;
+    }
+
+    uint64_t runMask = Owner_->RunMask_.load(std::memory_order_acquire);
+    while (runMask == DISTRIBUTING) {
+      _mm_pause();
+      runMask = Owner_->RunMask_.load(std::memory_order_acquire);
+    }
+
+    return runMask & mask;
+  }
+
+  void Run(uint64_t mask) {
     ExecutedEpoch_ = SeenEpoch_;
-    HasObligation_ = false;
     IsRunning_ = true;
-    Owner_->Run(uint64_t{1} << ThreadId_);
+    Owner_->Run(mask);
     IsRunning_ = false;
+    Tracing::GotRapidTask();
   }
 
 private:
   RapidGroup* Owner_ = nullptr;
-  int ThreadId_ = 0;
-  bool HasObligation_ = false;
   bool IsRunning_ = false;
   uint64_t ExecutedEpoch_ = 0;
   uint64_t SeenEpoch_ = 0;
+  uint64_t Mask_ = 0;
 };
 }
 
@@ -296,14 +339,14 @@ public:
         pt->pool = this;
         pt->rand = GlobalThreadIdHash();
         pt->thread_id = i;
-        pt->rapid_subscriber = RapidStart::Subscriber(i);
+        pt->rapid_subscriber = RapidStart::Subscriber(&rapid_group_, i);
       } else {
         thread_data_[i].thread.reset(env_.CreateThread([this, i]() {
           PerThread *pt = GetPerThread();
           pt->pool = this;
           pt->rand = GlobalThreadIdHash();
           pt->thread_id = i;
-          pt->rapid_subscriber = RapidStart::Subscriber(i);
+          pt->rapid_subscriber = RapidStart::Subscriber(&rapid_group_, i);
           WorkerLoop();
         }));
       }
@@ -429,8 +472,12 @@ public:
     return WorkerLoop(External, JustOnce);
   }
 
-  std::unique_ptr<RapidStart::Task> TryScheduleRapid(std::unique_ptr<RapidStart::Task>&& task) {
-    return rapid_group_.TryPushTask(std::move(task), GetPerThread()->thread_id);
+  bool TryScheduleRapid(RapidStart::Task* task) {
+    auto pt = GetPerThread();
+    if (pt) {
+      return pt->rapid_subscriber.TryPushTask(task);
+    }
+    return false;
   }
 
 private:
@@ -615,40 +662,53 @@ private:
     PerThread *pt = GetPerThread();
     auto thread_id = pt->thread_id;
     auto &thread_data = thread_data_[thread_id];
+    uint64_t mask = uint64_t{1} << static_cast<uint64_t>(thread_id);
 
-    auto can_steal = !external && !is_stack_half_full();
+    auto can_steal = !external && !Util::is_stack_half_full();
     constexpr uint32_t StaleLimit = 10;
     uint32_t current_stale = 0;
 
     thread_data.ResetIdle();
+    // Keep local track of subscription instead of going to RapidGroup each cycle
+    bool is_subscribed = pt->rapid_subscriber.SubscribeTo(rapid_group_);
+    auto eventual_unsubscribe = Util::defer([pt, mask] {
+      if (pt->rapid_subscriber.IsSubscribed(mask) && pt->rapid_subscriber.Unsubscribe(mask)) {
+        pt->rapid_subscriber.RunSureAvailable(mask);
+      }
+    });
+
     bool processed_anything = false;
     bool all_empty = false;
     while (!cancelled_) {
-      if (pt->rapid_subscriber.RunIfAvailable()) {
-        // std::cout << "thread " << pt->thread_id << ", run rapid, had stale " << current_stale << std::endl;
-        Tracing::GotRapidTask();
+      if (is_subscribed && pt->rapid_subscriber.RunIfAvailable(mask)) {
+        is_subscribed = false;
         current_stale = 0;
-        continue;
       }
 
       TaskPtr t = thread_data.PopFront();
-      if (t && !(t = RescheduleOnRapidObligation(t, *pt))) {
+      if (t && is_subscribed && !(t = RescheduleOnRapidObligation(t, *pt, mask))) {
+        current_stale = 0;
+        is_subscribed = false;
         continue;
       }
       if (!t && can_steal) {
         if (t = LocalSteal(all_empty); t) {
-          if (t = RescheduleOnRapidObligation(t, *pt); t) {
+          if (!is_subscribed || (t = RescheduleOnRapidObligation(t, *pt, mask))) {
             Tracing::TaskStolen();
           } else {
+            current_stale = 0;
+            is_subscribed = false;
             continue;
           }
         }
       }
       if (!t && can_steal) {
         if (t = GlobalSteal(all_empty); t) {
-          if (t = RescheduleOnRapidObligation(t, *pt); t) {
+          if (!is_subscribed || (t = RescheduleOnRapidObligation(t, *pt, mask))) {
             Tracing::TaskStolen();
           } else {
+            current_stale = 0;
+            is_subscribed = false;
             continue;
           }
         }
@@ -660,7 +720,6 @@ private:
       if (t) {
         ExecuteTask(t);
         processed_anything = true;
-        // std::cout << "thread " << pt->thread_id << ", had stale " << current_stale << std::endl;
         current_stale = 0;
         all_empty = false;
       } else if (done_) {
@@ -672,18 +731,21 @@ private:
         break;
       }
       if (all_empty && (++current_stale == StaleLimit)) {
-        pt->rapid_subscriber.SubscribeTo(rapid_group_);
+        is_subscribed = pt->rapid_subscriber.SubscribeTo(rapid_group_);;
       }
     }
 
     return processed_anything;
   }
 
-  Task* RescheduleOnRapidObligation(Task* task, PerThread& pt) {
-    if (!pt.rapid_subscriber.IsSubscribed() || pt.rapid_subscriber.Unsubscribe()) {
+  Task* RescheduleOnRapidObligation(Task* task, PerThread& pt, uint64_t mask) {
+    if (!pt.rapid_subscriber.IsSubscribed(mask) || !pt.rapid_subscriber.Unsubscribe(mask)) {
       return task;
     }
-    thread_data_[pt.thread_id].PushTask(task, true);
+    if (task) {
+      thread_data_[pt.thread_id].PushTask(task, true);
+    }
+    pt.rapid_subscriber.RunSureAvailable(mask);
     return nullptr;
   }
 
