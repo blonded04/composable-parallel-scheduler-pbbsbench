@@ -9,14 +9,18 @@
 // with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
 #include <emmintrin.h>
+#include <bitset>
+#include <chrono>
 #include <cstdint>
+#include <stdexcept>
 #include "mpmc_queue.h"
 #include "tracing.h"
 #ifndef EIGEN_CXX11_THREADPOOL_NONBLOCKING_THREAD_POOL_H
 #define EIGEN_CXX11_THREADPOOL_NONBLOCKING_THREAD_POOL_H
-#ifdef EIGEN_POOL_RUNNEXT
-#undef EIGEN_POOL_RUNNEXT
-#endif
+// #ifdef EIGEN_POOL_RUNNEXT
+// #undef EIGEN_POOL_RUNNEXT
+// #endif
+#define EIGEN_POOL_RUNNEXT
 
 #include "max_size_vector.h"
 #include "run_queue.h"
@@ -148,28 +152,37 @@ public:
 
     uint64_t epoch = Epoch_;
     RunMask_.store(DISTRIBUTING, std::memory_order_relaxed);
+    GroupMask_.fetch_or(mask, std::memory_order_relaxed);
     Task_ = task;
+    // ScheduledAt_ = std::chrono::steady_clock::now();
     Epoch_.store(epoch + 1, std::memory_order_release);
     std::atomic_thread_fence(std::memory_order_seq_cst);
 
-    CaughtMask_ = GroupMask_.load(std::memory_order_acquire) | mask;
+    CaughtMask_ = GroupMask_.load(std::memory_order_acquire);
     FinishMask_.store(0, std::memory_order_relaxed);
     RunMask_.store(CaughtMask_, std::memory_order_release);
+
+    Tracing::ParForStart(nullptr);
+
+    // std::cout << std::bitset<8>(mask) << std::endl;
 
     return true;
   }
 
-  void WaitAndClean() noexcept {
+  void WaitAndClean(uint64_t mask) noexcept {
     // I switch between this and cleanup in Run(). Usually the latter goes together with IntoTask() instead of loop
     // Currently the latter gives beter results in benches
+    GroupMask_.fetch_and(~mask, std::memory_order_relaxed);
 
-    // while (CaughtMask_ != FinishMask_.load(std::memory_order_acquire)) {
-    //   _mm_pause();
-    // }
+    while (CaughtMask_ != FinishMask_.load(std::memory_order_acquire)) {
+      _mm_pause();
+      _mm_pause();
+      _mm_pause();
+    }
 
-    // delete Task_;
-    // Task_ = nullptr;
-    // Locked_.store(false, std::memory_order_release);
+    Task_ = nullptr;
+    Locked_.store(false, std::memory_order_relaxed);
+    std::atomic_thread_fence(std::memory_order_release);
   }
 
 private:
@@ -185,21 +198,25 @@ private:
 
     auto cleaned_mask = CaughtMask_ & ~left_mask;
     int part = __builtin_popcountl(cleaned_mask);
+    // auto startedAt = std::chrono::steady_clock::now();
+    // Tracing::TaskStarted(Task_, startedAt - ScheduledAt_);
 
     (*Task_)(part, parts);
 
-    auto curr_finish = FinishMask_.fetch_or(mask, std::memory_order_release) | mask;
-    if (curr_finish == CaughtMask_) {
-      delete Task_;
-      Task_ = nullptr;
-      Locked_.store(false, std::memory_order_release);
-    }
+    FinishMask_.fetch_or(mask, std::memory_order_release);
+    // auto curr_finish = FinishMask_.fetch_or(mask, std::memory_order_release) | mask;
+    // if (curr_finish == CaughtMask_) {
+    //   delete Task_;
+    //   Task_ = nullptr;
+    //   Locked_.store(false, std::memory_order_release);
+    // }
   }
   alignas(internal::CacheLine) std::atomic<bool> Locked_ = false;
   alignas(internal::CacheLine) std::atomic<uint64_t> GroupMask_ = 0;
   alignas(internal::CacheLine) std::atomic<uint64_t> FinishMask_ = 0;
   alignas(internal::CacheLine) std::atomic<uint64_t> RunMask_ = 0;
   Task* Task_ = nullptr;
+  // std::chrono::steady_clock::time_point ScheduledAt_{};
   std::atomic<uint64_t> Epoch_ = 0;
   uint64_t CaughtMask_ = 0;
 };
@@ -217,57 +234,57 @@ public:
     }
 
     ExecutedEpoch_ = SeenEpoch_ = Owner_->Epoch_.load(std::memory_order_relaxed);
-    IsRunning_ = true;
     Owner_->Run(Mask_);
-    IsRunning_ = false;
 
-    Owner_->WaitAndClean();
+    Owner_->WaitAndClean(Mask_);
+    IsSubscribed_ = false;
     return true;
   }
 
-  bool SubscribeTo(RapidGroup& group) noexcept {
-    if (!IsRunning_) {
-      group.Subscribe(Mask_);
+  void SubscribeAs(uint64_t mask) noexcept {
+    if (!IsSubscribed_) {
+      Owner_->Subscribe(mask);
     }
-    return !IsRunning_;
+    IsSubscribed_ = true;
   }
 
   // returns true if there is work subscriber must do after unsubscribing
   bool Unsubscribe(uint64_t mask) noexcept {
     assert(mask == Mask_);
-    if (IsRunning_) {
-      return false;
+    if (IsSubscribed_) {
+      Owner_->Unsubscribe(mask);
     }
-    Owner_->Unsubscribe(mask);
+    IsSubscribed_ = false;
     return UpdateObligation(mask);
   }
 
   bool IsSubscribed(uint64_t mask) const noexcept {
     assert(Mask_ == mask);
     assert(Owner_);
-    return !IsRunning_ && Owner_->IsSubscribed(mask);
-  }
-
-  bool IsRunning() const noexcept {
-    return IsRunning_;
+    return IsSubscribed_;
   }
 
   bool RunIfAvailable(uint64_t mask) {
     assert(mask == Mask_);
-    if (IsRunning_) {
-      return false;
-    }
-    Owner_->Unsubscribe(mask);
     if (UpdateObligation(mask)) {
+      Owner_->Unsubscribe(mask);
+      IsSubscribed_ = false;
       Run(mask);
       return true;
     }
-    Owner_->Subscribe(mask);
     return false;
   }
 
   void RunSureAvailable(uint64_t mask) {
     Run(mask);
+  }
+
+  bool CheckWork(uint64_t mask) {
+    if ((Owner_->RunMask_.load(std::memory_order_acquire) & mask) && !(Owner_->FinishMask_.load(std::memory_order_acquire) & mask)) {
+      throw std::runtime_error{"fucking die"};
+      return true;
+    }
+    return false;
   }
 
 private:
@@ -281,6 +298,7 @@ private:
     uint64_t runMask = Owner_->RunMask_.load(std::memory_order_acquire);
     while (runMask == DISTRIBUTING) {
       _mm_pause();
+
       runMask = Owner_->RunMask_.load(std::memory_order_acquire);
     }
 
@@ -288,16 +306,14 @@ private:
   }
 
   void Run(uint64_t mask) {
-    ExecutedEpoch_ = SeenEpoch_;
-    IsRunning_ = true;
+    ExecutedEpoch_ = SeenEpoch_ = Owner_->Epoch_.load(std::memory_order_acquire);
     Owner_->Run(mask);
-    IsRunning_ = false;
     Tracing::GotRapidTask();
   }
 
 private:
   RapidGroup* Owner_ = nullptr;
-  bool IsRunning_ = false;
+  bool IsSubscribed_ = false;
   uint64_t ExecutedEpoch_ = 0;
   uint64_t SeenEpoch_ = 0;
   uint64_t Mask_ = 0;
@@ -561,7 +577,7 @@ private:
         if (runnext.load(std::memory_order_relaxed) == nullptr) {
           TaskPtr expected = nullptr;
           if (runnext.compare_exchange_strong(expected, p,
-                                              std::memory_order_seq_cst)) {
+                                              std::memory_order_acq_rel)) {
             return true;
           }
         }
@@ -609,11 +625,11 @@ private:
     TaskPtr PopBack(bool) {
       TaskPtr task = nullptr;
       task = local_tasks.PopBack();
-#ifdef EIGEN_POOL_RUNNEXT
-      if (!task) {
-        task = PopRunnext();
-      }
-#endif
+// #ifdef EIGEN_POOL_RUNNEXT
+//       if (!task) {
+//         task = PopRunnext();
+//       }
+// #endif
       return task;
     }
 
@@ -627,7 +643,7 @@ private:
     TaskPtr PopRunnext() {
       if (auto p = runnext.load(std::memory_order_acquire); p && p != IDLE) {
         auto success = runnext.compare_exchange_strong(
-            p, nullptr, std::memory_order_seq_cst);
+            p, nullptr, std::memory_order_acq_rel);
         if (success) {
           return p;
         }
@@ -665,12 +681,12 @@ private:
     uint64_t mask = uint64_t{1} << static_cast<uint64_t>(thread_id);
 
     auto can_steal = !external && !Util::is_stack_half_full();
-    constexpr uint32_t StaleLimit = 10;
+    constexpr uint32_t StaleLimit = 0;
     uint32_t current_stale = 0;
 
     thread_data.ResetIdle();
     // Keep local track of subscription instead of going to RapidGroup each cycle
-    bool is_subscribed = pt->rapid_subscriber.SubscribeTo(rapid_group_);
+    pt->rapid_subscriber.SubscribeAs(mask);
     auto eventual_unsubscribe = Util::defer([pt, mask] {
       if (pt->rapid_subscriber.IsSubscribed(mask) && pt->rapid_subscriber.Unsubscribe(mask)) {
         pt->rapid_subscriber.RunSureAvailable(mask);
@@ -680,35 +696,31 @@ private:
     bool processed_anything = false;
     bool all_empty = false;
     while (!cancelled_) {
-      if (is_subscribed && pt->rapid_subscriber.RunIfAvailable(mask)) {
-        is_subscribed = false;
+      if (pt->rapid_subscriber.RunIfAvailable(mask)) {
         current_stale = 0;
       }
 
       TaskPtr t = thread_data.PopFront();
-      if (t && is_subscribed && !(t = RescheduleOnRapidObligation(t, *pt, mask))) {
+      if (t && !(t = RescheduleOnRapidObligation(t, *pt, mask))) {
         current_stale = 0;
-        is_subscribed = false;
         continue;
       }
       if (!t && can_steal) {
         if (t = LocalSteal(all_empty); t) {
-          if (!is_subscribed || (t = RescheduleOnRapidObligation(t, *pt, mask))) {
+          if (t = RescheduleOnRapidObligation(t, *pt, mask); t) {
             Tracing::TaskStolen();
           } else {
             current_stale = 0;
-            is_subscribed = false;
             continue;
           }
         }
       }
       if (!t && can_steal) {
         if (t = GlobalSteal(all_empty); t) {
-          if (!is_subscribed || (t = RescheduleOnRapidObligation(t, *pt, mask))) {
+          if (t = RescheduleOnRapidObligation(t, *pt, mask); t) {
             Tracing::TaskStolen();
           } else {
             current_stale = 0;
-            is_subscribed = false;
             continue;
           }
         }
@@ -718,6 +730,9 @@ private:
         return processed_anything;
       }
       if (t) {
+        if (pt->rapid_subscriber.CheckWork(mask)) {
+          throw std::runtime_error{"fucking die"};
+        }
         ExecuteTask(t);
         processed_anything = true;
         current_stale = 0;
@@ -730,8 +745,8 @@ private:
       if (once) {
         break;
       }
-      if (all_empty && (++current_stale == StaleLimit)) {
-        is_subscribed = pt->rapid_subscriber.SubscribeTo(rapid_group_);;
+      if (all_empty && (++current_stale >= StaleLimit)&& !pt->rapid_subscriber.IsSubscribed(mask)) {
+        pt->rapid_subscriber.SubscribeAs(mask);
       }
     }
 
@@ -739,7 +754,7 @@ private:
   }
 
   Task* RescheduleOnRapidObligation(Task* task, PerThread& pt, uint64_t mask) {
-    if (!pt.rapid_subscriber.IsSubscribed(mask) || !pt.rapid_subscriber.Unsubscribe(mask)) {
+    if (!pt.rapid_subscriber.Unsubscribe(mask)) {
       return task;
     }
     if (task) {

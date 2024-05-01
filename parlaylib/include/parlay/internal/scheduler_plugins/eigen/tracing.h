@@ -1,5 +1,6 @@
 #pragma once
 
+#include <chrono>
 #include <cstdint>
 #include <deque>
 #include <filesystem>
@@ -77,6 +78,27 @@ private:
     std::ofstream out_file_;
 };
 
+struct AvgMetric {
+    uint64_t sum = 0;
+    uint64_t count = 0;
+
+    void Add(uint64_t value) noexcept {
+        sum += value;
+        ++count;
+    }
+
+    AvgMetric& operator+=(const AvgMetric& rhs) noexcept {
+        sum += rhs.sum;
+        count += rhs.count;
+        return *this;
+    }
+
+    friend std::ostream& operator<<(std::ostream& out, const AvgMetric& metric) {
+        auto avg = static_cast<double>(metric.sum) / static_cast<double>(metric.count);
+        return out << avg;
+    }
+};
+
 struct Metrics {
     uint64_t par_fors = 0;
     uint64_t cur_par_fors = 0;
@@ -87,6 +109,7 @@ struct Metrics {
     uint64_t tasks_undivided = 0;
     uint64_t tasks_split = 0;
     uint64_t got_rapid_tasks = 0;
+    AvgMetric rapid_start_time;
 
     static Metrics& this_thread();
 
@@ -110,6 +133,7 @@ struct Metrics {
         tasks_undivided += rhs.tasks_undivided;
         tasks_split += rhs.tasks_split;
         got_rapid_tasks += rhs.got_rapid_tasks;
+        rapid_start_time += rhs.rapid_start_time;
         return *this;
     }
 };
@@ -126,6 +150,7 @@ inline std::ostream& operator<<(std::ostream& strm, const Metrics& metrics) {
     PRINT_FIELD(tasks_undivided)
     PRINT_FIELD(tasks_split)
     PRINT_FIELD(got_rapid_tasks)
+    PRINT_FIELD(rapid_start_time)
 #undef PRINT_FIELD
     strm << "}";
     return strm;
@@ -256,9 +281,11 @@ inline void TaskScheduled(const void* root, const void* task, uint32_t trgt_thre
 }
 
 
-inline void TaskStarted(const void* root, const void* task) {
+inline void TaskStarted(const void* root, std::chrono::nanoseconds startTime) {
     // auto this_thread = GetThreadIndex();
-    Metrics::this_thread().tasks_created++;
+    auto& metrics = Metrics::this_thread();
+    metrics.tasks_created++;
+    metrics.rapid_start_time.Add(startTime.count());
     // Queue::this_thread().push(Trace{
     //     .root = reinterpret_cast<uintptr_t>(root),
     //     .task = reinterpret_cast<uintptr_t>(task),

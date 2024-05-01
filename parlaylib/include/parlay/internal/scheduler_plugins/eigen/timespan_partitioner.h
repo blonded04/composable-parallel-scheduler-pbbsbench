@@ -256,12 +256,13 @@ auto MakeInitialTask(EigenPoolWrapper &sched, TaskNode::NodePtr node, size_t fro
 template <Balance Balance, GrainSize GrainSizeMode, typename Func>
 class RapidStartTask : public Eigen::RapidStart::Task {
 public:
-  RapidStartTask(Func&& func, EigenPoolWrapper& scheduler, size_t from, size_t to, IntrusivePtr<TaskNode> node)
+  RapidStartTask(Func&& func, EigenPoolWrapper& scheduler, size_t from, size_t to, IntrusivePtr<TaskNode> node, size_t grainSize)
     : Scheduler_{scheduler}
     , Func_(std::forward<Func>(func))
     , From_{from}
     , To_{to}
     , CurrentNode_{std::move(node)}
+    , GrainSize_{grainSize}
   {}
 
   void operator()(int part, int totalParts) override {
@@ -282,18 +283,19 @@ public:
     //   Func_(i);
     // }
 
-    IntoTask<Initial::FALSE>(from, to)();
+    Scheduler_.run(IntoTask<Initial::FALSE>(from, to));
   }
 
   template <Initial Initial>
   Eigen::Partitioner::Task<Func, Balance, GrainSizeMode, Initial> IntoTask(size_t from, size_t to) {
+    size_t maxThreads = internal::GetNumThreads();
     return Eigen::Partitioner::Task<Func, Balance, GrainSizeMode, Initial>{
       Scheduler_,
       CurrentNode_,
       from,
       to,
       Func_,
-      SplitData{.Threads = {.From = 0, .To = 1}}
+      SplitData{.Threads = {.From = 0, .To = maxThreads}, .GrainSize = GrainSize_}
     };
   }
 
@@ -302,6 +304,7 @@ private:
   Func Func_;
   size_t From_ = 0;
   size_t To_ = 0;
+  size_t GrainSize_ = 0;
 
   IntrusivePtr<TaskNode> CurrentNode_;
 };
@@ -315,22 +318,23 @@ void ParallelFor(size_t from, size_t to, F func, int64_t grainSize) {
   IntrusivePtrAddRef(&rootNode); // avoid deletion
 
   using RapidTask = RapidStartTask<balance, grainSizeMode, F>;
-  auto rapid_task = new RapidTask(std::move(func), sched, from, to, &rootNode);
-  if (!sched.try_run_rapid(rapid_task)) {
+  {
+    auto rapid_task = RapidTask(std::move(func), sched, from, to, &rootNode, grainSize);
     if (detail::ThreadLocalTaskStack().IsEmpty()) {
-      rapid_task->template IntoTask<Initial::TRUE>(from, to)();
+      if (!sched.try_run_rapid(&rapid_task)) {
+        asm("int $3");
+        rapid_task.template IntoTask<Initial::TRUE>(from, to)();
+      }
     } else {
-      Task<F, balance, grainSizeMode, Initial::FALSE> task{
-          sched,
-          IntrusivePtr<TaskNode>(&rootNode),
-          from,
-          to,
-          std::move(func),
-          SplitData{.Threads = {0, static_cast<size_t>(Eigen::internal::GetNumThreads())},
-                    .GrainSize = static_cast<size_t>(grainSize)}};
-      task();
+      rapid_task.template IntoTask<Initial::FALSE>(from, to)();
     }
-    delete rapid_task;
+    // if (!sched.try_run_rapid(&rapid_task)) {
+    //   if (detail::ThreadLocalTaskStack().IsEmpty()) {
+    //     rapid_task.template IntoTask<Initial::TRUE>(from, to)();
+    //   } else {
+    //     rapid_task.template IntoTask<Initial::FALSE>(from, to)();
+    //   }
+    // }
   }
 
   while (IntrusivePtrLoadRef(&rootNode) != 1) {

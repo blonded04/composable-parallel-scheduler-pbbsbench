@@ -59,7 +59,7 @@ inline size_t worker_id() {
 
 template <typename F>
 inline void parallel_for(size_t start, size_t end, F&& f, long grain_size, bool) {
-    internal::EigenParallelFor(start, end, std::forward<F>(f), grain_size);
+  internal::EigenParallelFor(start, end, std::forward<F>(f), grain_size);
 }
 
 template <typename Lf, typename Rf>
