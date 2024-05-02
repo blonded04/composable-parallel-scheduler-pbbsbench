@@ -159,20 +159,15 @@ public:
 
     CaughtMask_ = GroupMask_.load(std::memory_order_acquire);
     FinishMask_.store(0, std::memory_order_relaxed);
-    RunMask_.store(CaughtMask_, std::memory_order_release);
+    RunMask_.store(CaughtMask_, std::memory_order_relaxed);
+    std::atomic_thread_fence(std::memory_order_release);
 
     Tracing::ParForStart(nullptr);
-
-    // std::cout << std::bitset<8>(mask) << std::endl;
 
     return true;
   }
 
   void WaitAndClean(uint64_t mask) noexcept {
-    // I switch between this and cleanup in Run(). Usually the latter goes together with IntoTask() instead of loop
-    // Currently the latter gives beter results in benches
-    GroupMask_.fetch_and(~mask, std::memory_order_relaxed);
-
     while (CaughtMask_ != FinishMask_.load(std::memory_order_acquire)) {
       CpuRelax();
       CpuRelax();
@@ -228,14 +223,16 @@ public:
   {}
 
   bool TryPushTask(Task* task) {
-    if (!Owner_->TryPushTask(task, Mask_)) {
+    auto mask = Mask_;
+    if (!Owner_->TryPushTask(task, mask)) {
       return false;
     }
 
     ExecutedEpoch_ = SeenEpoch_ = Owner_->Epoch_.load(std::memory_order_relaxed);
-    Owner_->Run(Mask_);
+    Owner_->Run(mask);
 
-    Owner_->WaitAndClean(Mask_);
+    Unsubscribe(mask);
+    Owner_->WaitAndClean(mask);
     IsSubscribed_ = false;
     return true;
   }
@@ -247,13 +244,17 @@ public:
     IsSubscribed_ = true;
   }
 
-  // returns true if there is work subscriber must do after unsubscribing
-  bool Unsubscribe(uint64_t mask) noexcept {
-    assert(mask == Mask_);
+  void Unsubscribe(uint64_t mask) noexcept {
     if (IsSubscribed_) {
       Owner_->Unsubscribe(mask);
     }
     IsSubscribed_ = false;
+  }
+
+  // returns true if there is work subscriber must do after unsubscribing
+  bool UnsubscribeAndCheck(uint64_t mask) noexcept {
+    assert(mask == Mask_);
+    Unsubscribe(mask);
     return UpdateObligation(mask);
   }
 
@@ -266,8 +267,7 @@ public:
   bool RunIfAvailable(uint64_t mask) {
     assert(mask == Mask_);
     if (UpdateObligation(mask)) {
-      Owner_->Unsubscribe(mask);
-      IsSubscribed_ = false;
+      Unsubscribe(mask);
       Run(mask);
       return true;
     }
@@ -279,7 +279,9 @@ public:
   }
 
   bool CheckWork(uint64_t mask) {
-    if ((Owner_->RunMask_.load(std::memory_order_acquire) & mask) && !(Owner_->FinishMask_.load(std::memory_order_acquire) & mask)) {
+    auto runMask = Owner_->RunMask_.load(std::memory_order_acquire);
+    auto finishMask = Owner_->FinishMask_.load(std::memory_order_acquire);
+    if ((runMask & mask) && (runMask != DISTRIBUTING) && !(finishMask & mask)) {
       throw std::runtime_error{"fucking die"};
       return true;
     }
@@ -687,7 +689,7 @@ private:
     // Keep local track of subscription instead of going to RapidGroup each cycle
     pt->rapid_subscriber.SubscribeAs(mask);
     auto eventual_unsubscribe = Util::defer([pt, mask] {
-      if (pt->rapid_subscriber.IsSubscribed(mask) && pt->rapid_subscriber.Unsubscribe(mask)) {
+      if (pt->rapid_subscriber.UnsubscribeAndCheck(mask)) {
         pt->rapid_subscriber.RunSureAvailable(mask);
       }
     });
@@ -753,7 +755,7 @@ private:
   }
 
   Task* RescheduleOnRapidObligation(Task* task, PerThread& pt, uint64_t mask) {
-    if (!pt.rapid_subscriber.Unsubscribe(mask)) {
+    if (!pt.rapid_subscriber.UnsubscribeAndCheck(mask)) {
       return task;
     }
     if (task) {
