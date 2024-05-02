@@ -8,7 +8,6 @@
 // Public License v. 2.0. If a copy of the MPL was not distributed
 // with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
-#include <emmintrin.h>
 #include <bitset>
 #include <chrono>
 #include <cstdint>
@@ -175,9 +174,9 @@ public:
     GroupMask_.fetch_and(~mask, std::memory_order_relaxed);
 
     while (CaughtMask_ != FinishMask_.load(std::memory_order_acquire)) {
-      _mm_pause();
-      _mm_pause();
-      _mm_pause();
+      CpuRelax();
+      CpuRelax();
+      CpuRelax();
     }
 
     Task_ = nullptr;
@@ -297,7 +296,7 @@ private:
 
     uint64_t runMask = Owner_->RunMask_.load(std::memory_order_acquire);
     while (runMask == DISTRIBUTING) {
-      _mm_pause();
+      CpuRelax();
 
       runMask = Owner_->RunMask_.load(std::memory_order_acquire);
     }
