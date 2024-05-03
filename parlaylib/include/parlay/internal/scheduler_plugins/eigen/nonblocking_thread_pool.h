@@ -132,11 +132,11 @@ public:
   friend class Subscriber;
 
   void Subscribe(uint64_t mask) noexcept {
-    GroupMask_.fetch_or(mask, std::memory_order_release);
+    GroupMask_.fetch_or(mask, std::memory_order_acq_rel);
   }
 
   void Unsubscribe(uint64_t mask) noexcept {
-    GroupMask_.fetch_and(~mask, std::memory_order_release);
+    GroupMask_.fetch_and(~mask, std::memory_order_acq_rel);
   }
 
   bool IsSubscribed(uint64_t mask) const noexcept {
@@ -151,13 +151,12 @@ public:
 
     uint64_t epoch = Epoch_;
     RunMask_.store(DISTRIBUTING, std::memory_order_relaxed);
-    GroupMask_.fetch_or(mask, std::memory_order_relaxed);
     Task_ = task;
     // ScheduledAt_ = std::chrono::steady_clock::now();
     Epoch_.store(epoch + 1, std::memory_order_release);
     std::atomic_thread_fence(std::memory_order_seq_cst);
 
-    CaughtMask_ = GroupMask_.load(std::memory_order_acquire);
+    CaughtMask_ = GroupMask_.load(std::memory_order_acquire) | mask;
     FinishMask_.store(0, std::memory_order_relaxed);
     RunMask_.store(CaughtMask_, std::memory_order_relaxed);
     std::atomic_thread_fence(std::memory_order_release);
@@ -197,7 +196,7 @@ private:
 
     (*Task_)(part, parts);
 
-    FinishMask_.fetch_or(mask, std::memory_order_release);
+    FinishMask_.fetch_or(mask, std::memory_order_acq_rel);
     // auto curr_finish = FinishMask_.fetch_or(mask, std::memory_order_release) | mask;
     // if (curr_finish == CaughtMask_) {
     //   delete Task_;
@@ -228,7 +227,7 @@ public:
       return false;
     }
 
-    ExecutedEpoch_ = SeenEpoch_ = Owner_->Epoch_.load(std::memory_order_relaxed);
+    ExecutedEpoch_ = Owner_->Epoch_.load(std::memory_order_relaxed);
     Owner_->Run(mask);
 
     Unsubscribe(mask);
@@ -291,8 +290,8 @@ public:
 private:
   [[nodiscard]] bool UpdateObligation(uint64_t mask) noexcept {
     assert(mask == Mask_);
-    SeenEpoch_ = Owner_->Epoch_.load(std::memory_order_acquire);
-    if (SeenEpoch_ <= ExecutedEpoch_) {
+    auto currEpoch = Owner_->Epoch_.load(std::memory_order_acquire);
+    if (currEpoch <= ExecutedEpoch_) {
       return false;
     }
 
@@ -307,7 +306,7 @@ private:
   }
 
   void Run(uint64_t mask) {
-    ExecutedEpoch_ = SeenEpoch_ = Owner_->Epoch_.load(std::memory_order_acquire);
+    ExecutedEpoch_ = Owner_->Epoch_.load(std::memory_order_acquire);
     Owner_->Run(mask);
     Tracing::GotRapidTask();
   }
@@ -316,7 +315,6 @@ private:
   RapidGroup* Owner_ = nullptr;
   bool IsSubscribed_ = false;
   uint64_t ExecutedEpoch_ = 0;
-  uint64_t SeenEpoch_ = 0;
   uint64_t Mask_ = 0;
 };
 }
@@ -731,9 +729,6 @@ private:
         return processed_anything;
       }
       if (t) {
-        if (pt->rapid_subscriber.CheckWork(mask)) {
-          throw std::runtime_error{"fucking die"};
-        }
         ExecuteTask(t);
         processed_anything = true;
         current_stale = 0;
@@ -746,16 +741,17 @@ private:
       if (once) {
         break;
       }
-      if (all_empty && (++current_stale >= StaleLimit)&& !pt->rapid_subscriber.IsSubscribed(mask)) {
-        pt->rapid_subscriber.SubscribeAs(mask);
-      }
+      // if (all_empty && (++current_stale >= StaleLimit)&& !pt->rapid_subscriber.IsSubscribed(mask)) {
+      //   pt->rapid_subscriber.SubscribeAs(mask);
+      // }
+      pt->rapid_subscriber.SubscribeAs(mask);
     }
 
     return processed_anything;
   }
 
   Task* RescheduleOnRapidObligation(Task* task, PerThread& pt, uint64_t mask) {
-    if (!pt.rapid_subscriber.UnsubscribeAndCheck(mask)) {
+    if (!pt.rapid_subscriber.IsSubscribed(mask) || !pt.rapid_subscriber.UnsubscribeAndCheck(mask)) {
       return task;
     }
     if (task) {
