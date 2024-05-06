@@ -132,11 +132,11 @@ public:
   friend class Subscriber;
 
   void Subscribe(uint64_t mask) noexcept {
-    GroupMask_.fetch_or(mask, std::memory_order_acq_rel);
+    GroupMask_.fetch_or(mask, std::memory_order_seq_cst);
   }
 
   void Unsubscribe(uint64_t mask) noexcept {
-    GroupMask_.fetch_and(~mask, std::memory_order_acq_rel);
+    GroupMask_.fetch_and(~mask, std::memory_order_seq_cst);
   }
 
   bool IsSubscribed(uint64_t mask) const noexcept {
@@ -145,12 +145,12 @@ public:
 
   bool TryPushTask(Task* task, uint64_t mask) {
     bool locked = false;
-    if (!Locked_.compare_exchange_strong(locked, true, std::memory_order_acq_rel)) {
+    if (!Locked_.compare_exchange_strong(locked, true, std::memory_order_seq_cst)) {
       return false;
     }
 
     uint64_t epoch = Epoch_;
-    RunMask_.store(DISTRIBUTING, std::memory_order_relaxed);
+    RunMask_.store(DISTRIBUTING, std::memory_order_release);
     Task_ = task;
     // ScheduledAt_ = std::chrono::steady_clock::now();
     Epoch_.store(epoch + 1, std::memory_order_release);
@@ -174,8 +174,7 @@ public:
     }
 
     Task_ = nullptr;
-    Locked_.store(false, std::memory_order_relaxed);
-    std::atomic_thread_fence(std::memory_order_release);
+    Locked_.store(false, std::memory_order_release);
   }
 
 private:
@@ -196,13 +195,7 @@ private:
 
     (*Task_)(part, parts);
 
-    FinishMask_.fetch_or(mask, std::memory_order_acq_rel);
-    // auto curr_finish = FinishMask_.fetch_or(mask, std::memory_order_release) | mask;
-    // if (curr_finish == CaughtMask_) {
-    //   delete Task_;
-    //   Task_ = nullptr;
-    //   Locked_.store(false, std::memory_order_release);
-    // }
+    FinishMask_.fetch_or(mask, std::memory_order_seq_cst);
   }
   alignas(internal::CacheLine) std::atomic<bool> Locked_ = false;
   alignas(internal::CacheLine) std::atomic<uint64_t> GroupMask_ = 0;
@@ -227,7 +220,7 @@ public:
       return false;
     }
 
-    ExecutedEpoch_ = Owner_->Epoch_.load(std::memory_order_relaxed);
+    ExecutedEpoch_ = Owner_->Epoch_.load(std::memory_order_acquire);
     Owner_->Run(mask);
 
     Unsubscribe(mask);
