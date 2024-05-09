@@ -162,7 +162,7 @@ struct Task {
 
           Sched_.run_on_thread(
               Task<Func, balance, grainSizeMode, Initial::TRUE>{
-                  Sched_, std::move(newNodePtr)}, otherData.From, dataSplit,
+                  Sched_, std::move(newNodePtr), otherData.From, dataSplit,
                   Func_,
                   SplitData{.Threads = {otherThreads.From, threadSplit},
                             .GrainSize = Split_.GrainSize}},
