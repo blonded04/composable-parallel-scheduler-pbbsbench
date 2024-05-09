@@ -39,27 +39,59 @@ template <typename F> struct UniqueTask : Task {
   UniqueTask(F &&f) : f(std::move(f)) {}
 
   void operator()() override {
+    auto runCnt = RunCount_.fetch_add(1);
+    if (runCnt != 0) {
+      throw std::runtime_error{"dies from cringe"};
+    }
     f();
     delete this; // really safe to do heere
   }
 
   std::decay_t<F> f;
+  std::atomic_uint32_t RunCount_ = 0;
 };
 
+// struct ProxyTask : Task {
+//   ProxyTask(Task* task) : InnerTask_{task} {}
+
+//   void operator()() override {
+//     Task* task = InnerTask_.load(std::memory_order_acquire);
+//     if (task && InnerTask_.compare_exchange_strong(task, nullptr)) {
+//       (*task)();
+//     } else {
+//       // proxy should only exist between 2 threads, thus the second thread deletes it
+//       delete this;
+//     }
+//   }
+
+//   std::atomic<Task*> InnerTask_;
+// };
+
+template <typename F>
 struct ProxyTask : Task {
-  ProxyTask(Task* task) : InnerTask_{task} {}
+  ProxyTask(F&& func)
+    : Func_{std::move(func)}
+  {}
 
   void operator()() override {
-    Task* task = InnerTask_.load(std::memory_order_acquire);
-    if (task && InnerTask_.compare_exchange_strong(task, nullptr)) {
-      (*task)();
-    } else {
-      // proxy should only exist between 2 threads, thus the second thread deletes it
+    // We should enter this function 2 times
+    // prevState:
+    // 0 => first entrance, run Func_
+    // 1 in same thread  => this thread finished Func_ before other thread entered
+    // 1 in other thread => other thread entered function before Func_ is finished
+    // 2 this is the last change of state, drop object
+    auto prevState = State_.fetch_add(1, std::memory_order_release);
+    if (prevState == 0) {
+      Func_();
+      prevState = State_.fetch_add(1, std::memory_order_release);
+    }
+    if (prevState == 2) {
       delete this;
     }
   }
 
-  std::atomic<Task*> InnerTask_;
+  std::decay_t<F> Func_;
+  std::atomic_uint_fast32_t State_ = 0;
 };
 
 template <typename F> Task *MakeTask(F &&f) {
@@ -67,7 +99,7 @@ template <typename F> Task *MakeTask(F &&f) {
 }
 
 template <typename F> Task *MakeProxyTask(F &&f) {
-  return new ProxyTask{new UniqueTask{std::forward<F>(f)}};
+  return new ProxyTask{std::forward<F>(f)};
 }
 
 // This defines an interface that ThreadPoolDevice can take to use
