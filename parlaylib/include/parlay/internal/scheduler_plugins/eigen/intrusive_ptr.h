@@ -2,6 +2,7 @@
 
 #include <atomic>
 #include <cstdint>
+#include <functional>
 
 template <typename T> struct IntrusivePtr {
 
@@ -10,7 +11,7 @@ template <typename T> struct IntrusivePtr {
   using element_type = T;
 
   IntrusivePtr() noexcept : Ptr_(nullptr) {}
-  IntrusivePtr(T *p) : Ptr_(p) {
+  explicit IntrusivePtr(T *p) : Ptr_(p) {
     if (p) {
       IntrusivePtrAddRef(p);
     }
@@ -22,7 +23,7 @@ template <typename T> struct IntrusivePtr {
     }
   }
 
-  IntrusivePtr(IntrusivePtr &&r) : Ptr_(r.get()) { r.Ptr_ = nullptr; }
+  IntrusivePtr(IntrusivePtr &&r) noexcept : Ptr_(r.get()) { r.Ptr_ = nullptr; }
 
   ~IntrusivePtr() {
     if (Ptr_) {
@@ -44,7 +45,7 @@ template <typename T> struct IntrusivePtr {
     return *this;
   }
 
-  IntrusivePtr &operator=(IntrusivePtr &&r) {
+  IntrusivePtr &operator=(IntrusivePtr &&r) noexcept {
     if (this != &r) {
       IntrusivePtr(std::move(r)).swap(*this);
     }
@@ -109,7 +110,7 @@ template <class T> void swap(IntrusivePtr<T> &a, IntrusivePtr<T> &b) noexcept {
 template <typename T> struct intrusive_ref_counter {
 
   template <typename D>
-  friend size_t IntrusivePtrLoadRef(const intrusive_ref_counter<D> *p) noexcept;
+  friend std::size_t IntrusivePtrLoadRef(const intrusive_ref_counter<D> *p) noexcept;
 
   template <typename D>
   friend void IntrusivePtrAddRef(const intrusive_ref_counter<D> *p) noexcept;
@@ -131,11 +132,11 @@ protected:
   ~intrusive_ref_counter() = default;
 
 private:
-  mutable std::atomic<size_t> m_cnt;
+  mutable std::atomic<std::size_t> m_cnt{0};
 };
 
 template <class Derived>
-size_t IntrusivePtrLoadRef(const intrusive_ref_counter<Derived> *p) noexcept {
+std::size_t IntrusivePtrLoadRef(const intrusive_ref_counter<Derived> *p) noexcept {
   return p->m_cnt.load(std::memory_order_acquire);
 }
 

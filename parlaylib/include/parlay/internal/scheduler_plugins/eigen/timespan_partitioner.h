@@ -12,6 +12,7 @@
 #include <cassert>
 #include <chrono>
 #include <cstddef>
+#include <cstdlib>
 #include <memory>
 #include <string>
 #include <utility>
@@ -64,7 +65,7 @@ inline TaskStack& ThreadLocalTaskStack() {
 struct TaskNode : intrusive_ref_counter<TaskNode> {
   using NodePtr = IntrusivePtr<TaskNode>;
 
-  TaskNode(NodePtr parent = nullptr) : Parent(std::move(parent)) {}
+  TaskNode(NodePtr parent = NodePtr{nullptr}) : Parent(std::move(parent)) {}
 
   void SpawnChild(size_t count = 1) {
     ChildWaitingSteal_.fetch_add(count, std::memory_order_relaxed);
@@ -153,9 +154,15 @@ struct Task {
                                       dataMod));
           assert(otherData.From < dataSplit);
           assert(otherThreads.From < threadSplit);
+
+          static_assert(alignof(TaskNode) >= 8);
+          auto nodeRaw = aligned_alloc(alignof(TaskNode), sizeof(TaskNode));
+          auto newNode = new(nodeRaw) TaskNode{CurrentNode_};
+          IntrusivePtr newNodePtr{newNode};
+
           Sched_.run_on_thread(
               Task<Func, balance, grainSizeMode, Initial::TRUE>{
-                  Sched_, new TaskNode(CurrentNode_), otherData.From, dataSplit,
+                  Sched_, std::move(newNodePtr)}, otherData.From, dataSplit,
                   Func_,
                   SplitData{.Threads = {otherThreads.From, threadSplit},
                             .GrainSize = Split_.GrainSize}},
@@ -206,8 +213,11 @@ struct Task {
         // CurrentNode_->SpawnChild();
         // eigen's scheduler will push task to the current thread queue,
         // then some other thread can steal this
+        auto nodeRaw = aligned_alloc(alignof(TaskNode), sizeof(TaskNode));
+        auto* newNode = new(nodeRaw) TaskNode{CurrentNode_};
+        IntrusivePtr<TaskNode> nodePtr{newNode};
         Sched_.run(Task<Func, Balance::SIMPLE, GrainSize::DEFAULT>{
-            Sched_, new TaskNode(CurrentNode_), mid, End_, Func_,
+            Sched_, std::move(nodePtr), mid, End_, Func_,
             SplitData{.GrainSize = Split_.GrainSize, .Depth = Split_.Depth + 1}});
         End_ = mid;
       }
@@ -306,7 +316,7 @@ void ParallelDo(F1&& fst, F2&& sec) {
   TaskNode rootNode;
   IntrusivePtrAddRef(&rootNode); // avoid deletion
 
-  sched.run(detail::WrapAsTask(std::forward<F1>(fst), &rootNode));
+  sched.run(detail::WrapAsTask(std::forward<F1>(fst), IntrusivePtr{&rootNode}));
   std::forward<F2>(sec)();
 
   while (IntrusivePtrLoadRef(&rootNode) != 1) {
