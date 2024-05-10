@@ -51,22 +51,33 @@ template <typename F> struct UniqueTask : Task {
   std::atomic_uint32_t RunCount_ = 0;
 };
 
-// struct ProxyTask : Task {
-//   ProxyTask(Task* task) : InnerTask_{task} {}
+template <typename F> Task *MakeTask(F &&f) {
+  return new UniqueTask<decltype(std::forward<F>(f))>{std::forward<F>(f)};
+}
 
-//   void operator()() override {
-//     Task* task = InnerTask_.load(std::memory_order_acquire);
-//     if (task && InnerTask_.compare_exchange_strong(task, nullptr)) {
-//       (*task)();
-//     } else {
-//       // proxy should only exist between 2 threads, thus the second thread deletes it
-//       delete this;
-//     }
-//   }
+/*
+struct ProxyTask : Task {
+  ProxyTask(Task* task) : InnerTask_{task} {}
 
-//   std::atomic<Task*> InnerTask_;
-// };
+  void operator()() override {
+    Task* task = InnerTask_.load(std::memory_order_acquire);
+    if (task && InnerTask_.compare_exchange_strong(task, nullptr)) {
+      (*task)();
+    } else {
+      // proxy should only exist between 2 threads, thus the second thread deletes it
+      delete this;
+    }
+  }
 
+  std::atomic<Task*> InnerTask_;
+};
+
+template <typename F> Task *MakeProxyTask(F &&f) {
+  return new ProxyTask{new UniqueTask<F>(std::forward<F>(f))};
+}
+*/
+
+/**/
 template <typename F>
 struct ProxyTask : Task {
   ProxyTask(F&& func)
@@ -80,10 +91,10 @@ struct ProxyTask : Task {
     // 1 in same thread  => this thread finished Func_ before other thread entered
     // 1 in other thread => other thread entered function before Func_ is finished
     // 2 this is the last change of state, drop object
-    auto prevState = State_.fetch_add(1, std::memory_order_release);
+    auto prevState = State_.fetch_add(1, std::memory_order_seq_cst);
     if (prevState == 0) {
       Func_();
-      prevState = State_.fetch_add(1, std::memory_order_release);
+      prevState = State_.fetch_add(1, std::memory_order_seq_cst);
     }
     if (prevState == 2) {
       delete this;
@@ -94,13 +105,10 @@ struct ProxyTask : Task {
   std::atomic_uint_fast32_t State_ = 0;
 };
 
-template <typename F> Task *MakeTask(F &&f) {
-  return new UniqueTask<decltype(std::forward<F>(f))>{std::forward<F>(f)};
-}
-
 template <typename F> Task *MakeProxyTask(F &&f) {
   return new ProxyTask{std::forward<F>(f)};
 }
+/**/
 
 // This defines an interface that ThreadPoolDevice can take to use
 // custom thread pools underneath.

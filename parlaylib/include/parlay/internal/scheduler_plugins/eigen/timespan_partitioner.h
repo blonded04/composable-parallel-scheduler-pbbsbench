@@ -4,6 +4,7 @@
 
 #include "eigen_pool.h"
 #include "intrusive_ptr.h"
+#include "mpmc_queue.h"
 #include "num_threads.h"
 #include "thread_index.h"
 #include "util.h"
