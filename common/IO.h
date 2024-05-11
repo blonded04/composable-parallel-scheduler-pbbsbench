@@ -114,22 +114,31 @@ namespace benchIO {
     xToString(s+l+1, a.second);
   }
 
-  inline std::ostream& writeToStream(std::ostream& os, charstring const &a) {
-    return os << std::string_view(a.data(), a.size());
-  }
-  inline std::ostream& writeToStream(std::ostream& os, long a) { return os << a; }
-  inline std::ostream& writeToStream(std::ostream& os, uint a) { return os << a; }
-  inline std::ostream& writeToStream(std::ostream& os, unsigned long a) { return os << a; }
-  inline std::ostream& writeToStream(std::ostream& os, int a) { return os << a; }
-  inline std::ostream& writeToStream(std::ostream& os, double a) { return os << a; }
-  inline std::ostream& writeToStream(std::ostream& os, char* a) { return os << std::string_view(a, std::strlen(a)); }
+  template <typename T>
+  struct StreamWriter {
+    std::ostream& operator()(std::ostream& os, T const& a) { return os << a; }
+  };
 
-  template <class A, class B>
-  inline std::ostream& writeToStream(std::ostream& os, pair<A,B> const &a) {
-    writeToStream(os, a.first);
-    os << ' ';
-    writeToStream(os, a.second);
-    return os;
+  template <>
+  struct StreamWriter<charstring> {
+    std::ostream& operator()(std::ostream& os, charstring const& a) {
+      return StreamWriter<std::string_view>{}(os, std::string_view(a.data(), a.size()));
+    }
+  };
+
+  template <typename A, typename B>
+  struct StreamWriter<std::pair<A, B>> {
+    std::ostream& operator()(std::ostream& os, std::pair<A, B> const& a) {
+      StreamWriter<A>{}(os, a.first);
+      os << ' ';
+      StreamWriter<B>{}(os, a.second);
+      return os;
+    }
+  };
+
+  template <typename T>
+  std::ostream& writeToStream(std::ostream& os, T const& a) {
+    return StreamWriter<T>{}(os, a);
   }
 
   template <class T>

@@ -79,26 +79,30 @@ namespace benchIO {
   string HeaderPoint3d = "pbbs_sequencePoint3d";
   string HeaderTriangles = "pbbs_triangles";
 
-  template <class T>
-  inline std::ostream& writeToStream(std::ostream& os, point2d<T> const &point) {
-    writeToStream(os, point.x);
-    os << ' ';
-    writeToStream(os, point.y);
-    return os;
-  }
+  template <typename T>
+  struct StreamWriter<point2d<T>> {
+    std::ostream& operator()(std::ostream& os, point2d<T> const& point) {
+      writeToStream(os, point.x);
+      os << ' ';
+      writeToStream(point.y);
+      return os;
+    }
+  };
 
-  template <class T>
-  inline std::ostream& writeToStream(std::ostream& os, point3d<T> const &point) {
-    writeToStream(os, point.x);
-    os << ' ';
-    writeToStream(os, point.y);
-    os << ' ';
-    writeToStream(os, point.z);
-    return os;
-  }
+  template <typename T>
+  struct StreamWriter<point3d<T>> {
+    std::ostream& operator()(std::ostream& os, point3d<T> const &point) {
+      writeToStream(os, point.x);
+      os << ' ';
+      writeToStream(os, point.y);
+      os << ' ';
+      writeToStream(os, point.z);
+      return os;
+    }
+  };
 
   template <class Point>
-    int writePointsToFile(parlay::sequence<Point> const &P, char const *fname) {
+  int writePointsToFile(parlay::sequence<Point> const &P, char const *fname) {
     string Header = (Point::dim == 2) ? HeaderPoint2d : HeaderPoint3d;
     int r = writeSeqToFile(Header, P, fname);
     return r;
