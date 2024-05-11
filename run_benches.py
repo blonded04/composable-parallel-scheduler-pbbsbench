@@ -15,6 +15,7 @@ parser.add_argument("--tbb", action="store_true", help="set if want to run with 
 parser.add_argument("--eigen", action="store_true", help="set if want to run with eigen executor")
 
 parser.add_argument("--numa", action="store_true", help="set if run on numa machine")
+parser.add_argument("--nocheck", action="store_true", help="run without result validation")
 parser.add_argument("--only", type=str, nargs='+', help="only run given test")
 parser.add_argument("--small", action="store_true", help="set if want to test on smaller datasets")
 parser.add_argument("--mode", type=str, help="run with specified mode")
