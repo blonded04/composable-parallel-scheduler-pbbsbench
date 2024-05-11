@@ -39,43 +39,16 @@ template <typename F> struct UniqueTask : Task {
   UniqueTask(F &&f) : f(std::move(f)) {}
 
   void operator()() override {
-    auto runCnt = RunCount_.fetch_add(1);
-    if (runCnt != 0) {
-      throw std::runtime_error{"dies from cringe"};
-    }
     f();
     delete this; // really safe to do heere
   }
 
   std::decay_t<F> f;
-  std::atomic_uint32_t RunCount_ = 0;
 };
 
 template <typename F> Task *MakeTask(F &&f) {
   return new UniqueTask<decltype(std::forward<F>(f))>{std::forward<F>(f)};
 }
-
-/*
-struct ProxyTask : Task {
-  ProxyTask(Task* task) : InnerTask_{task} {}
-
-  void operator()() override {
-    Task* task = InnerTask_.load(std::memory_order_acquire);
-    if (task && InnerTask_.compare_exchange_strong(task, nullptr)) {
-      (*task)();
-    } else {
-      // proxy should only exist between 2 threads, thus the second thread deletes it
-      delete this;
-    }
-  }
-
-  std::atomic<Task*> InnerTask_;
-};
-
-template <typename F> Task *MakeProxyTask(F &&f) {
-  return new ProxyTask{new UniqueTask<F>(std::forward<F>(f))};
-}
-*/
 
 /**/
 template <typename F>

@@ -84,7 +84,7 @@ namespace benchIO {
     std::ostream& operator()(std::ostream& os, point2d<T> const& point) {
       writeToStream(os, point.x);
       os << ' ';
-      writeToStream(point.y);
+      writeToStream(os, point.y);
       return os;
     }
   };

@@ -63,8 +63,8 @@ parlay::sequence<indexT> quickHull(parlay::sequence<point> const & Points,
 	indexT j = Idxs[i];
 	coord lefta = triArea(lP, midP, Points[j]);
 	coord righta = triArea(midP, rP, Points[j]);
-	leftFlag[i] = lefta > 0.0;
-	rightFlag[i] = righta > 0.0;
+	leftFlag[i] = lefta > 1e-18;
+	rightFlag[i] = righta > 1e-18;
 	return cipairs(cipair(lefta,j),cipair(righta,j));
       });
     cipairs prs = parlay::reduce(P, ci_monoid);
@@ -146,7 +146,6 @@ parlay::sequence<indexT> hull(parlay::sequence<point> const &Points) {
 				    max_x_idx, max_lower_idx, min_x_idx);}
 	 );
   t.next("recurse");
-    
   parlay::sequence<indexT> result(upperR.size() + lowerR.size() + 2);
   result[0] = min_x_idx;
   auto xxx = result.cut(1, 1 + upperR.size());
