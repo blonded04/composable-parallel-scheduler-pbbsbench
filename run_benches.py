@@ -63,9 +63,9 @@ if args.tbb:
 
 if args.eigen:
     eigen_modes = [
-        "EIGEN_SIMPLE",
-        "EIGEN_TIMESPAN",
-        "EIGEN_STATIC",
+#        "EIGEN_SIMPLE",
+#        "EIGEN_TIMESPAN",
+#        "EIGEN_STATIC",
         "EIGEN_TIMESPAN_GRAINSIZE",
     ]
     eigen_executor = Executor(name="eigen", flag=("EIGEN", 1), modes=eigen_modes)
@@ -111,6 +111,7 @@ for executor in executors:
         if args.only:
             cmd.append("-only")
             cmd.extend(args.only)
+            cmd.append("-ext")
         if args.small:
             cmd.extend(["-small"])
 

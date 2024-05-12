@@ -63,8 +63,8 @@ parlay::sequence<indexT> quickHull(parlay::sequence<point> const & Points,
 	indexT j = Idxs[i];
 	coord lefta = triArea(lP, midP, Points[j]);
 	coord righta = triArea(midP, rP, Points[j]);
-	leftFlag[i] = lefta > 0.0;
-	rightFlag[i] = righta > 0.0;
+	leftFlag[i] = lefta > 1e-21;
+	rightFlag[i] = righta > 1e-21;
 	return cipairs(cipair(lefta,j),cipair(righta,j));
       });
     cipairs prs = parlay::reduce(P, ci_monoid);

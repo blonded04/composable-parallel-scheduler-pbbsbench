@@ -4,51 +4,116 @@ Forcing Compile
 running on 48 threads
 
 cd benchmarks/integerSort/parallelRadixSort ; make -s cleanall ; make -j 24
-clang++ -DPARLAY_OPENMP -DOMP_MODE=OMP_DYNAMIC_NONMONOTONIC -fopenmp=libomp -O2 -g -std=c++17 -DNDEBUG -I .  -include isort.h -o isort ../bench/isortTime.C -DPARLAY_OPENMP -DOMP_MODE=OMP_DYNAMIC_NONMONOTONIC -fopenmp=libomp -ldl 
+clang++ -DPARLAY_OPENMP -DOMP_MODE=OMP_DYNAMIC_NONMONOTONIC -fopenmp=libomp -O2 -g -std=c++17 -DNDEBUG -I .  -include isort.h -o isort ../bench/isortTime.C -DPARLAY_OPENMP -DOMP_MODE=OMP_DYNAMIC_NONMONOTONIC -fopenmp=libomp -ldl -Wl,-rpath,/home/itmo_denis/local/lib -L/home/itmo_denis/local/lib -ljemalloc
 cp ../bench/testInputs ../bench/testInputs_small .
 cd ../bench; make isortCheck
 make[1]: Entering directory '/home/itmo_denis/pbbsbench/benchmarks/integerSort/bench'
-clang++ -DPARLAY_OPENMP -DOMP_MODE=OMP_DYNAMIC_NONMONOTONIC -fopenmp=libomp -O2 -g -std=c++17 -DNDEBUG -I . -Icommon -o isortCheck isortCheck.C -DPARLAY_OPENMP -DOMP_MODE=OMP_DYNAMIC_NONMONOTONIC -fopenmp=libomp -ldl 
+clang++ -DPARLAY_OPENMP -DOMP_MODE=OMP_DYNAMIC_NONMONOTONIC -fopenmp=libomp -O2 -g -std=c++17 -DNDEBUG -I . -Icommon -o isortCheck isortCheck.C -DPARLAY_OPENMP -DOMP_MODE=OMP_DYNAMIC_NONMONOTONIC -fopenmp=libomp -ldl -Wl,-rpath,/home/itmo_denis/local/lib -L/home/itmo_denis/local/lib -ljemalloc
 make[1]: Leaving directory '/home/itmo_denis/pbbsbench/benchmarks/integerSort/bench'
 cd benchmarks/integerSort/parallelRadixSort ; numactl -i all ./testInputs -r 3 -p 48
 running cd ../sequenceData/data; make randomSeq_100M_int
-running OMP_NUM_THREADS=48 ./isort -b 27 -r 3 -o /tmp/ofile468128_948010 ../sequenceData/data/randomSeq_100M_int
-running ./../bench/isortCheck  ../sequenceData/data/randomSeq_100M_int /tmp/ofile468128_948010
+running OMP_NUM_THREADS=48 ./isort -b 27 -r 3 -o /tmp/ofile534672_590641 ../sequenceData/data/randomSeq_100M_int
+running ./../bench/isortCheck  ../sequenceData/data/randomSeq_100M_int /tmp/ofile534672_590641
 CheckOut: ./../bench/isortCheck: in and out types don't match
 
 TEST TERMINATED ABNORMALLY:
-[./../bench/isortCheck  ../sequenceData/data/randomSeq_100M_int /tmp/ofile468128_948010
+[./../bench/isortCheck  ../sequenceData/data/randomSeq_100M_int /tmp/ofile534672_590641
 ./../bench/isortCheck: in and out types don't match
 ]
 
 cd benchmarks/comparisonSort/sampleSort ; make -s cleanall ; make -j 24
-clang++ -DPARLAY_OPENMP -DOMP_MODE=OMP_DYNAMIC_NONMONOTONIC -fopenmp=libomp -O2 -g -std=c++17 -DNDEBUG -I .  -include sort.h -o sort ../bench/sortTime.C -DPARLAY_OPENMP -DOMP_MODE=OMP_DYNAMIC_NONMONOTONIC -fopenmp=libomp -ldl 
+clang++ -DPARLAY_OPENMP -DOMP_MODE=OMP_DYNAMIC_NONMONOTONIC -fopenmp=libomp -O2 -g -std=c++17 -DNDEBUG -I .  -include sort.h -o sort ../bench/sortTime.C -DPARLAY_OPENMP -DOMP_MODE=OMP_DYNAMIC_NONMONOTONIC -fopenmp=libomp -ldl -Wl,-rpath,/home/itmo_denis/local/lib -L/home/itmo_denis/local/lib -ljemalloc
 cp ../bench/testInputs ../bench/testInputs_small .
 cd ../bench; make sortCheck
 make[1]: Entering directory '/home/itmo_denis/pbbsbench/benchmarks/comparisonSort/bench'
-clang++ -DPARLAY_OPENMP -DOMP_MODE=OMP_DYNAMIC_NONMONOTONIC -fopenmp=libomp -O2 -g -std=c++17 -DNDEBUG -I . -o sortCheck sortCheck.C -DPARLAY_OPENMP -DOMP_MODE=OMP_DYNAMIC_NONMONOTONIC -fopenmp=libomp -ldl 
+clang++ -DPARLAY_OPENMP -DOMP_MODE=OMP_DYNAMIC_NONMONOTONIC -fopenmp=libomp -O2 -g -std=c++17 -DNDEBUG -I . -o sortCheck sortCheck.C -DPARLAY_OPENMP -DOMP_MODE=OMP_DYNAMIC_NONMONOTONIC -fopenmp=libomp -ldl -Wl,-rpath,/home/itmo_denis/local/lib -L/home/itmo_denis/local/lib -ljemalloc
 make[1]: Leaving directory '/home/itmo_denis/pbbsbench/benchmarks/comparisonSort/bench'
 cd benchmarks/comparisonSort/sampleSort ; numactl -i all ./testInputs -r 3 -p 48
 running cd ../sequenceData/data; make randomSeq_100M_double
-running OMP_NUM_THREADS=48 ./sort  -r 3 -o /tmp/ofile148369_84759 ../sequenceData/data/randomSeq_100M_double
-running ./../bench/sortCheck  ../sequenceData/data/randomSeq_100M_double /tmp/ofile148369_84759
+running OMP_NUM_THREADS=48 ./sort  -r 3 -o /tmp/ofile546536_974696 ../sequenceData/data/randomSeq_100M_double
+running ./../bench/sortCheck  ../sequenceData/data/randomSeq_100M_double /tmp/ofile546536_974696
+CheckOut: sortCheck: types don't match
+
 TEST TERMINATED ABNORMALLY:
-[./../bench/sortCheck  ../sequenceData/data/randomSeq_100M_double /tmp/ofile148369_84759
-terminate called after throwing an instance of 'std::bad_alloc'
-  what():  std::bad_alloc
+[./../bench/sortCheck  ../sequenceData/data/randomSeq_100M_double /tmp/ofile546536_974696
+sortCheck: types don't match
 ]
 
 cd benchmarks/removeDuplicates/parlayhash ; make -s cleanall ; make -j 24
-clang++ -DPARLAY_OPENMP -DOMP_MODE=OMP_DYNAMIC_NONMONOTONIC -fopenmp=libomp -O2 -g -std=c++17 -DNDEBUG -I .  -include dedup.h -o dedup ../bench/dedupTime.C -DPARLAY_OPENMP -DOMP_MODE=OMP_DYNAMIC_NONMONOTONIC -fopenmp=libomp -ldl 
+clang++ -DPARLAY_OPENMP -DOMP_MODE=OMP_DYNAMIC_NONMONOTONIC -fopenmp=libomp -O2 -g -std=c++17 -DNDEBUG -I .  -include dedup.h -o dedup ../bench/dedupTime.C -DPARLAY_OPENMP -DOMP_MODE=OMP_DYNAMIC_NONMONOTONIC -fopenmp=libomp -ldl -Wl,-rpath,/home/itmo_denis/local/lib -L/home/itmo_denis/local/lib -ljemalloc
 cp ../bench/testInputs ../bench/testInputs_small .
 cd ../bench; make dedupCheck
 make[1]: Entering directory '/home/itmo_denis/pbbsbench/benchmarks/removeDuplicates/bench'
-clang++ -DPARLAY_OPENMP -DOMP_MODE=OMP_DYNAMIC_NONMONOTONIC -fopenmp=libomp -O2 -g -std=c++17 -DNDEBUG -I . -o dedupCheck dedupCheck.C -DPARLAY_OPENMP -DOMP_MODE=OMP_DYNAMIC_NONMONOTONIC -fopenmp=libomp -ldl 
+clang++ -DPARLAY_OPENMP -DOMP_MODE=OMP_DYNAMIC_NONMONOTONIC -fopenmp=libomp -O2 -g -std=c++17 -DNDEBUG -I . -o dedupCheck dedupCheck.C -DPARLAY_OPENMP -DOMP_MODE=OMP_DYNAMIC_NONMONOTONIC -fopenmp=libomp -ldl -Wl,-rpath,/home/itmo_denis/local/lib -L/home/itmo_denis/local/lib -ljemalloc
 make[1]: Leaving directory '/home/itmo_denis/pbbsbench/benchmarks/removeDuplicates/bench'
 cd benchmarks/removeDuplicates/parlayhash ; numactl -i all ./testInputs -r 3 -p 48
 running cd ../sequenceData/data; make randomSeq_100M_int
-running OMP_NUM_THREADS=48 ./dedup  -r 3 -o /tmp/ofile976471_731108 ../sequenceData/data/randomSeq_100M_int
-running ./../bench/dedupCheck  ../sequenceData/data/randomSeq_100M_int /tmp/ofile976471_731108
+running OMP_NUM_THREADS=48 ./dedup  -r 3 -o /tmp/ofile92488_762581 ../sequenceData/data/randomSeq_100M_int
+running ./../bench/dedupCheck  ../sequenceData/data/randomSeq_100M_int /tmp/ofile92488_762581
 running rm ../sequenceData/data/randomSeq_100M_int
 TEST TERMINATED ABNORMALLY:
   cd benchmarks/removeDuplicates/parlayhash ; numactl -i all ./testInputs -r 3 -p 48
+HOSTNAME: collab1
+Running only:  [['comparisonSort/quickSort', True, 1]]
+Extended Benchmarks
+Not Checking
+Parallel Only
+Forcing Compile
+running on 48 threads
+
+cd benchmarks/comparisonSort/quickSort ; make -s cleanall ; make -j 24
+clang++ -DPARLAY_OPENMP -DOMP_MODE=OMP_DYNAMIC_NONMONOTONIC -fopenmp=libomp -O2 -g -std=c++17 -DNDEBUG -I .  -include sort.h -o sort ../bench/sortTime.C -DPARLAY_OPENMP -DOMP_MODE=OMP_DYNAMIC_NONMONOTONIC -fopenmp=libomp -ldl -Wl,-rpath,/home/itmo_denis/local/lib -L/home/itmo_denis/local/lib -ljemalloc
+cp ../bench/testInputs ../bench/testInputs_small .
+cd ../bench; make sortCheck
+make[1]: Entering directory '/home/itmo_denis/pbbsbench/benchmarks/comparisonSort/bench'
+clang++ -DPARLAY_OPENMP -DOMP_MODE=OMP_DYNAMIC_NONMONOTONIC -fopenmp=libomp -O2 -g -std=c++17 -DNDEBUG -I . -o sortCheck sortCheck.C -DPARLAY_OPENMP -DOMP_MODE=OMP_DYNAMIC_NONMONOTONIC -fopenmp=libomp -ldl -Wl,-rpath,/home/itmo_denis/local/lib -L/home/itmo_denis/local/lib -ljemalloc
+make[1]: Leaving directory '/home/itmo_denis/pbbsbench/benchmarks/comparisonSort/bench'
+cd benchmarks/comparisonSort/quickSort ; numactl -i all ./testInputs -r 3 -p 48 -x
+running cd ../sequenceData/data; make randomSeq_100M_double
+running OMP_NUM_THREADS=48 ./sort  -r 3 ../sequenceData/data/randomSeq_100M_double
+running rm ../sequenceData/data/randomSeq_100M_double
+randomSeq_100M_double :  -r 3 : '1.999', '2.03', '2.029', geomean = 2.019
+running cd ../sequenceData/data; make exptSeq_100M_double
+running OMP_NUM_THREADS=48 ./sort  -r 3 ../sequenceData/data/exptSeq_100M_double
+running rm ../sequenceData/data/exptSeq_100M_double
+exptSeq_100M_double :  -r 3 : '1.301', '1.301', '1.298', geomean = 1.3
+running cd ../sequenceData/data; make almostSortedSeq_100M_double
+running OMP_NUM_THREADS=48 ./sort  -r 3 ../sequenceData/data/almostSortedSeq_100M_double
+running rm ../sequenceData/data/almostSortedSeq_100M_double
+almostSortedSeq_100M_double :  -r 3 : '0.951', '1.007', '1.018', geomean = 0.992
+running cd ../sequenceData/data; make randomSeq_100M_double_pair_double
+running OMP_NUM_THREADS=48 ./sort  -r 3 ../sequenceData/data/randomSeq_100M_double_pair_double
+running rm ../sequenceData/data/randomSeq_100M_double_pair_double
+randomSeq_100M_double_pair_double :  -r 3 : '3.037', '3.047', '3.055', geomean = 3.046
+running cd ../sequenceData/data; make trigramSeq_100M
+running OMP_NUM_THREADS=48 ./sort  -r 3 ../sequenceData/data/trigramSeq_100M
+running rm ../sequenceData/data/trigramSeq_100M
+trigramSeq_100M :  -r 3 : '8.565', '9.282', '8.699', geomean = 8.843
+quickSort : 48 : geomean of mins = 2.299, geomean of geomeans = 2.34
+HOSTNAME: collab1
+Running only:  [['convexHull/quickHull', True, 0]]
+Not Checking
+Parallel Only
+Forcing Compile
+running on 48 threads
+
+cd benchmarks/convexHull/quickHull ; make -s cleanall ; make -j 24
+clang++ -DPARLAY_OPENMP -DOMP_MODE=OMP_DYNAMIC_NONMONOTONIC -fopenmp=libomp -O2 -g -std=c++17 -DNDEBUG -I .  -o hullTime.o -c ../bench/hullTime.C
+clang++ -DPARLAY_OPENMP -DOMP_MODE=OMP_DYNAMIC_NONMONOTONIC -fopenmp=libomp -O2 -g -std=c++17 -DNDEBUG -I .  -c hull.C -o hull.o
+cd ../bench; make -s hullCheck
+cp ../bench/testInputs ../bench/testInputs_small .
+clang++ -o hull hullTime.o hull.o -DPARLAY_OPENMP -DOMP_MODE=OMP_DYNAMIC_NONMONOTONIC -fopenmp=libomp -ldl -Wl,-rpath,/home/itmo_denis/local/lib -L/home/itmo_denis/local/lib -ljemalloc
+cd benchmarks/convexHull/quickHull ; numactl -i all ./testInputs -r 3 -p 48 -x
+running cd ../geometryData/data; make 2DinSphere_100000000
+running OMP_NUM_THREADS=48 ./hull  -r 3 ../geometryData/data/2DinSphere_100000000
+running rm ../geometryData/data/2DinSphere_100000000
+2DinSphere_100000000 :  -r 3 : '1.517', '1.466', '1.579', geomean = 1.52
+running cd ../geometryData/data; make 2Dkuzmin_100000000
+running OMP_NUM_THREADS=48 ./hull  -r 3 ../geometryData/data/2Dkuzmin_100000000
+running rm ../geometryData/data/2Dkuzmin_100000000
+2Dkuzmin_100000000 :  -r 3 : '1.56', '1.526', '1.561', geomean = 1.549
+running cd ../geometryData/data; make 2DonSphere_100000000
+running OMP_NUM_THREADS=48 ./hull  -r 3 ../geometryData/data/2DonSphere_100000000
+running rm ../geometryData/data/2DonSphere_100000000
+2DonSphere_100000000 :  -r 3 : '6.993', '7.079', '7.092', geomean = 7.054
+quickHull : 48 : geomean of mins = 2.501, geomean of geomeans = 2.551

@@ -1,4 +1,5 @@
 HOSTNAME: collab1
+Not Checking
 Parallel Only
 Forcing Compile
 running on 48 threads
@@ -6,480 +7,422 @@ TBB_INCLUDE: /home/itmo_denis/local/include
 TBB_LFLAGS: -Wl,-rpath,/home/itmo_denis/local/lib64 /home/itmo_denis/local/lib64/libtbb.so
 
 cd benchmarks/integerSort/parallelRadixSort ; make -s cleanall ; make -j 24
-g++ -DPARLAY_TBB -DTBB_MODE=TBB_SIMPLE -I /home/itmo_denis/local/include   -O2 -g -std=c++17 -DNDEBUG -I .  -include isort.h -o isort ../bench/isortTime.C -Wl,-rpath,/home/itmo_denis/local/lib64 /home/itmo_denis/local/lib64/libtbb.so -ldl 
+g++ -DPARLAY_TBB -DTBB_MODE=TBB_SIMPLE -I /home/itmo_denis/local/include   -O2 -g -std=c++17 -DNDEBUG -I .  -include isort.h -o isort ../bench/isortTime.C -Wl,-rpath,/home/itmo_denis/local/lib64 /home/itmo_denis/local/lib64/libtbb.so -ldl -Wl,-rpath,/home/itmo_denis/local/lib -L/home/itmo_denis/local/lib -ljemalloc
 cp ../bench/testInputs ../bench/testInputs_small .
 cd ../bench; make isortCheck
 make[1]: Entering directory '/home/itmo_denis/pbbsbench/benchmarks/integerSort/bench'
-g++ -DPARLAY_TBB -DTBB_MODE=TBB_SIMPLE -I /home/itmo_denis/local/include   -O2 -g -std=c++17 -DNDEBUG -I . -Icommon -o isortCheck isortCheck.C -Wl,-rpath,/home/itmo_denis/local/lib64 /home/itmo_denis/local/lib64/libtbb.so -ldl 
+g++ -DPARLAY_TBB -DTBB_MODE=TBB_SIMPLE -I /home/itmo_denis/local/include   -O2 -g -std=c++17 -DNDEBUG -I . -Icommon -o isortCheck isortCheck.C -Wl,-rpath,/home/itmo_denis/local/lib64 /home/itmo_denis/local/lib64/libtbb.so -ldl -Wl,-rpath,/home/itmo_denis/local/lib -L/home/itmo_denis/local/lib -ljemalloc
 make[1]: Leaving directory '/home/itmo_denis/pbbsbench/benchmarks/integerSort/bench'
-cd benchmarks/integerSort/parallelRadixSort ; numactl -i all ./testInputs -r 3 -p 48
+cd benchmarks/integerSort/parallelRadixSort ; numactl -i all ./testInputs -r 3 -p 48 -x
 running cd ../sequenceData/data; make randomSeq_100M_int
-running PARLAY_NUM_THREADS=48 ./isort -b 27 -r 3 -o /tmp/ofile573139_704447 ../sequenceData/data/randomSeq_100M_int
-running ./../bench/isortCheck  ../sequenceData/data/randomSeq_100M_int /tmp/ofile573139_704447
+running PARLAY_NUM_THREADS=48 ./isort -b 27 -r 3 ../sequenceData/data/randomSeq_100M_int
 running rm ../sequenceData/data/randomSeq_100M_int
-randomSeq_100M_int : -b 27 -r 3 -o /tmp/ofile573139_704447 : '0.102', '0.101', '0.102', geomean = 0.102
+randomSeq_100M_int : -b 27 -r 3 : '0.1', '0.1', '0.1', geomean = 0.1
 running cd ../sequenceData/data; make exptSeq_100M_int
-running PARLAY_NUM_THREADS=48 ./isort -b 27 -r 3 -o /tmp/ofile157924_9023 ../sequenceData/data/exptSeq_100M_int
-running ./../bench/isortCheck  ../sequenceData/data/exptSeq_100M_int /tmp/ofile157924_9023
+running PARLAY_NUM_THREADS=48 ./isort -b 27 -r 3 ../sequenceData/data/exptSeq_100M_int
 running rm ../sequenceData/data/exptSeq_100M_int
-exptSeq_100M_int : -b 27 -r 3 -o /tmp/ofile157924_9023 : '0.11', '0.111', '0.11', geomean = 0.11
+exptSeq_100M_int : -b 27 -r 3 : '0.11', '0.111', '0.11', geomean = 0.11
 running cd ../sequenceData/data; make randomSeq_100M_int_pair_int
-running PARLAY_NUM_THREADS=48 ./isort -b 27 -r 3 -o /tmp/ofile261537_421319 ../sequenceData/data/randomSeq_100M_int_pair_int
-running ./../bench/isortCheck  ../sequenceData/data/randomSeq_100M_int_pair_int /tmp/ofile261537_421319
+running PARLAY_NUM_THREADS=48 ./isort -b 27 -r 3 ../sequenceData/data/randomSeq_100M_int_pair_int
 running rm ../sequenceData/data/randomSeq_100M_int_pair_int
-randomSeq_100M_int_pair_int : -b 27 -r 3 -o /tmp/ofile261537_421319 : '0.159', '0.157', '0.155', geomean = 0.157
+randomSeq_100M_int_pair_int : -b 27 -r 3 : '0.166', '0.165', '0.165', geomean = 0.165
 running cd ../sequenceData/data; make randomSeq_100M_256_int_pair_int
-running PARLAY_NUM_THREADS=48 ./isort -b 8 -r 3 -o /tmp/ofile688303_931643 ../sequenceData/data/randomSeq_100M_256_int_pair_int
-running ./../bench/isortCheck  ../sequenceData/data/randomSeq_100M_256_int_pair_int /tmp/ofile688303_931643
+running PARLAY_NUM_THREADS=48 ./isort -b 8 -r 3 ../sequenceData/data/randomSeq_100M_256_int_pair_int
 running rm ../sequenceData/data/randomSeq_100M_256_int_pair_int
-randomSeq_100M_256_int_pair_int : -b 8 -r 3 -o /tmp/ofile688303_931643 : '0.065', '0.058', '0.069', geomean = 0.064
-parallelRadixSort : 48 : geomean of mins = 0.1, geomean of geomeans = 0.103
+randomSeq_100M_256_int_pair_int : -b 8 -r 3 : '0.057', '0.058', '0.057', geomean = 0.057
+parallelRadixSort : 48 : geomean of mins = 0.101, geomean of geomeans = 0.101
 
 cd benchmarks/comparisonSort/sampleSort ; make -s cleanall ; make -j 24
-g++ -DPARLAY_TBB -DTBB_MODE=TBB_SIMPLE -I /home/itmo_denis/local/include   -O2 -g -std=c++17 -DNDEBUG -I .  -include sort.h -o sort ../bench/sortTime.C -Wl,-rpath,/home/itmo_denis/local/lib64 /home/itmo_denis/local/lib64/libtbb.so -ldl 
+g++ -DPARLAY_TBB -DTBB_MODE=TBB_SIMPLE -I /home/itmo_denis/local/include   -O2 -g -std=c++17 -DNDEBUG -I .  -include sort.h -o sort ../bench/sortTime.C -Wl,-rpath,/home/itmo_denis/local/lib64 /home/itmo_denis/local/lib64/libtbb.so -ldl -Wl,-rpath,/home/itmo_denis/local/lib -L/home/itmo_denis/local/lib -ljemalloc
 cp ../bench/testInputs ../bench/testInputs_small .
 cd ../bench; make sortCheck
 make[1]: Entering directory '/home/itmo_denis/pbbsbench/benchmarks/comparisonSort/bench'
-g++ -DPARLAY_TBB -DTBB_MODE=TBB_SIMPLE -I /home/itmo_denis/local/include   -O2 -g -std=c++17 -DNDEBUG -I . -o sortCheck sortCheck.C -Wl,-rpath,/home/itmo_denis/local/lib64 /home/itmo_denis/local/lib64/libtbb.so -ldl 
+g++ -DPARLAY_TBB -DTBB_MODE=TBB_SIMPLE -I /home/itmo_denis/local/include   -O2 -g -std=c++17 -DNDEBUG -I . -o sortCheck sortCheck.C -Wl,-rpath,/home/itmo_denis/local/lib64 /home/itmo_denis/local/lib64/libtbb.so -ldl -Wl,-rpath,/home/itmo_denis/local/lib -L/home/itmo_denis/local/lib -ljemalloc
 make[1]: Leaving directory '/home/itmo_denis/pbbsbench/benchmarks/comparisonSort/bench'
-cd benchmarks/comparisonSort/sampleSort ; numactl -i all ./testInputs -r 3 -p 48
+cd benchmarks/comparisonSort/sampleSort ; numactl -i all ./testInputs -r 3 -p 48 -x
 running cd ../sequenceData/data; make randomSeq_100M_double
-running PARLAY_NUM_THREADS=48 ./sort  -r 3 -o /tmp/ofile364364_500676 ../sequenceData/data/randomSeq_100M_double
-running ./../bench/sortCheck  ../sequenceData/data/randomSeq_100M_double /tmp/ofile364364_500676
+running PARLAY_NUM_THREADS=48 ./sort  -r 3 ../sequenceData/data/randomSeq_100M_double
 running rm ../sequenceData/data/randomSeq_100M_double
-randomSeq_100M_double :  -r 3 -o /tmp/ofile364364_500676 : '0.897', '1.021', '0.895', geomean = 0.935
+randomSeq_100M_double :  -r 3 : '0.919', '0.914', '0.918', geomean = 0.917
 running cd ../sequenceData/data; make exptSeq_100M_double
-running PARLAY_NUM_THREADS=48 ./sort  -r 3 -o /tmp/ofile79372_662981 ../sequenceData/data/exptSeq_100M_double
-running ./../bench/sortCheck  ../sequenceData/data/exptSeq_100M_double /tmp/ofile79372_662981
+running PARLAY_NUM_THREADS=48 ./sort  -r 3 ../sequenceData/data/exptSeq_100M_double
 running rm ../sequenceData/data/exptSeq_100M_double
-exptSeq_100M_double :  -r 3 -o /tmp/ofile79372_662981 : '0.749', '0.748', '0.749', geomean = 0.749
+exptSeq_100M_double :  -r 3 : '0.779', '0.777', '0.781', geomean = 0.779
 running cd ../sequenceData/data; make almostSortedSeq_100M_double
-running PARLAY_NUM_THREADS=48 ./sort  -r 3 -o /tmp/ofile121071_531912 ../sequenceData/data/almostSortedSeq_100M_double
-running ./../bench/sortCheck  ../sequenceData/data/almostSortedSeq_100M_double /tmp/ofile121071_531912
+running PARLAY_NUM_THREADS=48 ./sort  -r 3 ../sequenceData/data/almostSortedSeq_100M_double
 running rm ../sequenceData/data/almostSortedSeq_100M_double
-almostSortedSeq_100M_double :  -r 3 -o /tmp/ofile121071_531912 : '0.839', '0.838', '0.839', geomean = 0.839
+almostSortedSeq_100M_double :  -r 3 : '0.86', '0.858', '0.86', geomean = 0.859
 running cd ../sequenceData/data; make randomSeq_100M_double_pair_double
-running PARLAY_NUM_THREADS=48 ./sort  -r 3 -o /tmp/ofile652874_403689 ../sequenceData/data/randomSeq_100M_double_pair_double
-running ./../bench/sortCheck  ../sequenceData/data/randomSeq_100M_double_pair_double /tmp/ofile652874_403689
+running PARLAY_NUM_THREADS=48 ./sort  -r 3 ../sequenceData/data/randomSeq_100M_double_pair_double
 running rm ../sequenceData/data/randomSeq_100M_double_pair_double
-randomSeq_100M_double_pair_double :  -r 3 -o /tmp/ofile652874_403689 : '1.054', '0.994', '0.995', geomean = 1.014
+randomSeq_100M_double_pair_double :  -r 3 : '1.026', '1.026', '1.028', geomean = 1.027
 running cd ../sequenceData/data; make trigramSeq_100M
-running PARLAY_NUM_THREADS=48 ./sort  -r 3 -o /tmp/ofile848562_587231 ../sequenceData/data/trigramSeq_100M
-running ./../bench/sortCheck  ../sequenceData/data/trigramSeq_100M /tmp/ofile848562_587231
+running PARLAY_NUM_THREADS=48 ./sort  -r 3 ../sequenceData/data/trigramSeq_100M
 running rm ../sequenceData/data/trigramSeq_100M
-trigramSeq_100M :  -r 3 -o /tmp/ofile848562_587231 : '1.045', '1.042', '1.045', geomean = 1.044
-sampleSort : 48 : geomean of mins = 0.897, geomean of geomeans = 0.909
+trigramSeq_100M :  -r 3 : '1.04', '1.042', '1.043', geomean = 1.042
+sampleSort : 48 : geomean of mins = 0.917, geomean of geomeans = 0.919
 
 cd benchmarks/removeDuplicates/parlayhash ; make -s cleanall ; make -j 24
-g++ -DPARLAY_TBB -DTBB_MODE=TBB_SIMPLE -I /home/itmo_denis/local/include   -O2 -g -std=c++17 -DNDEBUG -I .  -include dedup.h -o dedup ../bench/dedupTime.C -Wl,-rpath,/home/itmo_denis/local/lib64 /home/itmo_denis/local/lib64/libtbb.so -ldl 
+g++ -DPARLAY_TBB -DTBB_MODE=TBB_SIMPLE -I /home/itmo_denis/local/include   -O2 -g -std=c++17 -DNDEBUG -I .  -include dedup.h -o dedup ../bench/dedupTime.C -Wl,-rpath,/home/itmo_denis/local/lib64 /home/itmo_denis/local/lib64/libtbb.so -ldl -Wl,-rpath,/home/itmo_denis/local/lib -L/home/itmo_denis/local/lib -ljemalloc
 cp ../bench/testInputs ../bench/testInputs_small .
 cd ../bench; make dedupCheck
 make[1]: Entering directory '/home/itmo_denis/pbbsbench/benchmarks/removeDuplicates/bench'
-g++ -DPARLAY_TBB -DTBB_MODE=TBB_SIMPLE -I /home/itmo_denis/local/include   -O2 -g -std=c++17 -DNDEBUG -I . -o dedupCheck dedupCheck.C -Wl,-rpath,/home/itmo_denis/local/lib64 /home/itmo_denis/local/lib64/libtbb.so -ldl 
+g++ -DPARLAY_TBB -DTBB_MODE=TBB_SIMPLE -I /home/itmo_denis/local/include   -O2 -g -std=c++17 -DNDEBUG -I . -o dedupCheck dedupCheck.C -Wl,-rpath,/home/itmo_denis/local/lib64 /home/itmo_denis/local/lib64/libtbb.so -ldl -Wl,-rpath,/home/itmo_denis/local/lib -L/home/itmo_denis/local/lib -ljemalloc
 make[1]: Leaving directory '/home/itmo_denis/pbbsbench/benchmarks/removeDuplicates/bench'
-cd benchmarks/removeDuplicates/parlayhash ; numactl -i all ./testInputs -r 3 -p 48
+cd benchmarks/removeDuplicates/parlayhash ; numactl -i all ./testInputs -r 3 -p 48 -x
 running cd ../sequenceData/data; make randomSeq_100M_int
-running PARLAY_NUM_THREADS=48 ./dedup  -r 3 -o /tmp/ofile977853_324334 ../sequenceData/data/randomSeq_100M_int
-running ./../bench/dedupCheck  ../sequenceData/data/randomSeq_100M_int /tmp/ofile977853_324334
+running PARLAY_NUM_THREADS=48 ./dedup  -r 3 ../sequenceData/data/randomSeq_100M_int
 running rm ../sequenceData/data/randomSeq_100M_int
-randomSeq_100M_int :  -r 3 -o /tmp/ofile977853_324334 : '0.48', '0.476', '0.477', geomean = 0.478
+randomSeq_100M_int :  -r 3 : '0.473', '0.481', '0.479', geomean = 0.477
 running cd ../sequenceData/data; make exptSeq_100M_int
-running PARLAY_NUM_THREADS=48 ./dedup  -r 3 -o /tmp/ofile826117_378775 ../sequenceData/data/exptSeq_100M_int
-running ./../bench/dedupCheck  ../sequenceData/data/exptSeq_100M_int /tmp/ofile826117_378775
+running PARLAY_NUM_THREADS=48 ./dedup  -r 3 ../sequenceData/data/exptSeq_100M_int
 running rm ../sequenceData/data/exptSeq_100M_int
-exptSeq_100M_int :  -r 3 -o /tmp/ofile826117_378775 : '0.41', '0.411', '0.408', geomean = 0.409
+exptSeq_100M_int :  -r 3 : '0.404', '0.405', '0.403', geomean = 0.404
 running cd ../sequenceData/data; make trigramSeq_100M
-running PARLAY_NUM_THREADS=48 ./dedup  -r 3 -o /tmp/ofile261463_303524 ../sequenceData/data/trigramSeq_100M
-running ./../bench/dedupCheck  ../sequenceData/data/trigramSeq_100M /tmp/ofile261463_303524
+running PARLAY_NUM_THREADS=48 ./dedup  -r 3 ../sequenceData/data/trigramSeq_100M
 running rm ../sequenceData/data/trigramSeq_100M
-trigramSeq_100M :  -r 3 -o /tmp/ofile261463_303524 : '0.673', '0.649', '0.673', geomean = 0.665
-parlayhash : 48 : geomean of mins = 0.501, geomean of geomeans = 0.507
+trigramSeq_100M :  -r 3 : '0.684', '0.702', '0.675', geomean = 0.687
+parlayhash : 48 : geomean of mins = 0.505, geomean of geomeans = 0.51
 
 cd benchmarks/histogram/parallel ; make -s cleanall ; make -j 24
 g++ -DPARLAY_TBB -DTBB_MODE=TBB_SIMPLE -I /home/itmo_denis/local/include   -O2 -g -std=c++17 -DNDEBUG -I .  -o histogramTime.o -c ../bench/histogramTime.C
 g++ -DPARLAY_TBB -DTBB_MODE=TBB_SIMPLE -I /home/itmo_denis/local/include   -O2 -g -std=c++17 -DNDEBUG -I .  -c histogram.C -o histogram.o
 cd ../bench; make -s histogramCheck
 cp ../bench/testInputs ../bench/testInputs_small .
-g++ -o histogram histogramTime.o histogram.o -Wl,-rpath,/home/itmo_denis/local/lib64 /home/itmo_denis/local/lib64/libtbb.so -ldl 
-cd benchmarks/histogram/parallel ; numactl -i all ./testInputs -r 3 -p 48
+g++ -o histogram histogramTime.o histogram.o -Wl,-rpath,/home/itmo_denis/local/lib64 /home/itmo_denis/local/lib64/libtbb.so -ldl -Wl,-rpath,/home/itmo_denis/local/lib -L/home/itmo_denis/local/lib -ljemalloc
+cd benchmarks/histogram/parallel ; numactl -i all ./testInputs -r 3 -p 48 -x
 running cd ../sequenceData/data; make randomSeq_100M_256_int
-running PARLAY_NUM_THREADS=48 ./histogram -b 256 -r 3 -o /tmp/ofile670060_163788 ../sequenceData/data/randomSeq_100M_256_int
-running ./../bench/histogramCheck  ../sequenceData/data/randomSeq_100M_256_int /tmp/ofile670060_163788
+running PARLAY_NUM_THREADS=48 ./histogram -b 256 -r 3 ../sequenceData/data/randomSeq_100M_256_int
 running rm ../sequenceData/data/randomSeq_100M_256_int
-randomSeq_100M_256_int : -b 256 -r 3 -o /tmp/ofile670060_163788 : '0.007', '0.007', '0.007', geomean = 0.007
+randomSeq_100M_256_int : -b 256 -r 3 : '0.007', '0.007', '0.007', geomean = 0.007
 running cd ../sequenceData/data; make randomSeq_100M_100K_int
-running PARLAY_NUM_THREADS=48 ./histogram -b 100000 -r 3 -o /tmp/ofile488575_607653 ../sequenceData/data/randomSeq_100M_100K_int
-running ./../bench/histogramCheck  ../sequenceData/data/randomSeq_100M_100K_int /tmp/ofile488575_607653
+running PARLAY_NUM_THREADS=48 ./histogram -b 100000 -r 3 ../sequenceData/data/randomSeq_100M_100K_int
 running rm ../sequenceData/data/randomSeq_100M_100K_int
-randomSeq_100M_100K_int : -b 100000 -r 3 -o /tmp/ofile488575_607653 : '0.046', '0.045', '0.045', geomean = 0.045
+randomSeq_100M_100K_int : -b 100000 -r 3 : '0.045', '0.044', '0.045', geomean = 0.044
 running cd ../sequenceData/data; make randomSeq_100M_int
-running PARLAY_NUM_THREADS=48 ./histogram -b 100000000 -r 3 -o /tmp/ofile659277_19139 ../sequenceData/data/randomSeq_100M_int
-running ./../bench/histogramCheck  ../sequenceData/data/randomSeq_100M_int /tmp/ofile659277_19139
+running PARLAY_NUM_THREADS=48 ./histogram -b 100000000 -r 3 ../sequenceData/data/randomSeq_100M_int
 running rm ../sequenceData/data/randomSeq_100M_int
-randomSeq_100M_int : -b 100000000 -r 3 -o /tmp/ofile659277_19139 : '0.368', '0.371', '0.371', geomean = 0.37
+randomSeq_100M_int : -b 100000000 -r 3 : '0.357', '0.374', '0.367', geomean = 0.366
 running cd ../sequenceData/data; make exptSeq_100M_int
-running PARLAY_NUM_THREADS=48 ./histogram -b 100000000 -r 3 -o /tmp/ofile616432_100786 ../sequenceData/data/exptSeq_100M_int
-running ./../bench/histogramCheck  ../sequenceData/data/exptSeq_100M_int /tmp/ofile616432_100786
+running PARLAY_NUM_THREADS=48 ./histogram -b 100000000 -r 3 ../sequenceData/data/exptSeq_100M_int
 running rm ../sequenceData/data/exptSeq_100M_int
-exptSeq_100M_int : -b 100000000 -r 3 -o /tmp/ofile616432_100786 : '0.365', '0.367', '0.363', geomean = 0.365
+exptSeq_100M_int : -b 100000000 -r 3 : '0.39', '0.365', '0.363', geomean = 0.372
 running cd ../sequenceData/data; make almostEqualSeq_100000000
-running PARLAY_NUM_THREADS=48 ./histogram -b 100000000 -r 3 -o /tmp/ofile159518_332653 ../sequenceData/data/almostEqualSeq_100000000
-running ./../bench/histogramCheck  ../sequenceData/data/almostEqualSeq_100000000 /tmp/ofile159518_332653
+running PARLAY_NUM_THREADS=48 ./histogram -b 100000000 -r 3 ../sequenceData/data/almostEqualSeq_100000000
 running rm ../sequenceData/data/almostEqualSeq_100000000
-almostEqualSeq_100000000 : -b 100000000 -r 3 -o /tmp/ofile159518_332653 : '0.382', '0.38', '0.382', geomean = 0.381
-parallel : 48 : geomean of mins = 0.112, geomean of geomeans = 0.113
+almostEqualSeq_100000000 : -b 100000000 -r 3 : '0.405', '0.384', '0.38', geomean = 0.389
+parallel : 48 : geomean of mins = 0.109, geomean of geomeans = 0.112
 
 cd benchmarks/wordCounts/histogram ; make -s cleanall ; make -j 24
 g++ -DPARLAY_TBB -DTBB_MODE=TBB_SIMPLE -I /home/itmo_denis/local/include   -O2 -g -std=c++17 -DNDEBUG -I .  -o wcTime.o -c ../bench/wcTime.C
 g++ -DPARLAY_TBB -DTBB_MODE=TBB_SIMPLE -I /home/itmo_denis/local/include   -O2 -g -std=c++17 -DNDEBUG -I .  -c wc.C -o wc.o
 cd ../bench; make -s wcCheck
 cp ../bench/testInputs ../bench/testInputs_small .
-g++ -o wc wcTime.o wc.o -Wl,-rpath,/home/itmo_denis/local/lib64 /home/itmo_denis/local/lib64/libtbb.so -ldl 
-cd benchmarks/wordCounts/histogram ; numactl -i all ./testInputs -r 3 -p 48
+g++ -o wc wcTime.o wc.o -Wl,-rpath,/home/itmo_denis/local/lib64 /home/itmo_denis/local/lib64/libtbb.so -ldl -Wl,-rpath,/home/itmo_denis/local/lib -L/home/itmo_denis/local/lib -ljemalloc
+cd benchmarks/wordCounts/histogram ; numactl -i all ./testInputs -r 3 -p 48 -x
 running cd ../sequenceData/data; make trigramString_250000000
-running PARLAY_NUM_THREADS=48 ./wc  -r 3 -o /tmp/ofile104291_432729 ../sequenceData/data/trigramString_250000000
-running ./../bench/wcCheck  ../sequenceData/data/trigramString_250000000 /tmp/ofile104291_432729
+running PARLAY_NUM_THREADS=48 ./wc  -r 3 ../sequenceData/data/trigramString_250000000
 running rm ../sequenceData/data/trigramString_250000000
-trigramString_250000000 :  -r 3 -o /tmp/ofile104291_432729 : '1.09', '1.019', '1.197', geomean = 1.099
+trigramString_250000000 :  -r 3 : '1.134', '1.213', '1.053', geomean = 1.132
 running cd ../sequenceData/data; make etext99
-running PARLAY_NUM_THREADS=48 ./wc  -r 3 -o /tmp/ofile823532_433851 ../sequenceData/data/etext99
-running ./../bench/wcCheck  ../sequenceData/data/etext99 /tmp/ofile823532_433851
+running PARLAY_NUM_THREADS=48 ./wc  -r 3 ../sequenceData/data/etext99
 running rm ../sequenceData/data/etext99
-etext99 :  -r 3 -o /tmp/ofile823532_433851 : '0.483', '0.404', '0.459', geomean = 0.447
+etext99 :  -r 3 : '0.413', '0.413', '0.428', geomean = 0.418
 running cd ../sequenceData/data; make wikipedia250M.txt
-running PARLAY_NUM_THREADS=48 ./wc  -r 3 -o /tmp/ofile98166_101350 ../sequenceData/data/wikipedia250M.txt
-running ./../bench/wcCheck  ../sequenceData/data/wikipedia250M.txt /tmp/ofile98166_101350
+running PARLAY_NUM_THREADS=48 ./wc  -r 3 ../sequenceData/data/wikipedia250M.txt
 running rm ../sequenceData/data/wikipedia250M.txt
-wikipedia250M.txt :  -r 3 -o /tmp/ofile98166_101350 : '0.92', '0.924', '1.141', geomean = 0.99
-histogram : 48 : geomean of mins = 0.724, geomean of geomeans = 0.787
+wikipedia250M.txt :  -r 3 : '0.957', '0.922', '0.929', geomean = 0.936
+histogram : 48 : geomean of mins = 0.737, geomean of geomeans = 0.762
 
 cd benchmarks/invertedIndex/parallel ; make -s cleanall ; make -j 24
 g++ -DPARLAY_TBB -DTBB_MODE=TBB_SIMPLE -I /home/itmo_denis/local/include   -O2 -g -std=c++17 -DNDEBUG -I .  -o indexTime.o -c ../bench/indexTime.C
 g++ -DPARLAY_TBB -DTBB_MODE=TBB_SIMPLE -I /home/itmo_denis/local/include   -O2 -g -std=c++17 -DNDEBUG -I .  -c index.C -o index.o
 cd ../bench; make -s indexCheck
 cp ../bench/testInputs ../bench/testInputs_small .
-g++ -o index indexTime.o index.o -Wl,-rpath,/home/itmo_denis/local/lib64 /home/itmo_denis/local/lib64/libtbb.so -ldl 
-cd benchmarks/invertedIndex/parallel ; numactl -i all ./testInputs -r 3 -p 48
+g++ -o index indexTime.o index.o -Wl,-rpath,/home/itmo_denis/local/lib64 /home/itmo_denis/local/lib64/libtbb.so -ldl -Wl,-rpath,/home/itmo_denis/local/lib -L/home/itmo_denis/local/lib -ljemalloc
+cd benchmarks/invertedIndex/parallel ; numactl -i all ./testInputs -r 3 -p 48 -x
 running cd ../sequenceData/data; make wikisamp.xml
-running PARLAY_NUM_THREADS=48 ./index  -r 3 -o /tmp/ofile474754_635284 ../sequenceData/data/wikisamp.xml
-running ./../bench/indexCheck  ../sequenceData/data/wikisamp.xml /tmp/ofile474754_635284
+running PARLAY_NUM_THREADS=48 ./index  -r 3 ../sequenceData/data/wikisamp.xml
 running rm ../sequenceData/data/wikisamp.xml
-wikisamp.xml :  -r 3 -o /tmp/ofile474754_635284 : '2.483', '2.569', '2.764', geomean = 2.603
+wikisamp.xml :  -r 3 : '0.691', '0.694', '0.684', geomean = 0.69
 running cd ../sequenceData/data; make wikipedia250M.txt
-running PARLAY_NUM_THREADS=48 ./index  -r 3 -o /tmp/ofile276854_365626 ../sequenceData/data/wikipedia250M.txt
-running ./../bench/indexCheck  ../sequenceData/data/wikipedia250M.txt /tmp/ofile276854_365626
+running PARLAY_NUM_THREADS=48 ./index  -r 3 ../sequenceData/data/wikipedia250M.txt
 running rm ../sequenceData/data/wikipedia250M.txt
-wikipedia250M.txt :  -r 3 -o /tmp/ofile276854_365626 : '14.749', '13.433', '15.985', geomean = 14.685
-parallel : 48 : geomean of mins = 5.776, geomean of geomeans = 6.183
+wikipedia250M.txt :  -r 3 : '2.421', '3.067', '2.689', geomean = 2.713
+parallel : 48 : geomean of mins = 1.287, geomean of geomeans = 1.368
 
 cd benchmarks/suffixArray/parallelRange ; make -s cleanall ; make -j 24
 g++ -DPARLAY_TBB -DTBB_MODE=TBB_SIMPLE -I /home/itmo_denis/local/include   -O2 -g -std=c++17 -DNDEBUG -I .  -o SATime.o -c ../bench/SATime.C
 g++ -DPARLAY_TBB -DTBB_MODE=TBB_SIMPLE -I /home/itmo_denis/local/include   -O2 -g -std=c++17 -DNDEBUG -I .  -c SA.C -o SA.o
 cd ../bench; make -s SACheck
 cp ../bench/testInputs ../bench/testInputs_small .
-g++ -o SA SATime.o SA.o -Wl,-rpath,/home/itmo_denis/local/lib64 /home/itmo_denis/local/lib64/libtbb.so -ldl 
-cd benchmarks/suffixArray/parallelRange ; numactl -i all ./testInputs -r 3 -p 48
+g++ -o SA SATime.o SA.o -Wl,-rpath,/home/itmo_denis/local/lib64 /home/itmo_denis/local/lib64/libtbb.so -ldl -Wl,-rpath,/home/itmo_denis/local/lib -L/home/itmo_denis/local/lib -ljemalloc
+cd benchmarks/suffixArray/parallelRange ; numactl -i all ./testInputs -r 3 -p 48 -x
 running cd ../sequenceData/data; make trigramString_100000000
-running PARLAY_NUM_THREADS=48 ./SA  -r 3 -o /tmp/ofile372056_423770 ../sequenceData/data/trigramString_100000000
-running ./../bench/SACheck  ../sequenceData/data/trigramString_100000000 /tmp/ofile372056_423770
+running PARLAY_NUM_THREADS=48 ./SA  -r 3 ../sequenceData/data/trigramString_100000000
 running rm ../sequenceData/data/trigramString_100000000
-trigramString_100000000 :  -r 3 -o /tmp/ofile372056_423770 : '1.528', '1.51', '1.521', geomean = 1.52
+trigramString_100000000 :  -r 3 : '1.436', '1.421', '1.42', geomean = 1.426
 running cd ../sequenceData/data; make chr22.dna
-running PARLAY_NUM_THREADS=48 ./SA  -r 3 -o /tmp/ofile309556_148000 ../sequenceData/data/chr22.dna
-running ./../bench/SACheck  ../sequenceData/data/chr22.dna /tmp/ofile309556_148000
+running PARLAY_NUM_THREADS=48 ./SA  -r 3 ../sequenceData/data/chr22.dna
 running rm ../sequenceData/data/chr22.dna
-chr22.dna :  -r 3 -o /tmp/ofile309556_148000 : '0.707', '0.699', '0.702', geomean = 0.702
+chr22.dna :  -r 3 : '0.683', '0.687', '0.683', geomean = 0.684
 running cd ../sequenceData/data; make etext99
-running PARLAY_NUM_THREADS=48 ./SA  -r 3 -o /tmp/ofile702328_827511 ../sequenceData/data/etext99
-running ./../bench/SACheck  ../sequenceData/data/etext99 /tmp/ofile702328_827511
+running PARLAY_NUM_THREADS=48 ./SA  -r 3 ../sequenceData/data/etext99
 running rm ../sequenceData/data/etext99
-etext99 :  -r 3 -o /tmp/ofile702328_827511 : '4.02', '4.308', '3.912', geomean = 4.077
+etext99 :  -r 3 : '3.993', '3.938', '3.886', geomean = 3.939
 running cd ../sequenceData/data; make wikisamp.xml
-running PARLAY_NUM_THREADS=48 ./SA  -r 3 -o /tmp/ofile58997_311064 ../sequenceData/data/wikisamp.xml
-running ./../bench/SACheck  ../sequenceData/data/wikisamp.xml /tmp/ofile58997_311064
+running PARLAY_NUM_THREADS=48 ./SA  -r 3 ../sequenceData/data/wikisamp.xml
 running rm ../sequenceData/data/wikisamp.xml
-wikisamp.xml :  -r 3 -o /tmp/ofile58997_311064 : '4.733', '4.526', '4.441', geomean = 4.565
-parallelRange : 48 : geomean of mins = 2.069, geomean of geomeans = 2.111
+wikisamp.xml :  -r 3 : '6.983', '6.586', '7.323', geomean = 6.958
+parallelRange : 48 : geomean of mins = 2.232, geomean of geomeans = 2.274
 
 cd benchmarks/longestRepeatedSubstring/doubling ; make -s cleanall ; make -j 24
 g++ -DPARLAY_TBB -DTBB_MODE=TBB_SIMPLE -I /home/itmo_denis/local/include   -O2 -g -std=c++17 -DNDEBUG -I .  -o lrsTime.o -c ../bench/lrsTime.C
 g++ -DPARLAY_TBB -DTBB_MODE=TBB_SIMPLE -I /home/itmo_denis/local/include   -O2 -g -std=c++17 -DNDEBUG -I .  -c lrs.C -o lrs.o
 cd ../bench; make -s lrsCheck
 cp ../bench/testInputs ../bench/testInputs_small .
-g++ -o lrs lrsTime.o lrs.o -Wl,-rpath,/home/itmo_denis/local/lib64 /home/itmo_denis/local/lib64/libtbb.so -ldl 
-cd benchmarks/longestRepeatedSubstring/doubling ; numactl -i all ./testInputs -r 3 -p 48
+g++ -o lrs lrsTime.o lrs.o -Wl,-rpath,/home/itmo_denis/local/lib64 /home/itmo_denis/local/lib64/libtbb.so -ldl -Wl,-rpath,/home/itmo_denis/local/lib -L/home/itmo_denis/local/lib -ljemalloc
+cd benchmarks/longestRepeatedSubstring/doubling ; numactl -i all ./testInputs -r 3 -p 48 -x
 running cd ../sequenceData/data; make chr22.dna
-running PARLAY_NUM_THREADS=48 ./lrs  -r 3 -o /tmp/ofile658179_83342 ../sequenceData/data/chr22.dna
-running ./../bench/lrsCheck  ../sequenceData/data/chr22.dna /tmp/ofile658179_83342
+running PARLAY_NUM_THREADS=48 ./lrs  -r 3 ../sequenceData/data/chr22.dna
 running rm ../sequenceData/data/chr22.dna
-chr22.dna :  -r 3 -o /tmp/ofile658179_83342 : '1.237', '1.238', '1.239', geomean = 1.238
+chr22.dna :  -r 3 : '1.249', '1.235', '1.227', geomean = 1.237
 running cd ../sequenceData/data; make etext99
-running PARLAY_NUM_THREADS=48 ./lrs  -r 3 -o /tmp/ofile757293_51950 ../sequenceData/data/etext99
-running ./../bench/lrsCheck  ../sequenceData/data/etext99 /tmp/ofile757293_51950
+running PARLAY_NUM_THREADS=48 ./lrs  -r 3 ../sequenceData/data/etext99
 running rm ../sequenceData/data/etext99
-etext99 :  -r 3 -o /tmp/ofile757293_51950 : '6.678', '6.178', '6.184', geomean = 6.342
+etext99 :  -r 3 : '6.13', '6.149', '6.148', geomean = 6.142
 running cd ../sequenceData/data; make wikisamp.xml
-running PARLAY_NUM_THREADS=48 ./lrs  -r 3 -o /tmp/ofile778830_252694 ../sequenceData/data/wikisamp.xml
-running ./../bench/lrsCheck  ../sequenceData/data/wikisamp.xml /tmp/ofile778830_252694
+running PARLAY_NUM_THREADS=48 ./lrs  -r 3 ../sequenceData/data/wikisamp.xml
 running rm ../sequenceData/data/wikisamp.xml
-wikisamp.xml :  -r 3 -o /tmp/ofile778830_252694 : '6.306', '5.796', '5.799', geomean = 5.962
-doubling : 48 : geomean of mins = 3.539, geomean of geomeans = 3.604
+wikisamp.xml :  -r 3 : '5.727', '5.777', '5.739', geomean = 5.748
+doubling : 48 : geomean of mins = 3.505, geomean of geomeans = 3.522
 
 cd benchmarks/classify/decisionTree ; make -s cleanall ; make -j 24
 g++ -DPARLAY_TBB -DTBB_MODE=TBB_SIMPLE -I /home/itmo_denis/local/include   -O2 -g -std=c++17 -DNDEBUG -I .  -o classifyTime.o -c ../bench/classifyTime.C
 g++ -DPARLAY_TBB -DTBB_MODE=TBB_SIMPLE -I /home/itmo_denis/local/include   -O2 -g -std=c++17 -DNDEBUG -I .  -c classify.C -o classify.o
 cd ../bench; make -s classifyCheck
 cp ../bench/testInputs ../bench/testInputs_small .
-g++ -o classify classifyTime.o classify.o -Wl,-rpath,/home/itmo_denis/local/lib64 /home/itmo_denis/local/lib64/libtbb.so -ldl 
-cd benchmarks/classify/decisionTree ; numactl -i all ./testInputs -r 3 -p 48
+g++ -o classify classifyTime.o classify.o -Wl,-rpath,/home/itmo_denis/local/lib64 /home/itmo_denis/local/lib64/libtbb.so -ldl -Wl,-rpath,/home/itmo_denis/local/lib -L/home/itmo_denis/local/lib -ljemalloc
+cd benchmarks/classify/decisionTree ; numactl -i all ./testInputs -r 3 -p 48 -x
 running cd ../sequenceData/data; make covtype.data
-running PARLAY_NUM_THREADS=48 ./classify  -r 3 -o /tmp/ofile13358_300260 ../sequenceData/data/covtype.data
-running ./../bench/classifyCheck  ../sequenceData/data/covtype.data /tmp/ofile13358_300260
-covtype.data :  -r 3 -o /tmp/ofile13358_300260 : '7.201', '7.006', '6.484', geomean = 6.89
+running PARLAY_NUM_THREADS=48 ./classify  -r 3 ../sequenceData/data/covtype.data
+covtype.data :  -r 3 : '6.984', '6.703', '6.446', geomean = 6.707
 running cd ../sequenceData/data; make kddcup.data
-running PARLAY_NUM_THREADS=48 ./classify  -r 3 -o /tmp/ofile3481_798804 ../sequenceData/data/kddcup.data
-running ./../bench/classifyCheck  ../sequenceData/data/kddcup.data /tmp/ofile3481_798804
-kddcup.data :  -r 3 -o /tmp/ofile3481_798804 : '3.339', '3.328', '3.418', geomean = 3.362
-decisionTree : 48 : geomean of mins = 4.645, geomean of geomeans = 4.813
+running PARLAY_NUM_THREADS=48 ./classify  -r 3 ../sequenceData/data/kddcup.data
+kddcup.data :  -r 3 : '3.425', '3.438', '3.416', geomean = 3.426
+decisionTree : 48 : geomean of mins = 4.692, geomean of geomeans = 4.794
 
 cd benchmarks/minSpanningForest/parallelFilterKruskal ; make -s cleanall ; make -j 24
 g++ -DPARLAY_TBB -DTBB_MODE=TBB_SIMPLE -I /home/itmo_denis/local/include   -O2 -g -std=c++17 -DNDEBUG -I .  -o MSTTime.o -c ../bench/MSTTime.C
 g++ -DPARLAY_TBB -DTBB_MODE=TBB_SIMPLE -I /home/itmo_denis/local/include   -O2 -g -std=c++17 -DNDEBUG -I .  -c MST.C -o MST.o
 cd ../bench; make -s MSTCheck
 cp ../bench/testInputs ../bench/testInputs_small .
-g++ -o MST MSTTime.o MST.o -Wl,-rpath,/home/itmo_denis/local/lib64 /home/itmo_denis/local/lib64/libtbb.so -ldl 
-cd benchmarks/minSpanningForest/parallelFilterKruskal ; numactl -i all ./testInputs -r 3 -p 48
+g++ -o MST MSTTime.o MST.o -Wl,-rpath,/home/itmo_denis/local/lib64 /home/itmo_denis/local/lib64/libtbb.so -ldl -Wl,-rpath,/home/itmo_denis/local/lib -L/home/itmo_denis/local/lib -ljemalloc
+cd benchmarks/minSpanningForest/parallelFilterKruskal ; numactl -i all ./testInputs -r 3 -p 48 -x
 running cd ../graphData/data; make randLocalGraph_WE_10_20000000
-running PARLAY_NUM_THREADS=48 ./MST  -r 3 -o /tmp/ofile670139_640513 ../graphData/data/randLocalGraph_WE_10_20000000
-running ./../bench/MSTCheck  ../graphData/data/randLocalGraph_WE_10_20000000 /tmp/ofile670139_640513
+running PARLAY_NUM_THREADS=48 ./MST  -r 3 ../graphData/data/randLocalGraph_WE_10_20000000
 running rm ../graphData/data/randLocalGraph_WE_10_20000000
-randLocalGraph_WE_10_20000000 :  -r 3 -o /tmp/ofile670139_640513 : '4.048', '4.042', '4.037', geomean = 4.042
+randLocalGraph_WE_10_20000000 :  -r 3 : '3.489', '3.497', '3.546', geomean = 3.511
 running cd ../graphData/data; make rMatGraph_WE_12_16000000
-running PARLAY_NUM_THREADS=48 ./MST  -r 3 -o /tmp/ofile263110_676476 ../graphData/data/rMatGraph_WE_12_16000000
-running ./../bench/MSTCheck  ../graphData/data/rMatGraph_WE_12_16000000 /tmp/ofile263110_676476
+running PARLAY_NUM_THREADS=48 ./MST  -r 3 ../graphData/data/rMatGraph_WE_12_16000000
 running rm ../graphData/data/rMatGraph_WE_12_16000000
-rMatGraph_WE_12_16000000 :  -r 3 -o /tmp/ofile263110_676476 : '3.191', '3.305', '2.848', geomean = 3.108
+rMatGraph_WE_12_16000000 :  -r 3 : '2.882', '2.881', '2.899', geomean = 2.887
 running cd ../graphData/data; make 2Dgrid_WE_64000000
-running PARLAY_NUM_THREADS=48 ./MST  -r 3 -o /tmp/ofile889978_811124 ../graphData/data/2Dgrid_WE_64000000
-running ./../bench/MSTCheck  ../graphData/data/2Dgrid_WE_64000000 /tmp/ofile889978_811124
+running PARLAY_NUM_THREADS=48 ./MST  -r 3 ../graphData/data/2Dgrid_WE_64000000
 running rm ../graphData/data/2Dgrid_WE_64000000
-2Dgrid_WE_64000000 :  -r 3 -o /tmp/ofile889978_811124 : '5.487', '5.432', '5.45', geomean = 5.456
-parallelFilterKruskal : 48 : geomean of mins = 3.968, geomean of geomeans = 4.093
+2Dgrid_WE_64000000 :  -r 3 : '4.283', '4.282', '4.012', geomean = 4.19
+parallelFilterKruskal : 48 : geomean of mins = 3.429, geomean of geomeans = 3.489
 
 cd benchmarks/spanningForest/ndST ; make -s cleanall ; make -j 24
 g++ -DPARLAY_TBB -DTBB_MODE=TBB_SIMPLE -I /home/itmo_denis/local/include   -O2 -g -std=c++17 -DNDEBUG -I .  -o STTime.o -c ../bench/STTime.C
 g++ -DPARLAY_TBB -DTBB_MODE=TBB_SIMPLE -I /home/itmo_denis/local/include   -O2 -g -std=c++17 -DNDEBUG -I .  -c ST.C -o ST.o
 cd ../bench; make -s STCheck
 cp ../bench/testInputs ../bench/testInputs_small .
-g++ -o ST STTime.o ST.o -Wl,-rpath,/home/itmo_denis/local/lib64 /home/itmo_denis/local/lib64/libtbb.so -ldl 
-cd benchmarks/spanningForest/ndST ; numactl -i all ./testInputs -r 3 -p 48
+g++ -o ST STTime.o ST.o -Wl,-rpath,/home/itmo_denis/local/lib64 /home/itmo_denis/local/lib64/libtbb.so -ldl -Wl,-rpath,/home/itmo_denis/local/lib -L/home/itmo_denis/local/lib -ljemalloc
+cd benchmarks/spanningForest/ndST ; numactl -i all ./testInputs -r 3 -p 48 -x
 running cd ../graphData/data; make randLocalGraph_E_10_20000000
-running PARLAY_NUM_THREADS=48 ./ST  -r 3 -o /tmp/ofile427487_72743 ../graphData/data/randLocalGraph_E_10_20000000
-running ./../bench/STCheck  ../graphData/data/randLocalGraph_E_10_20000000 /tmp/ofile427487_72743
+running PARLAY_NUM_THREADS=48 ./ST  -r 3 ../graphData/data/randLocalGraph_E_10_20000000
 running rm ../graphData/data/randLocalGraph_E_10_20000000
-randLocalGraph_E_10_20000000 :  -r 3 -o /tmp/ofile427487_72743 : '1.745', '1.721', '1.778', geomean = 1.748
+randLocalGraph_E_10_20000000 :  -r 3 : '1.726', '1.747', '1.733', geomean = 1.735
 running cd ../graphData/data; make rMatGraph_E_12_16000000
-running PARLAY_NUM_THREADS=48 ./ST  -r 3 -o /tmp/ofile357073_398932 ../graphData/data/rMatGraph_E_12_16000000
-running ./../bench/STCheck  ../graphData/data/rMatGraph_E_12_16000000 /tmp/ofile357073_398932
+running PARLAY_NUM_THREADS=48 ./ST  -r 3 ../graphData/data/rMatGraph_E_12_16000000
 running rm ../graphData/data/rMatGraph_E_12_16000000
-rMatGraph_E_12_16000000 :  -r 3 -o /tmp/ofile357073_398932 : '1.477', '1.464', '1.472', geomean = 1.471
+rMatGraph_E_12_16000000 :  -r 3 : '1.454', '1.462', '1.452', geomean = 1.456
 running cd ../graphData/data; make 2Dgrid_E_64000000
-running PARLAY_NUM_THREADS=48 ./ST  -r 3 -o /tmp/ofile152421_374830 ../graphData/data/2Dgrid_E_64000000
-running ./../bench/STCheck  ../graphData/data/2Dgrid_E_64000000 /tmp/ofile152421_374830
+running PARLAY_NUM_THREADS=48 ./ST  -r 3 ../graphData/data/2Dgrid_E_64000000
 running rm ../graphData/data/2Dgrid_E_64000000
-2Dgrid_E_64000000 :  -r 3 -o /tmp/ofile152421_374830 : '2.57', '2.382', '2.305', geomean = 2.416
-ndST : 48 : geomean of mins = 1.798, geomean of geomeans = 1.838
+2Dgrid_E_64000000 :  -r 3 : '2.356', '2.319', '2.28', geomean = 2.318
+ndST : 48 : geomean of mins = 1.788, geomean of geomeans = 1.803
 
 cd benchmarks/breadthFirstSearch/backForwardBFS ; make -s cleanall ; make -j 24
 g++ -DPARLAY_TBB -DTBB_MODE=TBB_SIMPLE -I /home/itmo_denis/local/include   -O2 -g -std=c++17 -DNDEBUG -I .  -o BFSTime.o -c ../bench/BFSTime.C
 g++ -DPARLAY_TBB -DTBB_MODE=TBB_SIMPLE -I /home/itmo_denis/local/include   -O2 -g -std=c++17 -DNDEBUG -I .  -c BFS.C -o BFS.o
 cd ../bench; make -s BFSCheck
 cp ../bench/testInputs ../bench/testInputs_small .
-g++ -o BFS BFSTime.o BFS.o -Wl,-rpath,/home/itmo_denis/local/lib64 /home/itmo_denis/local/lib64/libtbb.so -ldl 
-cd benchmarks/breadthFirstSearch/backForwardBFS ; numactl -i all ./testInputs -r 3 -p 48
+g++ -o BFS BFSTime.o BFS.o -Wl,-rpath,/home/itmo_denis/local/lib64 /home/itmo_denis/local/lib64/libtbb.so -ldl -Wl,-rpath,/home/itmo_denis/local/lib -L/home/itmo_denis/local/lib -ljemalloc
+cd benchmarks/breadthFirstSearch/backForwardBFS ; numactl -i all ./testInputs -r 3 -p 48 -x
 running cd ../graphData/data; make randLocalGraph_J_10_20000000
-running PARLAY_NUM_THREADS=48 ./BFS  -r 3 -o /tmp/ofile537060_556354 ../graphData/data/randLocalGraph_J_10_20000000
-running ./../bench/BFSCheck  ../graphData/data/randLocalGraph_J_10_20000000 /tmp/ofile537060_556354
+running PARLAY_NUM_THREADS=48 ./BFS  -r 3 ../graphData/data/randLocalGraph_J_10_20000000
 running rm ../graphData/data/randLocalGraph_J_10_20000000
-randLocalGraph_J_10_20000000 :  -r 3 -o /tmp/ofile537060_556354 : '0.175', '0.175', '0.174', geomean = 0.175
+randLocalGraph_J_10_20000000 :  -r 3 : '0.186', '0.188', '0.186', geomean = 0.187
 running cd ../graphData/data; make rMatGraph_J_12_16000000
-running PARLAY_NUM_THREADS=48 ./BFS  -r 3 -o /tmp/ofile163027_24639 ../graphData/data/rMatGraph_J_12_16000000
-running ./../bench/BFSCheck  ../graphData/data/rMatGraph_J_12_16000000 /tmp/ofile163027_24639
+running PARLAY_NUM_THREADS=48 ./BFS  -r 3 ../graphData/data/rMatGraph_J_12_16000000
 running rm ../graphData/data/rMatGraph_J_12_16000000
-rMatGraph_J_12_16000000 :  -r 3 -o /tmp/ofile163027_24639 : '0.218', '0.206', '0.23', geomean = 0.218
+rMatGraph_J_12_16000000 :  -r 3 : '0.576', '0.177', '0.176', geomean = 0.262
 running cd ../graphData/data; make 3Dgrid_J_64000000
-running PARLAY_NUM_THREADS=48 ./BFS  -r 3 -o /tmp/ofile562020_562753 ../graphData/data/3Dgrid_J_64000000
-running ./../bench/BFSCheck  ../graphData/data/3Dgrid_J_64000000 /tmp/ofile562020_562753
+running PARLAY_NUM_THREADS=48 ./BFS  -r 3 ../graphData/data/3Dgrid_J_64000000
 running rm ../graphData/data/3Dgrid_J_64000000
-3Dgrid_J_64000000 :  -r 3 -o /tmp/ofile562020_562753 : '2.061', '2.058', '2.059', geomean = 2.059
-backForwardBFS : 48 : geomean of mins = 0.42, geomean of geomeans = 0.428
+3Dgrid_J_64000000 :  -r 3 : '1.998', '1.994', '2.014', geomean = 2.002
+backForwardBFS : 48 : geomean of mins = 0.403, geomean of geomeans = 0.461
 
 cd benchmarks/maximalMatching/incrementalMatching ; make -s cleanall ; make -j 24
 g++ -DPARLAY_TBB -DTBB_MODE=TBB_SIMPLE -I /home/itmo_denis/local/include   -O2 -g -std=c++17 -DNDEBUG -I .  -o matchingTime.o -c ../bench/matchingTime.C
 g++ -DPARLAY_TBB -DTBB_MODE=TBB_SIMPLE -I /home/itmo_denis/local/include   -O2 -g -std=c++17 -DNDEBUG -I .  -c matching.C -o matching.o
 cd ../bench; make -s matchingCheck
 cp ../bench/testInputs ../bench/testInputs_small .
-g++ -o matching matchingTime.o matching.o -Wl,-rpath,/home/itmo_denis/local/lib64 /home/itmo_denis/local/lib64/libtbb.so -ldl 
-cd benchmarks/maximalMatching/incrementalMatching ; numactl -i all ./testInputs -r 3 -p 48
+g++ -o matching matchingTime.o matching.o -Wl,-rpath,/home/itmo_denis/local/lib64 /home/itmo_denis/local/lib64/libtbb.so -ldl -Wl,-rpath,/home/itmo_denis/local/lib -L/home/itmo_denis/local/lib -ljemalloc
+cd benchmarks/maximalMatching/incrementalMatching ; numactl -i all ./testInputs -r 3 -p 48 -x
 running cd ../graphData/data; make randLocalGraph_E_10_20000000
-running PARLAY_NUM_THREADS=48 ./matching  -r 3 -o /tmp/ofile906149_334476 ../graphData/data/randLocalGraph_E_10_20000000
-running ./../bench/matchingCheck  ../graphData/data/randLocalGraph_E_10_20000000 /tmp/ofile906149_334476
+running PARLAY_NUM_THREADS=48 ./matching  -r 3 ../graphData/data/randLocalGraph_E_10_20000000
 running rm ../graphData/data/randLocalGraph_E_10_20000000
-randLocalGraph_E_10_20000000 :  -r 3 -o /tmp/ofile906149_334476 : '0.602', '0.6', '0.594', geomean = 0.598
+randLocalGraph_E_10_20000000 :  -r 3 : '0.589', '0.574', '0.58', geomean = 0.581
 running cd ../graphData/data; make rMatGraph_E_10_20000000
-running PARLAY_NUM_THREADS=48 ./matching  -r 3 -o /tmp/ofile455816_612547 ../graphData/data/rMatGraph_E_10_20000000
-running ./../bench/matchingCheck  ../graphData/data/rMatGraph_E_10_20000000 /tmp/ofile455816_612547
+running PARLAY_NUM_THREADS=48 ./matching  -r 3 ../graphData/data/rMatGraph_E_10_20000000
 running rm ../graphData/data/rMatGraph_E_10_20000000
-rMatGraph_E_10_20000000 :  -r 3 -o /tmp/ofile455816_612547 : '0.924', '0.928', '1.042', geomean = 0.963
+rMatGraph_E_10_20000000 :  -r 3 : '0.823', '0.809', '0.825', geomean = 0.819
 running cd ../graphData/data; make 2Dgrid_E_64000000
-running PARLAY_NUM_THREADS=48 ./matching  -r 3 -o /tmp/ofile197105_743591 ../graphData/data/2Dgrid_E_64000000
-running ./../bench/matchingCheck  ../graphData/data/2Dgrid_E_64000000 /tmp/ofile197105_743591
+running PARLAY_NUM_THREADS=48 ./matching  -r 3 ../graphData/data/2Dgrid_E_64000000
 running rm ../graphData/data/2Dgrid_E_64000000
-2Dgrid_E_64000000 :  -r 3 -o /tmp/ofile197105_743591 : '1.562', '1.661', '1.545', geomean = 1.589
-incrementalMatching : 48 : geomean of mins = 0.946, geomean of geomeans = 0.971
+2Dgrid_E_64000000 :  -r 3 : '1.17', '1.171', '1.171', geomean = 1.17
+incrementalMatching : 48 : geomean of mins = 0.816, geomean of geomeans = 0.823
 
 cd benchmarks/maximalIndependentSet/incrementalMIS ; make -s cleanall ; make -j 24
 g++ -DPARLAY_TBB -DTBB_MODE=TBB_SIMPLE -I /home/itmo_denis/local/include   -O2 -g -std=c++17 -DNDEBUG -I .  -o MISTime.o -c ../bench/MISTime.C
 g++ -DPARLAY_TBB -DTBB_MODE=TBB_SIMPLE -I /home/itmo_denis/local/include   -O2 -g -std=c++17 -DNDEBUG -I .  -c MIS.C -o MIS.o
 cd ../bench; make -s MISCheck
 cp ../bench/testInputs ../bench/testInputs_small .
-g++ -o MIS MISTime.o MIS.o -Wl,-rpath,/home/itmo_denis/local/lib64 /home/itmo_denis/local/lib64/libtbb.so -ldl 
-cd benchmarks/maximalIndependentSet/incrementalMIS ; numactl -i all ./testInputs -r 3 -p 48
+g++ -o MIS MISTime.o MIS.o -Wl,-rpath,/home/itmo_denis/local/lib64 /home/itmo_denis/local/lib64/libtbb.so -ldl -Wl,-rpath,/home/itmo_denis/local/lib -L/home/itmo_denis/local/lib -ljemalloc
+cd benchmarks/maximalIndependentSet/incrementalMIS ; numactl -i all ./testInputs -r 3 -p 48 -x
 running cd ../graphData/data; make randLocalGraph_JR_10_20000000
-running PARLAY_NUM_THREADS=48 ./MIS  -r 3 -o /tmp/ofile803162_528594 ../graphData/data/randLocalGraph_JR_10_20000000
-running ./../bench/MISCheck  ../graphData/data/randLocalGraph_JR_10_20000000 /tmp/ofile803162_528594
+running PARLAY_NUM_THREADS=48 ./MIS  -r 3 ../graphData/data/randLocalGraph_JR_10_20000000
 running rm ../graphData/data/randLocalGraph_JR_10_20000000
-randLocalGraph_JR_10_20000000 :  -r 3 -o /tmp/ofile803162_528594 : '0.194', '0.195', '0.194', geomean = 0.194
+randLocalGraph_JR_10_20000000 :  -r 3 : '0.174', '0.176', '0.165', geomean = 0.172
 running cd ../graphData/data; make rMatGraph_JR_12_16000000
-running PARLAY_NUM_THREADS=48 ./MIS  -r 3 -o /tmp/ofile123256_299639 ../graphData/data/rMatGraph_JR_12_16000000
-running ./../bench/MISCheck  ../graphData/data/rMatGraph_JR_12_16000000 /tmp/ofile123256_299639
+running PARLAY_NUM_THREADS=48 ./MIS  -r 3 ../graphData/data/rMatGraph_JR_12_16000000
 running rm ../graphData/data/rMatGraph_JR_12_16000000
-rMatGraph_JR_12_16000000 :  -r 3 -o /tmp/ofile123256_299639 : '0.116', '0.115', '0.113', geomean = 0.115
+rMatGraph_JR_12_16000000 :  -r 3 : '0.119', '0.138', '0.134', geomean = 0.13
 running cd ../graphData/data; make 3Dgrid_JR_64000000
-running PARLAY_NUM_THREADS=48 ./MIS  -r 3 -o /tmp/ofile665095_745003 ../graphData/data/3Dgrid_JR_64000000
-running ./../bench/MISCheck  ../graphData/data/3Dgrid_JR_64000000 /tmp/ofile665095_745003
+running PARLAY_NUM_THREADS=48 ./MIS  -r 3 ../graphData/data/3Dgrid_JR_64000000
 running rm ../graphData/data/3Dgrid_JR_64000000
-3Dgrid_JR_64000000 :  -r 3 -o /tmp/ofile665095_745003 : '0.468', '0.466', '0.467', geomean = 0.467
-incrementalMIS : 48 : geomean of mins = 0.217, geomean of geomeans = 0.218
+3Dgrid_JR_64000000 :  -r 3 : '0.473', '0.473', '0.473', geomean = 0.473
+incrementalMIS : 48 : geomean of mins = 0.21, geomean of geomeans = 0.219
 
 cd benchmarks/rayCast/kdTree ; make -s cleanall ; make -j 24
 g++ -DPARLAY_TBB -DTBB_MODE=TBB_SIMPLE -I /home/itmo_denis/local/include   -O2 -g -std=c++17 -DNDEBUG -I .  -o rayTime.o -c ../bench/rayTime.C
 g++ -DPARLAY_TBB -DTBB_MODE=TBB_SIMPLE -I /home/itmo_denis/local/include   -O2 -g -std=c++17 -DNDEBUG -I .  -c ray.C -o ray.o
 cd ../bench; make -s rayCheck
 cp ../bench/testInputs ../bench/testInputs_small .
-g++ -o ray rayTime.o ray.o -Wl,-rpath,/home/itmo_denis/local/lib64 /home/itmo_denis/local/lib64/libtbb.so -ldl 
-cd benchmarks/rayCast/kdTree ; numactl -i all ./testInputs -r 3 -p 48
+g++ -o ray rayTime.o ray.o -Wl,-rpath,/home/itmo_denis/local/lib64 /home/itmo_denis/local/lib64/libtbb.so -ldl -Wl,-rpath,/home/itmo_denis/local/lib -L/home/itmo_denis/local/lib -ljemalloc
+cd benchmarks/rayCast/kdTree ; numactl -i all ./testInputs -r 3 -p 48 -x
 running cd ../geometryData/data; make happyTriangles happyRays
-running PARLAY_NUM_THREADS=48 ./ray  -r 3 -o /tmp/ofile634749_419496 ../geometryData/data/happyTriangles ../geometryData/data/happyRays
-running ./../bench/rayCheck  ../geometryData/data/happyTriangles ../geometryData/data/happyRays /tmp/ofile634749_419496
+running PARLAY_NUM_THREADS=48 ./ray  -r 3 ../geometryData/data/happyTriangles ../geometryData/data/happyRays
 running rm ../geometryData/data/happyTriangles ../geometryData/data/happyRays
-happyTriangles happyRays :  -r 3 -o /tmp/ofile634749_419496 : '0.938', '0.936', '0.916', geomean = 0.93
+happyTriangles happyRays :  -r 3 : '0.932', '0.915', '0.901', geomean = 0.916
 running cd ../geometryData/data; make angelTriangles angelRays
-running PARLAY_NUM_THREADS=48 ./ray  -r 3 -o /tmp/ofile450336_192012 ../geometryData/data/angelTriangles ../geometryData/data/angelRays
-running ./../bench/rayCheck  ../geometryData/data/angelTriangles ../geometryData/data/angelRays /tmp/ofile450336_192012
+running PARLAY_NUM_THREADS=48 ./ray  -r 3 ../geometryData/data/angelTriangles ../geometryData/data/angelRays
 running rm ../geometryData/data/angelTriangles ../geometryData/data/angelRays
-angelTriangles angelRays :  -r 3 -o /tmp/ofile450336_192012 : '0.361', '0.346', '0.357', geomean = 0.354
+angelTriangles angelRays :  -r 3 : '0.347', '0.36', '0.343', geomean = 0.35
 running cd ../geometryData/data; make dragonTriangles dragonRays
-running PARLAY_NUM_THREADS=48 ./ray  -r 3 -o /tmp/ofile387388_471666 ../geometryData/data/dragonTriangles ../geometryData/data/dragonRays
-running ./../bench/rayCheck  ../geometryData/data/dragonTriangles ../geometryData/data/dragonRays /tmp/ofile387388_471666
+running PARLAY_NUM_THREADS=48 ./ray  -r 3 ../geometryData/data/dragonTriangles ../geometryData/data/dragonRays
 running rm ../geometryData/data/dragonTriangles ../geometryData/data/dragonRays
-dragonTriangles dragonRays :  -r 3 -o /tmp/ofile387388_471666 : '0.672', '0.669', '0.665', geomean = 0.669
-kdTree : 48 : geomean of mins = 0.595, geomean of geomeans = 0.604
+dragonTriangles dragonRays :  -r 3 : '0.665', '0.66', '0.662', geomean = 0.662
+kdTree : 48 : geomean of mins = 0.589, geomean of geomeans = 0.596
 
 cd benchmarks/convexHull/quickHull ; make -s cleanall ; make -j 24
 g++ -DPARLAY_TBB -DTBB_MODE=TBB_SIMPLE -I /home/itmo_denis/local/include   -O2 -g -std=c++17 -DNDEBUG -I .  -o hullTime.o -c ../bench/hullTime.C
 g++ -DPARLAY_TBB -DTBB_MODE=TBB_SIMPLE -I /home/itmo_denis/local/include   -O2 -g -std=c++17 -DNDEBUG -I .  -c hull.C -o hull.o
 cd ../bench; make -s hullCheck
 cp ../bench/testInputs ../bench/testInputs_small .
-g++ -o hull hullTime.o hull.o -Wl,-rpath,/home/itmo_denis/local/lib64 /home/itmo_denis/local/lib64/libtbb.so -ldl 
-cd benchmarks/convexHull/quickHull ; numactl -i all ./testInputs -r 3 -p 48
+g++ -o hull hullTime.o hull.o -Wl,-rpath,/home/itmo_denis/local/lib64 /home/itmo_denis/local/lib64/libtbb.so -ldl -Wl,-rpath,/home/itmo_denis/local/lib -L/home/itmo_denis/local/lib -ljemalloc
+cd benchmarks/convexHull/quickHull ; numactl -i all ./testInputs -r 3 -p 48 -x
 running cd ../geometryData/data; make 2DinSphere_100000000
-running PARLAY_NUM_THREADS=48 ./hull  -r 3 -o /tmp/ofile725427_357438 ../geometryData/data/2DinSphere_100000000
-running ./../bench/hullCheck  ../geometryData/data/2DinSphere_100000000 /tmp/ofile725427_357438
-CheckOut: checkHull: unexpected points in hull
-
+running PARLAY_NUM_THREADS=48 ./hull  -r 3 ../geometryData/data/2DinSphere_100000000
+running rm ../geometryData/data/2DinSphere_100000000
+2DinSphere_100000000 :  -r 3 : '0.296', '0.286', '0.291', geomean = 0.291
+running cd ../geometryData/data; make 2Dkuzmin_100000000
+running PARLAY_NUM_THREADS=48 ./hull  -r 3 ../geometryData/data/2Dkuzmin_100000000
+running rm ../geometryData/data/2Dkuzmin_100000000
+2Dkuzmin_100000000 :  -r 3 : '0.116', '0.116', '0.117', geomean = 0.116
+running cd ../geometryData/data; make 2DonSphere_100000000
+running PARLAY_NUM_THREADS=48 ./hull  -r 3 ../geometryData/data/2DonSphere_100000000
+running rm ../geometryData/data/2DonSphere_100000000
 TEST TERMINATED ABNORMALLY:
-[./../bench/hullCheck  ../geometryData/data/2DinSphere_100000000 /tmp/ofile725427_357438
-checkHull: unexpected points in hull
-]
+  cd benchmarks/convexHull/quickHull ; numactl -i all ./testInputs -r 3 -p 48 -x
+HOSTNAME: collab1
+Running only:  [['comparisonSort/quickSort', True, 1]]
+Extended Benchmarks
+Not Checking
+Parallel Only
+Forcing Compile
+running on 48 threads
+TBB_INCLUDE: /home/itmo_denis/local//include
+TBB_LFLAGS: -Wl,-rpath,/home/itmo_denis/local/lib64 /home/itmo_denis/local/lib64/libtbb.so
 
-cd benchmarks/delaunayTriangulation/incrementalDelaunay ; make -s cleanall ; make -j 24
-g++ -DPARLAY_TBB -DTBB_MODE=TBB_SIMPLE -I /home/itmo_denis/local/include   -O2 -g -std=c++17 -DNDEBUG -I .  -o delaunayTime.o -c ../bench/delaunayTime.C
-g++ -DPARLAY_TBB -DTBB_MODE=TBB_SIMPLE -I /home/itmo_denis/local/include   -O2 -g -std=c++17 -DNDEBUG -I .  -c delaunay.C -o delaunay.o
-cd ../bench; make -s delaunayCheck
+cd benchmarks/comparisonSort/quickSort ; make -s cleanall ; make -j 24
+g++ -DPARLAY_TBB -DTBB_MODE=TBB_SIMPLE -I /home/itmo_denis/local//include   -O2 -g -std=c++17 -DNDEBUG -I .  -include sort.h -o sort ../bench/sortTime.C -Wl,-rpath,/home/itmo_denis/local/lib64 /home/itmo_denis/local/lib64/libtbb.so -ldl -Wl,-rpath,/home/itmo_denis/local/lib -L/home/itmo_denis/local/lib -ljemalloc
 cp ../bench/testInputs ../bench/testInputs_small .
-g++ -o delaunay delaunayTime.o delaunay.o -Wl,-rpath,/home/itmo_denis/local/lib64 /home/itmo_denis/local/lib64/libtbb.so -ldl 
-cd benchmarks/delaunayTriangulation/incrementalDelaunay ; numactl -i all ./testInputs -r 3 -p 48
-running cd ../geometryData/data; make 2DinCube_10M
-running PARLAY_NUM_THREADS=48 ./delaunay  -r 3 -o /tmp/ofile745282_759738 ../geometryData/data/2DinCube_10M
-running ./../bench/delaunayCheck  ../geometryData/data/2DinCube_10M /tmp/ofile745282_759738
-running rm ../geometryData/data/2DinCube_10M
-2DinCube_10M :  -r 3 -o /tmp/ofile745282_759738 : '3.198', '3.192', '3.435', geomean = 3.273
-running cd ../geometryData/data; make 2Dkuzmin_10M
-running PARLAY_NUM_THREADS=48 ./delaunay  -r 3 -o /tmp/ofile377790_836047 ../geometryData/data/2Dkuzmin_10M
-running ./../bench/delaunayCheck  ../geometryData/data/2Dkuzmin_10M /tmp/ofile377790_836047
-running rm ../geometryData/data/2Dkuzmin_10M
-2Dkuzmin_10M :  -r 3 -o /tmp/ofile377790_836047 : '3.484', '3.496', '3.483', geomean = 3.487
-incrementalDelaunay : 48 : geomean of mins = 3.334, geomean of geomeans = 3.378
+cd ../bench; make sortCheck
+make[1]: Entering directory '/home/itmo_denis/pbbsbench/benchmarks/comparisonSort/bench'
+g++ -DPARLAY_TBB -DTBB_MODE=TBB_SIMPLE -I /home/itmo_denis/local//include   -O2 -g -std=c++17 -DNDEBUG -I . -o sortCheck sortCheck.C -Wl,-rpath,/home/itmo_denis/local/lib64 /home/itmo_denis/local/lib64/libtbb.so -ldl -Wl,-rpath,/home/itmo_denis/local/lib -L/home/itmo_denis/local/lib -ljemalloc
+make[1]: Leaving directory '/home/itmo_denis/pbbsbench/benchmarks/comparisonSort/bench'
+cd benchmarks/comparisonSort/quickSort ; numactl -i all ./testInputs -r 3 -p 48 -x
+running cd ../sequenceData/data; make randomSeq_100M_double
+running PARLAY_NUM_THREADS=48 ./sort  -r 3 ../sequenceData/data/randomSeq_100M_double
+running rm ../sequenceData/data/randomSeq_100M_double
+randomSeq_100M_double :  -r 3 : '0.798', '0.715', '0.599', geomean = 0.699
+running cd ../sequenceData/data; make exptSeq_100M_double
+running PARLAY_NUM_THREADS=48 ./sort  -r 3 ../sequenceData/data/exptSeq_100M_double
+running rm ../sequenceData/data/exptSeq_100M_double
+exptSeq_100M_double :  -r 3 : '0.813', '0.549', '0.766', geomean = 0.699
+running cd ../sequenceData/data; make almostSortedSeq_100M_double
+running PARLAY_NUM_THREADS=48 ./sort  -r 3 ../sequenceData/data/almostSortedSeq_100M_double
+running rm ../sequenceData/data/almostSortedSeq_100M_double
+almostSortedSeq_100M_double :  -r 3 : '0.461', '0.472', '0.434', geomean = 0.456
+running cd ../sequenceData/data; make randomSeq_100M_double_pair_double
+running PARLAY_NUM_THREADS=48 ./sort  -r 3 ../sequenceData/data/randomSeq_100M_double_pair_double
+running rm ../sequenceData/data/randomSeq_100M_double_pair_double
+randomSeq_100M_double_pair_double :  -r 3 : '0.934', '1.03', '0.888', geomean = 0.949
+running cd ../sequenceData/data; make trigramSeq_100M
+running PARLAY_NUM_THREADS=48 ./sort  -r 3 ../sequenceData/data/trigramSeq_100M
+running rm ../sequenceData/data/trigramSeq_100M
+trigramSeq_100M :  -r 3 : '1.51', '1.416', '1.479', geomean = 1.468
+quickSort : 48 : geomean of mins = 0.709, geomean of geomeans = 0.791
+HOSTNAME: collab1
+Running only:  [['convexHull/quickHull', True, 0]]
+Not Checking
+Parallel Only
+Forcing Compile
+running on 48 threads
+TBB_INCLUDE: /home/itmo_denis/local//include
+TBB_LFLAGS: -Wl,-rpath,/home/itmo_denis/local/lib64 /home/itmo_denis/local/lib64/libtbb.so
 
-cd benchmarks/delaunayRefine/incrementalRefine ; make -s cleanall ; make -j 24
-g++ -DPARLAY_TBB -DTBB_MODE=TBB_SIMPLE -I /home/itmo_denis/local/include   -O2 -g -std=c++17 -DNDEBUG -I .  -o refineTime.o -c ../bench/refineTime.C
-g++ -DPARLAY_TBB -DTBB_MODE=TBB_SIMPLE -I /home/itmo_denis/local/include   -O2 -g -std=c++17 -DNDEBUG -I .  -c refine.C -o refine.o
-cd ../bench; make -s refineCheck
+cd benchmarks/convexHull/quickHull ; make -s cleanall ; make -j 24
+g++ -DPARLAY_TBB -DTBB_MODE=TBB_SIMPLE -I /home/itmo_denis/local//include   -O2 -g -std=c++17 -DNDEBUG -I .  -o hullTime.o -c ../bench/hullTime.C
+g++ -DPARLAY_TBB -DTBB_MODE=TBB_SIMPLE -I /home/itmo_denis/local//include   -O2 -g -std=c++17 -DNDEBUG -I .  -c hull.C -o hull.o
+cd ../bench; make -s hullCheck
 cp ../bench/testInputs ../bench/testInputs_small .
-g++ -o refine refineTime.o refine.o -Wl,-rpath,/home/itmo_denis/local/lib64 /home/itmo_denis/local/lib64/libtbb.so -ldl 
-cd benchmarks/delaunayRefine/incrementalRefine ; numactl -i all ./testInputs -r 3 -p 48
-running cd ../geometryData/data; make 2DinCubeDelaunay_5000000
-running PARLAY_NUM_THREADS=48 ./refine  -r 3 -o /tmp/ofile576361_209604 ../geometryData/data/2DinCubeDelaunay_5000000
-running ./../bench/refineCheck  ../geometryData/data/2DinCubeDelaunay_5000000 /tmp/ofile576361_209604
-running rm ../geometryData/data/2DinCubeDelaunay_5000000
-2DinCubeDelaunay_5000000 :  -r 3 -o /tmp/ofile576361_209604 : '4.932', '5.11', '4.862', geomean = 4.967
-running cd ../geometryData/data; make 2DkuzminDelaunay_5000000
-running PARLAY_NUM_THREADS=48 ./refine  -r 3 -o /tmp/ofile220327_742981 ../geometryData/data/2DkuzminDelaunay_5000000
-running ./../bench/refineCheck  ../geometryData/data/2DkuzminDelaunay_5000000 /tmp/ofile220327_742981
-running rm ../geometryData/data/2DkuzminDelaunay_5000000
-2DkuzminDelaunay_5000000 :  -r 3 -o /tmp/ofile220327_742981 : '5.236', '5.18', '5.138', geomean = 5.185
-incrementalRefine : 48 : geomean of mins = 4.998, geomean of geomeans = 5.074
-
-cd benchmarks/rangeQuery2d/parallelPlaneSweep ; make -s cleanall ; make -j 24
-g++ -DPARLAY_TBB -DTBB_MODE=TBB_SIMPLE -I /home/itmo_denis/local/include   -O2 -g -std=c++17 -DNDEBUG -I .  -o rangeTime.o -c ../bench/rangeTime.C
-g++ -DPARLAY_TBB -DTBB_MODE=TBB_SIMPLE -I /home/itmo_denis/local/include   -O2 -g -std=c++17 -DNDEBUG -I .  -c range.C -o range.o
-cd ../bench; make -s rangeCheck
-cp ../bench/testInputs ../bench/testInputs_small .
-g++ -o range rangeTime.o range.o -Wl,-rpath,/home/itmo_denis/local/lib64 /home/itmo_denis/local/lib64/libtbb.so -ldl 
-cd benchmarks/rangeQuery2d/parallelPlaneSweep ; numactl -i all ./testInputs -r 3 -p 48
-running cd ../geometryData/data; make 2DinCube_10M
-running PARLAY_NUM_THREADS=48 ./range  -r 3 -o /tmp/ofile484573_511179 ../geometryData/data/2DinCube_10M
-running ./../bench/rangeCheck  ../geometryData/data/2DinCube_10M /tmp/ofile484573_511179
-running rm ../geometryData/data/2DinCube_10M
-2DinCube_10M :  -r 3 -o /tmp/ofile484573_511179 : '2.703', '2.635', '2.576', geomean = 2.637
-running cd ../geometryData/data; make 2Dkuzmin_10M
-running PARLAY_NUM_THREADS=48 ./range  -r 3 -o /tmp/ofile405858_43584 ../geometryData/data/2Dkuzmin_10M
-running ./../bench/rangeCheck  ../geometryData/data/2Dkuzmin_10M /tmp/ofile405858_43584
-running rm ../geometryData/data/2Dkuzmin_10M
-2Dkuzmin_10M :  -r 3 -o /tmp/ofile405858_43584 : '2.728', '2.588', '2.577', geomean = 2.63
-parallelPlaneSweep : 48 : geomean of mins = 2.577, geomean of geomeans = 2.634
-
-cd benchmarks/nBody/parallelCK ; make -s cleanall ; make -j 24
-g++ -DPARLAY_TBB -DTBB_MODE=TBB_SIMPLE -I /home/itmo_denis/local/include   -O2 -g -std=c++17 -DNDEBUG -I .  -o nbodyTime.o -c ../bench/nbodyTime.C
-g++ -DPARLAY_TBB -DTBB_MODE=TBB_SIMPLE -I /home/itmo_denis/local/include   -O2 -g -std=c++17 -DNDEBUG -I .  -c nbody.C -o nbody.o
-cd ../bench; make -s nbodyCheck
-cp ../bench/testInputs ../bench/testInputs_small .
-g++ -o nbody nbodyTime.o nbody.o -Wl,-rpath,/home/itmo_denis/local/lib64 /home/itmo_denis/local/lib64/libtbb.so -ldl 
-cd benchmarks/nBody/parallelCK ; numactl -i all ./testInputs -r 3 -p 48
-running cd ../geometryData/data; make 3DonSphere_1000000
-running PARLAY_NUM_THREADS=48 ./nbody  -r 3 -o /tmp/ofile695710_387736 ../geometryData/data/3DonSphere_1000000
-running ./../bench/nbodyCheck  ../geometryData/data/3DonSphere_1000000 /tmp/ofile695710_387736
-running rm ../geometryData/data/3DonSphere_1000000
-3DonSphere_1000000 :  -r 3 -o /tmp/ofile695710_387736 : '1.566', '1.578', '1.553', geomean = 1.566
-running cd ../geometryData/data; make 3DinCube_1000000
-running PARLAY_NUM_THREADS=48 ./nbody  -r 3 -o /tmp/ofile7387_435426 ../geometryData/data/3DinCube_1000000
-running ./../bench/nbodyCheck  ../geometryData/data/3DinCube_1000000 /tmp/ofile7387_435426
-running rm ../geometryData/data/3DinCube_1000000
-3DinCube_1000000 :  -r 3 -o /tmp/ofile7387_435426 : '3.478', '3.554', '3.467', geomean = 3.5
-running cd ../geometryData/data; make 3Dplummer_1000000
-running PARLAY_NUM_THREADS=48 ./nbody  -r 3 -o /tmp/ofile952745_101840 ../geometryData/data/3Dplummer_1000000
-running ./../bench/nbodyCheck  ../geometryData/data/3Dplummer_1000000 /tmp/ofile952745_101840
-running rm ../geometryData/data/3Dplummer_1000000
-3Dplummer_1000000 :  -r 3 -o /tmp/ofile952745_101840 : '5.324', '5.204', '5.294', geomean = 5.274
-parallelCK : 48 : geomean of mins = 3.038, geomean of geomeans = 3.069
+g++ -o hull hullTime.o hull.o -Wl,-rpath,/home/itmo_denis/local/lib64 /home/itmo_denis/local/lib64/libtbb.so -ldl -Wl,-rpath,/home/itmo_denis/local/lib -L/home/itmo_denis/local/lib -ljemalloc
+cd benchmarks/convexHull/quickHull ; numactl -i all ./testInputs -r 3 -p 48 -x
+running cd ../geometryData/data; make 2DinSphere_100000000
+running PARLAY_NUM_THREADS=48 ./hull  -r 3 ../geometryData/data/2DinSphere_100000000
+running rm ../geometryData/data/2DinSphere_100000000
+2DinSphere_100000000 :  -r 3 : '0.284', '0.284', '0.296', geomean = 0.288
+running cd ../geometryData/data; make 2Dkuzmin_100000000
+running PARLAY_NUM_THREADS=48 ./hull  -r 3 ../geometryData/data/2Dkuzmin_100000000
+running rm ../geometryData/data/2Dkuzmin_100000000
+2Dkuzmin_100000000 :  -r 3 : '0.12', '0.117', '0.121', geomean = 0.119
+running cd ../geometryData/data; make 2DonSphere_100000000
+running PARLAY_NUM_THREADS=48 ./hull  -r 3 ../geometryData/data/2DonSphere_100000000
+running rm ../geometryData/data/2DonSphere_100000000
+2DonSphere_100000000 :  -r 3 : '7.246', '6.571', '6.239', geomean = 6.672
+quickHull : 48 : geomean of mins = 0.592, geomean of geomeans = 0.613
