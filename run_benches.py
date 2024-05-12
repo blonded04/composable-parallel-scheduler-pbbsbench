@@ -106,6 +106,8 @@ for executor in executors:
 
         if not args.numa:
             cmd.append("-nonuma")
+        if args.nocheck:
+            cmd.append("-nocheck")
         if args.only:
             cmd.append("-only")
             cmd.extend(args.only)
