@@ -14,7 +14,7 @@ inline int GetNumThreads() {
       return std::stoi(envThreads);
     }
     // left just for compatibility
-    if (const char *envThreads = std::getenv("BENCH_MAX_THREADS")) {
+    if (const char *envThreads = std::getenv("OMP_NUM_THREADS")) {
       return std::stoi(envThreads);
     }
     return static_cast<int>(std::thread::hardware_concurrency());

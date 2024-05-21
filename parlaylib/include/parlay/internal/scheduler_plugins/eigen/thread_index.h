@@ -6,7 +6,7 @@ using ThreadId = size_t;
 
 inline ThreadId GetThreadIndex() {
   thread_local static size_t id = [] {
-    return EigenPool.CurrentThreadId();
+    return EigenPool().CurrentThreadId();
   }();
   return id;
 }
