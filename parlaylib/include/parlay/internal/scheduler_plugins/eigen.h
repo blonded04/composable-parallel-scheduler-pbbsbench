@@ -49,7 +49,7 @@ inline size_t num_workers() {
       return std::stoul(envThreads);
     }
     // left just for compatibility
-    if (const char *envThreads = std::getenv("BENCH_MAX_THREADS")) {
+    if (const char *envThreads = std::getenv("OMP_NUM_THREADS")) {
       return std::stoul(envThreads);
     }
     return std::thread::hardware_concurrency();

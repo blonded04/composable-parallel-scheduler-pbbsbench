@@ -18,7 +18,20 @@ namespace parlay {
 
 // IWYU pragma: private, include "../../parallel.h"
 
-inline size_t num_workers() { return tbb::this_task_arena::max_concurrency(); }
+inline size_t num_workers() {
+  // cache result to avoid calling getenv on every call
+  static size_t threads = []() -> size_t {
+    if (const char *envThreads = std::getenv("BENCH_NUM_THREADS")) {
+      return std::stoul(envThreads);
+    }
+    // left just for compatibility
+    if (const char *envThreads = std::getenv("OMP_NUM_THREADS")) {
+      return std::stoul(envThreads);
+    }
+    return std::thread::hardware_concurrency();
+  }();
+  return threads;
+}
 
 inline size_t worker_id() {
   auto id = tbb::this_task_arena::current_thread_index();
@@ -32,7 +45,6 @@ inline void parallel_for(size_t start, size_t end, F&& f, long granularity, bool
     tbb::task_group_context::bound,
     tbb::task_group_context::default_traits |
         tbb::task_group_context::concurrent_wait);
-  tbb::auto_partitioner part;
   #if TBB_MODE == TBB_SIMPLE
     const tbb::simple_partitioner part;
   #elif TBB_MODE == TBB_AUTO

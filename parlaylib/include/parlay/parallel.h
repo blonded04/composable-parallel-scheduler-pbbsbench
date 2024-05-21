@@ -75,6 +75,16 @@ inline void init_plugin() {
   static internal::InitOnce warmup{[] { internal::warmup(num_workers()); }};
 }
 
+struct Initializer {
+  Initializer() {
+    init_plugin();
+  }
+
+  static Initializer initializer;
+};
+
+inline Initializer Initializer::initializer;
+
 // ----------------------------------------------------------------------------
 //          Extra functions implemented on top of the four basic ones
 //
