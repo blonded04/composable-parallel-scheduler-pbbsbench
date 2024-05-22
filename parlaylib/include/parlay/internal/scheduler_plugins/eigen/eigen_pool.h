@@ -13,7 +13,7 @@
 inline auto EigenPool =
     Eigen::ThreadPool(GetNumThreads() - 1); // 1 for main thread
 #else
-Eigen::ThreadPool& EigenPool() {
+inline Eigen::ThreadPool& EigenPool() {
   static auto pool = Eigen::ThreadPool(Eigen::internal::GetNumThreads(), true,
                                           true); // todo: disable spinning?
   return pool;

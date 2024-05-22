@@ -62,7 +62,7 @@ inline void parallel_for(size_t start, size_t end, F&& f, long granularity, bool
     // TODO: grain size?
 
   tbb::parallel_for(
-      tbb::blocked_range(start, end, granularity),
+      tbb::blocked_range(start, end, std::max(granularity, long{1})),
       [&](const tbb::blocked_range<size_t> &range) {
         for (size_t i = range.begin(); i != range.end(); ++i) {
           f(i);
