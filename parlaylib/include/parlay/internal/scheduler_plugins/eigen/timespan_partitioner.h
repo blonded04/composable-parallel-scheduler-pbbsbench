@@ -267,7 +267,7 @@ void ParallelFor(size_t from, size_t to, F func) {
   // allocating only for top-level nodes
   TaskNode rootNode;
   IntrusivePtrAddRef(&rootNode); // avoid deletion
-  if (detail::ThreadLocalTaskStack().IsEmpty()) {
+  // if (detail::ThreadLocalTaskStack().IsEmpty()) {
     Task<F, balance, grainSizeMode, Initial::TRUE> task{
         sched,
         IntrusivePtr<TaskNode>(&rootNode),
@@ -277,7 +277,7 @@ void ParallelFor(size_t from, size_t to, F func) {
         SplitData{.Threads = {0, static_cast<size_t>(Eigen::internal::GetNumThreads())},
                   .GrainSize = 1}};
     task();
-  } else {
+  /*} else {
     Task<F, balance, grainSizeMode, Initial::FALSE> task{
         sched,
         IntrusivePtr<TaskNode>(&rootNode),
@@ -288,10 +288,10 @@ void ParallelFor(size_t from, size_t to, F func) {
                   .GrainSize = 1}};
     task();
   }
+  */
 
   while (IntrusivePtrLoadRef(&rootNode) != 1) {
     sched.execute_something_else();
-    // sched.join_main_thread();
   }
 }
 
