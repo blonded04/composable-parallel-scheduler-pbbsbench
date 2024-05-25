@@ -1,0 +1,431 @@
+HOSTNAME: collab1
+Not Checking
+Parallel Only
+No numactl
+Forcing Compile
+running on 48 threads
+
+cd benchmarks/integerSort/parallelRadixSort ; make -s cleanall ; make -j 24
+g++ -DPARLAY_EIGEN -DEIGEN_MODE=EIGEN_TIMESPAN_GRAINSIZE -pthread -O2 -g -std=c++17 -DNDEBUG -I .  -include isort.h -o isort ../bench/isortTime.C -DPARLAY_EIGEN -DEIGEN_MODE=EIGEN_TIMESPAN_GRAINSIZE -pthread -ldl -Wl,-rpath,/home/itmo_denis/local/lib -L/home/itmo_denis/local/lib -ljemalloc
+cp ../bench/testInputs ../bench/testInputs_small .
+cd ../bench; make isortCheck
+make[1]: Entering directory '/home/itmo_denis/pbbsbench/benchmarks/integerSort/bench'
+g++ -DPARLAY_EIGEN -DEIGEN_MODE=EIGEN_TIMESPAN_GRAINSIZE -pthread -O2 -g -std=c++17 -DNDEBUG -I . -Icommon -o isortCheck isortCheck.C -DPARLAY_EIGEN -DEIGEN_MODE=EIGEN_TIMESPAN_GRAINSIZE -pthread -ldl -Wl,-rpath,/home/itmo_denis/local/lib -L/home/itmo_denis/local/lib -ljemalloc
+make[1]: Leaving directory '/home/itmo_denis/pbbsbench/benchmarks/integerSort/bench'
+cd benchmarks/integerSort/parallelRadixSort ; ./testInputs -r 3 -p 48 -x
+running cd ../sequenceData/data; make randomSeq_100M_int
+running PARLAY_NUM_THREADS=48 ./isort -b 27 -r 3 ../sequenceData/data/randomSeq_100M_int
+running rm ../sequenceData/data/randomSeq_100M_int
+randomSeq_100M_int : -b 27 -r 3 : '0.153', '0.156', '0.147', geomean = 0.152
+running cd ../sequenceData/data; make exptSeq_100M_int
+running PARLAY_NUM_THREADS=48 ./isort -b 27 -r 3 ../sequenceData/data/exptSeq_100M_int
+running rm ../sequenceData/data/exptSeq_100M_int
+exptSeq_100M_int : -b 27 -r 3 : '0.273', '0.178', '0.178', geomean = 0.205
+running cd ../sequenceData/data; make randomSeq_100M_int_pair_int
+running PARLAY_NUM_THREADS=48 ./isort -b 27 -r 3 ../sequenceData/data/randomSeq_100M_int_pair_int
+running rm ../sequenceData/data/randomSeq_100M_int_pair_int
+randomSeq_100M_int_pair_int : -b 27 -r 3 : '0.201', '0.196', '0.201', geomean = 0.199
+running cd ../sequenceData/data; make randomSeq_100M_256_int_pair_int
+running PARLAY_NUM_THREADS=48 ./isort -b 8 -r 3 ../sequenceData/data/randomSeq_100M_256_int_pair_int
+running rm ../sequenceData/data/randomSeq_100M_256_int_pair_int
+randomSeq_100M_256_int_pair_int : -b 8 -r 3 : '0.064', '0.064', '0.069', geomean = 0.066
+parallelRadixSort : 48 : geomean of mins = 0.135, geomean of geomeans = 0.142
+
+cd benchmarks/comparisonSort/sampleSort ; make -s cleanall ; make -j 24
+g++ -DPARLAY_EIGEN -DEIGEN_MODE=EIGEN_TIMESPAN_GRAINSIZE -pthread -O2 -g -std=c++17 -DNDEBUG -I .  -include sort.h -o sort ../bench/sortTime.C -DPARLAY_EIGEN -DEIGEN_MODE=EIGEN_TIMESPAN_GRAINSIZE -pthread -ldl -Wl,-rpath,/home/itmo_denis/local/lib -L/home/itmo_denis/local/lib -ljemalloc
+cp ../bench/testInputs ../bench/testInputs_small .
+cd ../bench; make sortCheck
+make[1]: Entering directory '/home/itmo_denis/pbbsbench/benchmarks/comparisonSort/bench'
+g++ -DPARLAY_EIGEN -DEIGEN_MODE=EIGEN_TIMESPAN_GRAINSIZE -pthread -O2 -g -std=c++17 -DNDEBUG -I . -o sortCheck sortCheck.C -DPARLAY_EIGEN -DEIGEN_MODE=EIGEN_TIMESPAN_GRAINSIZE -pthread -ldl -Wl,-rpath,/home/itmo_denis/local/lib -L/home/itmo_denis/local/lib -ljemalloc
+make[1]: Leaving directory '/home/itmo_denis/pbbsbench/benchmarks/comparisonSort/bench'
+cd benchmarks/comparisonSort/sampleSort ; ./testInputs -r 3 -p 48 -x
+running cd ../sequenceData/data; make randomSeq_100M_double
+running PARLAY_NUM_THREADS=48 ./sort  -r 3 ../sequenceData/data/randomSeq_100M_double
+running rm ../sequenceData/data/randomSeq_100M_double
+randomSeq_100M_double :  -r 3 : '0.299', '0.301', '0.302', geomean = 0.301
+running cd ../sequenceData/data; make exptSeq_100M_double
+running PARLAY_NUM_THREADS=48 ./sort  -r 3 ../sequenceData/data/exptSeq_100M_double
+running rm ../sequenceData/data/exptSeq_100M_double
+exptSeq_100M_double :  -r 3 : '0.252', '0.262', '0.266', geomean = 0.26
+running cd ../sequenceData/data; make almostSortedSeq_100M_double
+running PARLAY_NUM_THREADS=48 ./sort  -r 3 ../sequenceData/data/almostSortedSeq_100M_double
+running rm ../sequenceData/data/almostSortedSeq_100M_double
+almostSortedSeq_100M_double :  -r 3 : '0.323', '0.25', '0.255', geomean = 0.274
+running cd ../sequenceData/data; make randomSeq_100M_double_pair_double
+running PARLAY_NUM_THREADS=48 ./sort  -r 3 ../sequenceData/data/randomSeq_100M_double_pair_double
+running rm ../sequenceData/data/randomSeq_100M_double_pair_double
+randomSeq_100M_double_pair_double :  -r 3 : '0.379', '0.377', '0.409', geomean = 0.388
+running cd ../sequenceData/data; make trigramSeq_100M
+running PARLAY_NUM_THREADS=48 ./sort  -r 3 ../sequenceData/data/trigramSeq_100M
+running rm ../sequenceData/data/trigramSeq_100M
+trigramSeq_100M :  -r 3 : '0.7', '0.682', '0.857', geomean = 0.742
+sampleSort : 48 : geomean of mins = 0.344, geomean of geomeans = 0.361
+
+cd benchmarks/removeDuplicates/parlayhash ; make -s cleanall ; make -j 24
+g++ -DPARLAY_EIGEN -DEIGEN_MODE=EIGEN_TIMESPAN_GRAINSIZE -pthread -O2 -g -std=c++17 -DNDEBUG -I .  -include dedup.h -o dedup ../bench/dedupTime.C -DPARLAY_EIGEN -DEIGEN_MODE=EIGEN_TIMESPAN_GRAINSIZE -pthread -ldl -Wl,-rpath,/home/itmo_denis/local/lib -L/home/itmo_denis/local/lib -ljemalloc
+cp ../bench/testInputs ../bench/testInputs_small .
+cd ../bench; make dedupCheck
+make[1]: Entering directory '/home/itmo_denis/pbbsbench/benchmarks/removeDuplicates/bench'
+g++ -DPARLAY_EIGEN -DEIGEN_MODE=EIGEN_TIMESPAN_GRAINSIZE -pthread -O2 -g -std=c++17 -DNDEBUG -I . -o dedupCheck dedupCheck.C -DPARLAY_EIGEN -DEIGEN_MODE=EIGEN_TIMESPAN_GRAINSIZE -pthread -ldl -Wl,-rpath,/home/itmo_denis/local/lib -L/home/itmo_denis/local/lib -ljemalloc
+make[1]: Leaving directory '/home/itmo_denis/pbbsbench/benchmarks/removeDuplicates/bench'
+cd benchmarks/removeDuplicates/parlayhash ; ./testInputs -r 3 -p 48 -x
+running cd ../sequenceData/data; make randomSeq_100M_int
+running PARLAY_NUM_THREADS=48 ./dedup  -r 3 ../sequenceData/data/randomSeq_100M_int
+running rm ../sequenceData/data/randomSeq_100M_int
+randomSeq_100M_int :  -r 3 : '0.194', '0.142', '0.177', geomean = 0.17
+running cd ../sequenceData/data; make exptSeq_100M_int
+running PARLAY_NUM_THREADS=48 ./dedup  -r 3 ../sequenceData/data/exptSeq_100M_int
+running rm ../sequenceData/data/exptSeq_100M_int
+exptSeq_100M_int :  -r 3 : '0.119', '0.125', '0.121', geomean = 0.122
+running cd ../sequenceData/data; make trigramSeq_100M
+running PARLAY_NUM_THREADS=48 ./dedup  -r 3 ../sequenceData/data/trigramSeq_100M
+running rm ../sequenceData/data/trigramSeq_100M
+trigramSeq_100M :  -r 3 : '0.684', '0.571', '0.565', geomean = 0.604
+parlayhash : 48 : geomean of mins = 0.212, geomean of geomeans = 0.232
+
+cd benchmarks/histogram/parallel ; make -s cleanall ; make -j 24
+g++ -DPARLAY_EIGEN -DEIGEN_MODE=EIGEN_TIMESPAN_GRAINSIZE -pthread -O2 -g -std=c++17 -DNDEBUG -I .  -o histogramTime.o -c ../bench/histogramTime.C
+g++ -DPARLAY_EIGEN -DEIGEN_MODE=EIGEN_TIMESPAN_GRAINSIZE -pthread -O2 -g -std=c++17 -DNDEBUG -I .  -c histogram.C -o histogram.o
+cd ../bench; make -s histogramCheck
+cp ../bench/testInputs ../bench/testInputs_small .
+g++ -o histogram histogramTime.o histogram.o -DPARLAY_EIGEN -DEIGEN_MODE=EIGEN_TIMESPAN_GRAINSIZE -pthread -ldl -Wl,-rpath,/home/itmo_denis/local/lib -L/home/itmo_denis/local/lib -ljemalloc
+cd benchmarks/histogram/parallel ; ./testInputs -r 3 -p 48 -x
+running cd ../sequenceData/data; make randomSeq_100M_256_int
+running PARLAY_NUM_THREADS=48 ./histogram -b 256 -r 3 ../sequenceData/data/randomSeq_100M_256_int
+running rm ../sequenceData/data/randomSeq_100M_256_int
+randomSeq_100M_256_int : -b 256 -r 3 : '0.008', '0.008', '0.01', geomean = 0.009
+running cd ../sequenceData/data; make randomSeq_100M_100K_int
+running PARLAY_NUM_THREADS=48 ./histogram -b 100000 -r 3 ../sequenceData/data/randomSeq_100M_100K_int
+running rm ../sequenceData/data/randomSeq_100M_100K_int
+randomSeq_100M_100K_int : -b 100000 -r 3 : '0.045', '0.045', '0.046', geomean = 0.045
+running cd ../sequenceData/data; make randomSeq_100M_int
+running PARLAY_NUM_THREADS=48 ./histogram -b 100000000 -r 3 ../sequenceData/data/randomSeq_100M_int
+running rm ../sequenceData/data/randomSeq_100M_int
+randomSeq_100M_int : -b 100000000 -r 3 : '0.161', '0.114', '0.081', geomean = 0.114
+running cd ../sequenceData/data; make exptSeq_100M_int
+running PARLAY_NUM_THREADS=48 ./histogram -b 100000000 -r 3 ../sequenceData/data/exptSeq_100M_int
+running rm ../sequenceData/data/exptSeq_100M_int
+exptSeq_100M_int : -b 100000000 -r 3 : '0.112', '0.089', '0.088', geomean = 0.096
+running cd ../sequenceData/data; make almostEqualSeq_100000000
+running PARLAY_NUM_THREADS=48 ./histogram -b 100000000 -r 3 ../sequenceData/data/almostEqualSeq_100000000
+running rm ../sequenceData/data/almostEqualSeq_100000000
+almostEqualSeq_100000000 : -b 100000000 -r 3 : '0.105', '0.121', '0.099', geomean = 0.108
+parallel : 48 : geomean of mins = 0.048, geomean of geomeans = 0.055
+
+cd benchmarks/wordCounts/histogram ; make -s cleanall ; make -j 24
+g++ -DPARLAY_EIGEN -DEIGEN_MODE=EIGEN_TIMESPAN_GRAINSIZE -pthread -O2 -g -std=c++17 -DNDEBUG -I .  -o wcTime.o -c ../bench/wcTime.C
+g++ -DPARLAY_EIGEN -DEIGEN_MODE=EIGEN_TIMESPAN_GRAINSIZE -pthread -O2 -g -std=c++17 -DNDEBUG -I .  -c wc.C -o wc.o
+cd ../bench; make -s wcCheck
+cp ../bench/testInputs ../bench/testInputs_small .
+g++ -o wc wcTime.o wc.o -DPARLAY_EIGEN -DEIGEN_MODE=EIGEN_TIMESPAN_GRAINSIZE -pthread -ldl -Wl,-rpath,/home/itmo_denis/local/lib -L/home/itmo_denis/local/lib -ljemalloc
+cd benchmarks/wordCounts/histogram ; ./testInputs -r 3 -p 48 -x
+running cd ../sequenceData/data; make trigramString_250000000
+running PARLAY_NUM_THREADS=48 ./wc  -r 3 ../sequenceData/data/trigramString_250000000
+running rm ../sequenceData/data/trigramString_250000000
+trigramString_250000000 :  -r 3 : '19.645', '16.305', '20.011', geomean = 18.576
+running cd ../sequenceData/data; make etext99
+running PARLAY_NUM_THREADS=48 ./wc  -r 3 ../sequenceData/data/etext99
+running rm ../sequenceData/data/etext99
+etext99 :  -r 3 : '7.718', '8.321', '6.804', geomean = 7.588
+running cd ../sequenceData/data; make wikipedia250M.txt
+running PARLAY_NUM_THREADS=48 ./wc  -r 3 ../sequenceData/data/wikipedia250M.txt
+running rm ../sequenceData/data/wikipedia250M.txt
+wikipedia250M.txt :  -r 3 : '13.805', '16.077', '13.896', geomean = 14.556
+histogram : 48 : geomean of mins = 11.527, geomean of geomeans = 12.707
+
+cd benchmarks/invertedIndex/parallel ; make -s cleanall ; make -j 24
+g++ -DPARLAY_EIGEN -DEIGEN_MODE=EIGEN_TIMESPAN_GRAINSIZE -pthread -O2 -g -std=c++17 -DNDEBUG -I .  -o indexTime.o -c ../bench/indexTime.C
+g++ -DPARLAY_EIGEN -DEIGEN_MODE=EIGEN_TIMESPAN_GRAINSIZE -pthread -O2 -g -std=c++17 -DNDEBUG -I .  -c index.C -o index.o
+cd ../bench; make -s indexCheck
+cp ../bench/testInputs ../bench/testInputs_small .
+g++ -o index indexTime.o index.o -DPARLAY_EIGEN -DEIGEN_MODE=EIGEN_TIMESPAN_GRAINSIZE -pthread -ldl -Wl,-rpath,/home/itmo_denis/local/lib -L/home/itmo_denis/local/lib -ljemalloc
+cd benchmarks/invertedIndex/parallel ; ./testInputs -r 3 -p 48 -x
+running cd ../sequenceData/data; make wikisamp.xml
+running PARLAY_NUM_THREADS=48 ./index  -r 3 ../sequenceData/data/wikisamp.xml
+running rm ../sequenceData/data/wikisamp.xml
+wikisamp.xml :  -r 3 : '11.093', '13.471', '13.973', geomean = 12.781
+running cd ../sequenceData/data; make wikipedia250M.txt
+running PARLAY_NUM_THREADS=48 ./index  -r 3 ../sequenceData/data/wikipedia250M.txt
+running rm ../sequenceData/data/wikipedia250M.txt
+wikipedia250M.txt :  -r 3 : '31.689', '42.09', '29.331', geomean = 33.947
+parallel : 48 : geomean of mins = 18.038, geomean of geomeans = 20.83
+
+cd benchmarks/suffixArray/parallelRange ; make -s cleanall ; make -j 24
+g++ -DPARLAY_EIGEN -DEIGEN_MODE=EIGEN_TIMESPAN_GRAINSIZE -pthread -O2 -g -std=c++17 -DNDEBUG -I .  -o SATime.o -c ../bench/SATime.C
+g++ -DPARLAY_EIGEN -DEIGEN_MODE=EIGEN_TIMESPAN_GRAINSIZE -pthread -O2 -g -std=c++17 -DNDEBUG -I .  -c SA.C -o SA.o
+cd ../bench; make -s SACheck
+cp ../bench/testInputs ../bench/testInputs_small .
+g++ -o SA SATime.o SA.o -DPARLAY_EIGEN -DEIGEN_MODE=EIGEN_TIMESPAN_GRAINSIZE -pthread -ldl -Wl,-rpath,/home/itmo_denis/local/lib -L/home/itmo_denis/local/lib -ljemalloc
+cd benchmarks/suffixArray/parallelRange ; ./testInputs -r 3 -p 48 -x
+running cd ../sequenceData/data; make trigramString_100000000
+running PARLAY_NUM_THREADS=48 ./SA  -r 3 ../sequenceData/data/trigramString_100000000
+running rm ../sequenceData/data/trigramString_100000000
+trigramString_100000000 :  -r 3 : '1.046', '0.961', '1.033', geomean = 1.012
+running cd ../sequenceData/data; make chr22.dna
+running PARLAY_NUM_THREADS=48 ./SA  -r 3 ../sequenceData/data/chr22.dna
+running rm ../sequenceData/data/chr22.dna
+chr22.dna :  -r 3 : '0.843', '1.013', '0.946', geomean = 0.931
+running cd ../sequenceData/data; make etext99
+running PARLAY_NUM_THREADS=48 ./SA  -r 3 ../sequenceData/data/etext99
+running rm ../sequenceData/data/etext99
+etext99 :  -r 3 : '17.693', '16.894', '17.733', geomean = 17.436
+running cd ../sequenceData/data; make wikisamp.xml
+running PARLAY_NUM_THREADS=48 ./SA  -r 3 ../sequenceData/data/wikisamp.xml
+running rm ../sequenceData/data/wikisamp.xml
+wikisamp.xml :  -r 3 : '6.82', '7.088', '6.395', geomean = 6.761
+parallelRange : 48 : geomean of mins = 3.059, geomean of geomeans = 3.247
+
+cd benchmarks/longestRepeatedSubstring/doubling ; make -s cleanall ; make -j 24
+g++ -DPARLAY_EIGEN -DEIGEN_MODE=EIGEN_TIMESPAN_GRAINSIZE -pthread -O2 -g -std=c++17 -DNDEBUG -I .  -o lrsTime.o -c ../bench/lrsTime.C
+g++ -DPARLAY_EIGEN -DEIGEN_MODE=EIGEN_TIMESPAN_GRAINSIZE -pthread -O2 -g -std=c++17 -DNDEBUG -I .  -c lrs.C -o lrs.o
+cd ../bench; make -s lrsCheck
+cp ../bench/testInputs ../bench/testInputs_small .
+g++ -o lrs lrsTime.o lrs.o -DPARLAY_EIGEN -DEIGEN_MODE=EIGEN_TIMESPAN_GRAINSIZE -pthread -ldl -Wl,-rpath,/home/itmo_denis/local/lib -L/home/itmo_denis/local/lib -ljemalloc
+cd benchmarks/longestRepeatedSubstring/doubling ; ./testInputs -r 3 -p 48 -x
+running cd ../sequenceData/data; make chr22.dna
+running PARLAY_NUM_THREADS=48 ./lrs  -r 3 ../sequenceData/data/chr22.dna
+running rm ../sequenceData/data/chr22.dna
+chr22.dna :  -r 3 : '0.969', '1.137', '1.265', geomean = 1.117
+running cd ../sequenceData/data; make etext99
+running PARLAY_NUM_THREADS=48 ./lrs  -r 3 ../sequenceData/data/etext99
+running rm ../sequenceData/data/etext99
+etext99 :  -r 3 : '28.228', '29.451', '32.51', geomean = 30.01
+running cd ../sequenceData/data; make wikisamp.xml
+running PARLAY_NUM_THREADS=48 ./lrs  -r 3 ../sequenceData/data/wikisamp.xml
+running rm ../sequenceData/data/wikisamp.xml
+wikisamp.xml :  -r 3 : '6.444', '5.83', '6.156', geomean = 6.138
+doubling : 48 : geomean of mins = 5.424, geomean of geomeans = 5.904
+
+cd benchmarks/classify/decisionTree ; make -s cleanall ; make -j 24
+g++ -DPARLAY_EIGEN -DEIGEN_MODE=EIGEN_TIMESPAN_GRAINSIZE -pthread -O2 -g -std=c++17 -DNDEBUG -I .  -o classifyTime.o -c ../bench/classifyTime.C
+g++ -DPARLAY_EIGEN -DEIGEN_MODE=EIGEN_TIMESPAN_GRAINSIZE -pthread -O2 -g -std=c++17 -DNDEBUG -I .  -c classify.C -o classify.o
+cd ../bench; make -s classifyCheck
+cp ../bench/testInputs ../bench/testInputs_small .
+g++ -o classify classifyTime.o classify.o -DPARLAY_EIGEN -DEIGEN_MODE=EIGEN_TIMESPAN_GRAINSIZE -pthread -ldl -Wl,-rpath,/home/itmo_denis/local/lib -L/home/itmo_denis/local/lib -ljemalloc
+cd benchmarks/classify/decisionTree ; ./testInputs -r 3 -p 48 -x
+running cd ../sequenceData/data; make covtype.data
+running PARLAY_NUM_THREADS=48 ./classify  -r 3 ../sequenceData/data/covtype.data
+covtype.data :  -r 3 : '28.628', '27.967', '26.224', geomean = 27.587
+running cd ../sequenceData/data; make kddcup.data
+running PARLAY_NUM_THREADS=48 ./classify  -r 3 ../sequenceData/data/kddcup.data
+kddcup.data :  -r 3 : '1.398', '1.356', '1.484', geomean = 1.412
+decisionTree : 48 : geomean of mins = 5.964, geomean of geomeans = 6.242
+
+cd benchmarks/minSpanningForest/parallelFilterKruskal ; make -s cleanall ; make -j 24
+g++ -DPARLAY_EIGEN -DEIGEN_MODE=EIGEN_TIMESPAN_GRAINSIZE -pthread -O2 -g -std=c++17 -DNDEBUG -I .  -o MSTTime.o -c ../bench/MSTTime.C
+g++ -DPARLAY_EIGEN -DEIGEN_MODE=EIGEN_TIMESPAN_GRAINSIZE -pthread -O2 -g -std=c++17 -DNDEBUG -I .  -c MST.C -o MST.o
+cd ../bench; make -s MSTCheck
+cp ../bench/testInputs ../bench/testInputs_small .
+g++ -o MST MSTTime.o MST.o -DPARLAY_EIGEN -DEIGEN_MODE=EIGEN_TIMESPAN_GRAINSIZE -pthread -ldl -Wl,-rpath,/home/itmo_denis/local/lib -L/home/itmo_denis/local/lib -ljemalloc
+cd benchmarks/minSpanningForest/parallelFilterKruskal ; ./testInputs -r 3 -p 48 -x
+running cd ../graphData/data; make randLocalGraph_WE_10_20000000
+running PARLAY_NUM_THREADS=48 ./MST  -r 3 ../graphData/data/randLocalGraph_WE_10_20000000
+running rm ../graphData/data/randLocalGraph_WE_10_20000000
+randLocalGraph_WE_10_20000000 :  -r 3 : '1.925', '1.943', '1.995', geomean = 1.954
+running cd ../graphData/data; make rMatGraph_WE_12_16000000
+running PARLAY_NUM_THREADS=48 ./MST  -r 3 ../graphData/data/rMatGraph_WE_12_16000000
+running rm ../graphData/data/rMatGraph_WE_12_16000000
+rMatGraph_WE_12_16000000 :  -r 3 : '1.355', '1.341', '1.352', geomean = 1.349
+running cd ../graphData/data; make 2Dgrid_WE_64000000
+running PARLAY_NUM_THREADS=48 ./MST  -r 3 ../graphData/data/2Dgrid_WE_64000000
+running rm ../graphData/data/2Dgrid_WE_64000000
+2Dgrid_WE_64000000 :  -r 3 : '3.616', '3.274', '2.926', geomean = 3.26
+parallelFilterKruskal : 48 : geomean of mins = 1.962, geomean of geomeans = 2.048
+
+cd benchmarks/spanningForest/ndST ; make -s cleanall ; make -j 24
+g++ -DPARLAY_EIGEN -DEIGEN_MODE=EIGEN_TIMESPAN_GRAINSIZE -pthread -O2 -g -std=c++17 -DNDEBUG -I .  -o STTime.o -c ../bench/STTime.C
+g++ -DPARLAY_EIGEN -DEIGEN_MODE=EIGEN_TIMESPAN_GRAINSIZE -pthread -O2 -g -std=c++17 -DNDEBUG -I .  -c ST.C -o ST.o
+cd ../bench; make -s STCheck
+cp ../bench/testInputs ../bench/testInputs_small .
+g++ -o ST STTime.o ST.o -DPARLAY_EIGEN -DEIGEN_MODE=EIGEN_TIMESPAN_GRAINSIZE -pthread -ldl -Wl,-rpath,/home/itmo_denis/local/lib -L/home/itmo_denis/local/lib -ljemalloc
+cd benchmarks/spanningForest/ndST ; ./testInputs -r 3 -p 48 -x
+running cd ../graphData/data; make randLocalGraph_E_10_20000000
+running PARLAY_NUM_THREADS=48 ./ST  -r 3 ../graphData/data/randLocalGraph_E_10_20000000
+running rm ../graphData/data/randLocalGraph_E_10_20000000
+randLocalGraph_E_10_20000000 :  -r 3 : '0.941', '0.927', '0.925', geomean = 0.931
+running cd ../graphData/data; make rMatGraph_E_12_16000000
+running PARLAY_NUM_THREADS=48 ./ST  -r 3 ../graphData/data/rMatGraph_E_12_16000000
+running rm ../graphData/data/rMatGraph_E_12_16000000
+rMatGraph_E_12_16000000 :  -r 3 : '0.708', '0.713', '0.799', geomean = 0.739
+running cd ../graphData/data; make 2Dgrid_E_64000000
+running PARLAY_NUM_THREADS=48 ./ST  -r 3 ../graphData/data/2Dgrid_E_64000000
+running rm ../graphData/data/2Dgrid_E_64000000
+2Dgrid_E_64000000 :  -r 3 : '1.65', '1.411', '1.368', geomean = 1.471
+ndST : 48 : geomean of mins = 0.964, geomean of geomeans = 1.004
+
+cd benchmarks/breadthFirstSearch/backForwardBFS ; make -s cleanall ; make -j 24
+g++ -DPARLAY_EIGEN -DEIGEN_MODE=EIGEN_TIMESPAN_GRAINSIZE -pthread -O2 -g -std=c++17 -DNDEBUG -I .  -o BFSTime.o -c ../bench/BFSTime.C
+g++ -DPARLAY_EIGEN -DEIGEN_MODE=EIGEN_TIMESPAN_GRAINSIZE -pthread -O2 -g -std=c++17 -DNDEBUG -I .  -c BFS.C -o BFS.o
+cd ../bench; make -s BFSCheck
+cp ../bench/testInputs ../bench/testInputs_small .
+g++ -o BFS BFSTime.o BFS.o -DPARLAY_EIGEN -DEIGEN_MODE=EIGEN_TIMESPAN_GRAINSIZE -pthread -ldl -Wl,-rpath,/home/itmo_denis/local/lib -L/home/itmo_denis/local/lib -ljemalloc
+cd benchmarks/breadthFirstSearch/backForwardBFS ; ./testInputs -r 3 -p 48 -x
+running cd ../graphData/data; make randLocalGraph_J_10_20000000
+running PARLAY_NUM_THREADS=48 ./BFS  -r 3 ../graphData/data/randLocalGraph_J_10_20000000
+running rm ../graphData/data/randLocalGraph_J_10_20000000
+randLocalGraph_J_10_20000000 :  -r 3 : '0.124', '0.124', '0.125', geomean = 0.124
+running cd ../graphData/data; make rMatGraph_J_12_16000000
+running PARLAY_NUM_THREADS=48 ./BFS  -r 3 ../graphData/data/rMatGraph_J_12_16000000
+running rm ../graphData/data/rMatGraph_J_12_16000000
+rMatGraph_J_12_16000000 :  -r 3 : '0.163', '0.171', '0.221', geomean = 0.183
+running cd ../graphData/data; make 3Dgrid_J_64000000
+running PARLAY_NUM_THREADS=48 ./BFS  -r 3 ../graphData/data/3Dgrid_J_64000000
+running rm ../graphData/data/3Dgrid_J_64000000
+3Dgrid_J_64000000 :  -r 3 : '1.634', '1.507', '1.724', geomean = 1.619
+backForwardBFS : 48 : geomean of mins = 0.312, geomean of geomeans = 0.333
+
+cd benchmarks/maximalMatching/incrementalMatching ; make -s cleanall ; make -j 24
+g++ -DPARLAY_EIGEN -DEIGEN_MODE=EIGEN_TIMESPAN_GRAINSIZE -pthread -O2 -g -std=c++17 -DNDEBUG -I .  -o matchingTime.o -c ../bench/matchingTime.C
+g++ -DPARLAY_EIGEN -DEIGEN_MODE=EIGEN_TIMESPAN_GRAINSIZE -pthread -O2 -g -std=c++17 -DNDEBUG -I .  -c matching.C -o matching.o
+cd ../bench; make -s matchingCheck
+cp ../bench/testInputs ../bench/testInputs_small .
+g++ -o matching matchingTime.o matching.o -DPARLAY_EIGEN -DEIGEN_MODE=EIGEN_TIMESPAN_GRAINSIZE -pthread -ldl -Wl,-rpath,/home/itmo_denis/local/lib -L/home/itmo_denis/local/lib -ljemalloc
+cd benchmarks/maximalMatching/incrementalMatching ; ./testInputs -r 3 -p 48 -x
+running cd ../graphData/data; make randLocalGraph_E_10_20000000
+running PARLAY_NUM_THREADS=48 ./matching  -r 3 ../graphData/data/randLocalGraph_E_10_20000000
+running rm ../graphData/data/randLocalGraph_E_10_20000000
+randLocalGraph_E_10_20000000 :  -r 3 : '0.657', '0.554', '0.65', geomean = 0.618
+running cd ../graphData/data; make rMatGraph_E_10_20000000
+running PARLAY_NUM_THREADS=48 ./matching  -r 3 ../graphData/data/rMatGraph_E_10_20000000
+running rm ../graphData/data/rMatGraph_E_10_20000000
+rMatGraph_E_10_20000000 :  -r 3 : '0.806', '0.894', '0.803', geomean = 0.833
+running cd ../graphData/data; make 2Dgrid_E_64000000
+running PARLAY_NUM_THREADS=48 ./matching  -r 3 ../graphData/data/2Dgrid_E_64000000
+running rm ../graphData/data/2Dgrid_E_64000000
+2Dgrid_E_64000000 :  -r 3 : '1.215', '1.322', '1.258', geomean = 1.264
+incrementalMatching : 48 : geomean of mins = 0.815, geomean of geomeans = 0.867
+
+cd benchmarks/maximalIndependentSet/incrementalMIS ; make -s cleanall ; make -j 24
+g++ -DPARLAY_EIGEN -DEIGEN_MODE=EIGEN_TIMESPAN_GRAINSIZE -pthread -O2 -g -std=c++17 -DNDEBUG -I .  -o MISTime.o -c ../bench/MISTime.C
+g++ -DPARLAY_EIGEN -DEIGEN_MODE=EIGEN_TIMESPAN_GRAINSIZE -pthread -O2 -g -std=c++17 -DNDEBUG -I .  -c MIS.C -o MIS.o
+cd ../bench; make -s MISCheck
+cp ../bench/testInputs ../bench/testInputs_small .
+g++ -o MIS MISTime.o MIS.o -DPARLAY_EIGEN -DEIGEN_MODE=EIGEN_TIMESPAN_GRAINSIZE -pthread -ldl -Wl,-rpath,/home/itmo_denis/local/lib -L/home/itmo_denis/local/lib -ljemalloc
+cd benchmarks/maximalIndependentSet/incrementalMIS ; ./testInputs -r 3 -p 48 -x
+running cd ../graphData/data; make randLocalGraph_JR_10_20000000
+running PARLAY_NUM_THREADS=48 ./MIS  -r 3 ../graphData/data/randLocalGraph_JR_10_20000000
+running rm ../graphData/data/randLocalGraph_JR_10_20000000
+randLocalGraph_JR_10_20000000 :  -r 3 : '0.095', '0.094', '0.093', geomean = 0.094
+running cd ../graphData/data; make rMatGraph_JR_12_16000000
+running PARLAY_NUM_THREADS=48 ./MIS  -r 3 ../graphData/data/rMatGraph_JR_12_16000000
+running rm ../graphData/data/rMatGraph_JR_12_16000000
+rMatGraph_JR_12_16000000 :  -r 3 : '0.065', '0.066', '0.066', geomean = 0.066
+running cd ../graphData/data; make 3Dgrid_JR_64000000
+running PARLAY_NUM_THREADS=48 ./MIS  -r 3 ../graphData/data/3Dgrid_JR_64000000
+running rm ../graphData/data/3Dgrid_JR_64000000
+3Dgrid_JR_64000000 :  -r 3 : '0.427', '0.336', '0.323', geomean = 0.359
+incrementalMIS : 48 : geomean of mins = 0.125, geomean of geomeans = 0.13
+
+cd benchmarks/rayCast/kdTree ; make -s cleanall ; make -j 24
+g++ -DPARLAY_EIGEN -DEIGEN_MODE=EIGEN_TIMESPAN_GRAINSIZE -pthread -O2 -g -std=c++17 -DNDEBUG -I .  -o rayTime.o -c ../bench/rayTime.C
+g++ -DPARLAY_EIGEN -DEIGEN_MODE=EIGEN_TIMESPAN_GRAINSIZE -pthread -O2 -g -std=c++17 -DNDEBUG -I .  -c ray.C -o ray.o
+cd ../bench; make -s rayCheck
+cp ../bench/testInputs ../bench/testInputs_small .
+g++ -o ray rayTime.o ray.o -DPARLAY_EIGEN -DEIGEN_MODE=EIGEN_TIMESPAN_GRAINSIZE -pthread -ldl -Wl,-rpath,/home/itmo_denis/local/lib -L/home/itmo_denis/local/lib -ljemalloc
+cd benchmarks/rayCast/kdTree ; ./testInputs -r 3 -p 48 -x
+running cd ../geometryData/data; make happyTriangles happyRays
+running PARLAY_NUM_THREADS=48 ./ray  -r 3 ../geometryData/data/happyTriangles ../geometryData/data/happyRays
+running rm ../geometryData/data/happyTriangles ../geometryData/data/happyRays
+happyTriangles happyRays :  -r 3 : '1.455', '1.699', '1.467', geomean = 1.536
+running cd ../geometryData/data; make angelTriangles angelRays
+running PARLAY_NUM_THREADS=48 ./ray  -r 3 ../geometryData/data/angelTriangles ../geometryData/data/angelRays
+running rm ../geometryData/data/angelTriangles ../geometryData/data/angelRays
+angelTriangles angelRays :  -r 3 : '0.584', '0.607', '0.599', geomean = 0.597
+running cd ../geometryData/data; make dragonTriangles dragonRays
+running PARLAY_NUM_THREADS=48 ./ray  -r 3 ../geometryData/data/dragonTriangles ../geometryData/data/dragonRays
+running rm ../geometryData/data/dragonTriangles ../geometryData/data/dragonRays
+dragonTriangles dragonRays :  -r 3 : '1.122', '1.104', '1.097', geomean = 1.108
+kdTree : 48 : geomean of mins = 0.977, geomean of geomeans = 1.005
+
+cd benchmarks/convexHull/quickHull ; make -s cleanall ; make -j 24
+g++ -DPARLAY_EIGEN -DEIGEN_MODE=EIGEN_TIMESPAN_GRAINSIZE -pthread -O2 -g -std=c++17 -DNDEBUG -I .  -o hullTime.o -c ../bench/hullTime.C
+g++ -DPARLAY_EIGEN -DEIGEN_MODE=EIGEN_TIMESPAN_GRAINSIZE -pthread -O2 -g -std=c++17 -DNDEBUG -I .  -c hull.C -o hull.o
+cd ../bench; make -s hullCheck
+cp ../bench/testInputs ../bench/testInputs_small .
+g++ -o hull hullTime.o hull.o -DPARLAY_EIGEN -DEIGEN_MODE=EIGEN_TIMESPAN_GRAINSIZE -pthread -ldl -Wl,-rpath,/home/itmo_denis/local/lib -L/home/itmo_denis/local/lib -ljemalloc
+cd benchmarks/convexHull/quickHull ; ./testInputs -r 3 -p 48 -x
+running cd ../geometryData/data; make 2DinSphere_100000000
+running PARLAY_NUM_THREADS=48 ./hull  -r 3 ../geometryData/data/2DinSphere_100000000
+running rm ../geometryData/data/2DinSphere_100000000
+2DinSphere_100000000 :  -r 3 : '0.288', '0.303', '0.391', geomean = 0.324
+running cd ../geometryData/data; make 2Dkuzmin_100000000
+running PARLAY_NUM_THREADS=48 ./hull  -r 3 ../geometryData/data/2Dkuzmin_100000000
+running rm ../geometryData/data/2Dkuzmin_100000000
+2Dkuzmin_100000000 :  -r 3 : '0.215', '0.111', '0.116', geomean = 0.14
+running cd ../geometryData/data; make 2DonSphere_100000000
+running PARLAY_NUM_THREADS=48 ./hull  -r 3 ../geometryData/data/2DonSphere_100000000
+running rm ../geometryData/data/2DonSphere_100000000
+2DonSphere_100000000 :  -r 3 : '14.847', '15.8', '16.784', geomean = 15.79
+quickHull : 48 : geomean of mins = 0.781, geomean of geomeans = 0.897
+
+cd benchmarks/delaunayTriangulation/incrementalDelaunay ; make -s cleanall ; make -j 24
+g++ -DPARLAY_EIGEN -DEIGEN_MODE=EIGEN_TIMESPAN_GRAINSIZE -pthread -O2 -g -std=c++17 -DNDEBUG -I .  -o delaunayTime.o -c ../bench/delaunayTime.C
+g++ -DPARLAY_EIGEN -DEIGEN_MODE=EIGEN_TIMESPAN_GRAINSIZE -pthread -O2 -g -std=c++17 -DNDEBUG -I .  -c delaunay.C -o delaunay.o
+cd ../bench; make -s delaunayCheck
+cp ../bench/testInputs ../bench/testInputs_small .
+g++ -o delaunay delaunayTime.o delaunay.o -DPARLAY_EIGEN -DEIGEN_MODE=EIGEN_TIMESPAN_GRAINSIZE -pthread -ldl -Wl,-rpath,/home/itmo_denis/local/lib -L/home/itmo_denis/local/lib -ljemalloc
+cd benchmarks/delaunayTriangulation/incrementalDelaunay ; ./testInputs -r 3 -p 48 -x
+running cd ../geometryData/data; make 2DinCube_10M
+running PARLAY_NUM_THREADS=48 ./delaunay  -r 3 ../geometryData/data/2DinCube_10M
+running rm ../geometryData/data/2DinCube_10M
+2DinCube_10M :  -r 3 : '2.909', '2.992', '2.879', geomean = 2.926
+running cd ../geometryData/data; make 2Dkuzmin_10M
+running PARLAY_NUM_THREADS=48 ./delaunay  -r 3 ../geometryData/data/2Dkuzmin_10M
+running rm ../geometryData/data/2Dkuzmin_10M
+2Dkuzmin_10M :  -r 3 : '2.796', '3.385', '2.925', geomean = 3.025
+incrementalDelaunay : 48 : geomean of mins = 2.837, geomean of geomeans = 2.975
+
+cd benchmarks/delaunayRefine/incrementalRefine ; make -s cleanall ; make -j 24
+g++ -DPARLAY_EIGEN -DEIGEN_MODE=EIGEN_TIMESPAN_GRAINSIZE -pthread -O2 -g -std=c++17 -DNDEBUG -I .  -o refineTime.o -c ../bench/refineTime.C
+g++ -DPARLAY_EIGEN -DEIGEN_MODE=EIGEN_TIMESPAN_GRAINSIZE -pthread -O2 -g -std=c++17 -DNDEBUG -I .  -c refine.C -o refine.o
+cd ../bench; make -s refineCheck
+cp ../bench/testInputs ../bench/testInputs_small .
+g++ -o refine refineTime.o refine.o -DPARLAY_EIGEN -DEIGEN_MODE=EIGEN_TIMESPAN_GRAINSIZE -pthread -ldl -Wl,-rpath,/home/itmo_denis/local/lib -L/home/itmo_denis/local/lib -ljemalloc
+cd benchmarks/delaunayRefine/incrementalRefine ; ./testInputs -r 3 -p 48 -x
+running cd ../geometryData/data; make 2DinCubeDelaunay_5000000
+running PARLAY_NUM_THREADS=48 ./refine  -r 3 ../geometryData/data/2DinCubeDelaunay_5000000
+running rm ../geometryData/data/2DinCubeDelaunay_5000000
+2DinCubeDelaunay_5000000 :  -r 3 : '3.703', '3.658', '3.61', geomean = 3.657
+running cd ../geometryData/data; make 2DkuzminDelaunay_5000000
+running PARLAY_NUM_THREADS=48 ./refine  -r 3 ../geometryData/data/2DkuzminDelaunay_5000000
+running rm ../geometryData/data/2DkuzminDelaunay_5000000
+2DkuzminDelaunay_5000000 :  -r 3 : '3.647', '3.703', '3.641', geomean = 3.664
+incrementalRefine : 48 : geomean of mins = 3.626, geomean of geomeans = 3.66
+
+cd benchmarks/rangeQuery2d/parallelPlaneSweep ; make -s cleanall ; make -j 24
+g++ -DPARLAY_EIGEN -DEIGEN_MODE=EIGEN_TIMESPAN_GRAINSIZE -pthread -O2 -g -std=c++17 -DNDEBUG -I .  -o rangeTime.o -c ../bench/rangeTime.C
+g++ -DPARLAY_EIGEN -DEIGEN_MODE=EIGEN_TIMESPAN_GRAINSIZE -pthread -O2 -g -std=c++17 -DNDEBUG -I .  -c range.C -o range.o
+cd ../bench; make -s rangeCheck
+cp ../bench/testInputs ../bench/testInputs_small .
+g++ -o range rangeTime.o range.o -DPARLAY_EIGEN -DEIGEN_MODE=EIGEN_TIMESPAN_GRAINSIZE -pthread -ldl -Wl,-rpath,/home/itmo_denis/local/lib -L/home/itmo_denis/local/lib -ljemalloc
+cd benchmarks/rangeQuery2d/parallelPlaneSweep ; ./testInputs -r 3 -p 48 -x
+running cd ../geometryData/data; make 2DinCube_10M
+running PARLAY_NUM_THREADS=48 ./range  -r 3 ../geometryData/data/2DinCube_10M
+running rm ../geometryData/data/2DinCube_10M
+2DinCube_10M :  -r 3 : '2.443', '2.389', '2.47', geomean = 2.434
+running cd ../geometryData/data; make 2Dkuzmin_10M
+running PARLAY_NUM_THREADS=48 ./range  -r 3 ../geometryData/data/2Dkuzmin_10M
+running rm ../geometryData/data/2Dkuzmin_10M
+2Dkuzmin_10M :  -r 3 : '2.326', '2.519', '2.481', geomean = 2.441
+parallelPlaneSweep : 48 : geomean of mins = 2.357, geomean of geomeans = 2.437
+
+cd benchmarks/nBody/parallelCK ; make -s cleanall ; make -j 24
+g++ -DPARLAY_EIGEN -DEIGEN_MODE=EIGEN_TIMESPAN_GRAINSIZE -pthread -O2 -g -std=c++17 -DNDEBUG -I .  -o nbodyTime.o -c ../bench/nbodyTime.C
+g++ -DPARLAY_EIGEN -DEIGEN_MODE=EIGEN_TIMESPAN_GRAINSIZE -pthread -O2 -g -std=c++17 -DNDEBUG -I .  -c nbody.C -o nbody.o
+cd ../bench; make -s nbodyCheck
+cp ../bench/testInputs ../bench/testInputs_small .
+g++ -o nbody nbodyTime.o nbody.o -DPARLAY_EIGEN -DEIGEN_MODE=EIGEN_TIMESPAN_GRAINSIZE -pthread -ldl -Wl,-rpath,/home/itmo_denis/local/lib -L/home/itmo_denis/local/lib -ljemalloc
+cd benchmarks/nBody/parallelCK ; ./testInputs -r 3 -p 48 -x
+running cd ../geometryData/data; make 3DonSphere_1000000
+running PARLAY_NUM_THREADS=48 ./nbody  -r 3 ../geometryData/data/3DonSphere_1000000
+running rm ../geometryData/data/3DonSphere_1000000
+3DonSphere_1000000 :  -r 3 : '1.962', '1.843', '1.778', geomean = 1.859
+running cd ../geometryData/data; make 3DinCube_1000000
+running PARLAY_NUM_THREADS=48 ./nbody  -r 3 ../geometryData/data/3DinCube_1000000
+running rm ../geometryData/data/3DinCube_1000000
+3DinCube_1000000 :  -r 3 : '3.851', '3.895', '3.904', geomean = 3.883
+running cd ../geometryData/data; make 3Dplummer_1000000
+running PARLAY_NUM_THREADS=48 ./nbody  -r 3 ../geometryData/data/3Dplummer_1000000
+running rm ../geometryData/data/3Dplummer_1000000
+3Dplummer_1000000 :  -r 3 : '8.624', '9.148', '8.999', geomean = 8.921
+parallelCK : 48 : geomean of mins = 3.894, geomean of geomeans = 4.009
