@@ -37,6 +37,11 @@ inline std::string GetParallelMode() {
 #define EIGEN_STATIC 4
 #define EIGEN_TIMESPAN_GRAINSIZE 5
 
+#define TASKFLOW_GUIDED 1
+#define TASKFLOW_DYNAMIC 2
+#define TASKFLOW_STATIC 3
+#define TASKFLOW_RANDOM 4
+
 #ifdef TBB_MODE
 #include <tbb/parallel_for.h>
 #endif
