@@ -22,20 +22,20 @@ inline void parallel_for(size_t start, size_t end, F&& f, long granularity, bool
     tf::Taskflow tf;
 
 #if TASKFLOW_MODE == TASKFLOW_GUIDED
-    tf::ExecutionPolicy<tf::GuidedPartitioner> execution_policy;
+    tf::GuidedPartitioner execution_policy(granularity);
 #elif TASKFLOW_MODE == TASKFLOW_DYNAMIC
-    tf::ExecutionPolicy<tf::DynamicPartitioner> execution_policy;
+    tf::DynamicPartitioner execution_policy(granularity);
 #elif TASKFLOW_MODE == TASKFLOW_STATIC
-    tf::ExecutionPolicy<tf::StaticPartitioner> execution_policy;
+    tf::StaticPartitioner execution_policy(granularity);
 #elif TASKFLOW_MODE == TASKFLOW_RANDOM
-    tf::ExecutionPolicy<tf::RandomPartitioner> execution_policy;
+    tf::RandomPartitioner execution_policy(granularity);
 #else
     static_assert(false, "Wrong TASKFLOW_MODE mode");
 #endif  // TASKFLOW_MODE
     
-    tf.for_each_index(start, end, granularity, std::forward<F>(f), execution_policy);
+    tf.for_each(start, end, std::forward<F>(f), execution_policy);
 
-    exec.run(taskflow).get();
+    exec.run(tf).get();
 }
 
 template <typename Lf, typename Rf>
@@ -43,7 +43,7 @@ inline void par_do(Lf&& left, Rf&& right, bool) {
     tf::Taskflow tf;
 
     tf.emplace(std::forward<Lf>(left));
-    auto fut = exec.run(taskflow);
+    auto fut = exec.run(tf);
 
     std::forward<Rf>(right)();
 

@@ -13,6 +13,8 @@ inline std::string GetParallelMode() {
   return STR(OMP_MODE);
 #elif defined(EIGEN_MODE)
   return STR(EIGEN_MODE);
+#elif defined(TASKFLOW_MODE)
+  return STR(TASKFLOW_MODE);
 #else
   static_assert(false, "Unsupported mode");
 #endif
