@@ -11,14 +11,14 @@ namespace internal {
 
 class NumericIterator {
 public:
-    using value_type = int;
+    using value_type = size_t;
     using difference_type = std::ptrdiff_t;
-    using pointer = int*;
-    using reference = int&;
+    using pointer = size_t*;
+    using reference = size_t&;
     using iterator_category = std::forward_iterator_tag;
 
-    NumericIterator(int current, int step = 1)
-        : current(current), step(step) {}
+    NumericIterator(size_t current)
+        : current(current) {}
 
     // Dereference operator
     reference operator*() {
@@ -27,7 +27,7 @@ public:
 
     // Prefix increment
     NumericIterator& operator++() {
-        current += step;
+        current++;
         return *this;
     }
 
@@ -49,8 +49,7 @@ public:
     }
 
 private:
-    int current;
-    int step;
+    size_t current;
 };
 
 }  // namespace internal
