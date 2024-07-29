@@ -13,6 +13,7 @@ parser.add_argument("--dir", type=str, help="put output into given dir instead o
 parser.add_argument("--omp", action="store_true", help="set if want to run with OpenMP executor")
 parser.add_argument("--tbb", action="store_true", help="set if want to run with oneTBB executor")
 parser.add_argument("--eigen", action="store_true", help="set if want to run with eigen executor")
+parser.add_argument("--taskflow", action="store_true", help="set if want to run with taskflow executor")
 
 parser.add_argument("--numa", action="store_true", help="set if run on numa machine")
 parser.add_argument("--nocheck", action="store_true", help="run without result validation")
@@ -71,6 +72,17 @@ if args.eigen:
     eigen_executor = Executor(name="eigen", flag=("EIGEN", 1), modes=eigen_modes)
 
     executors.append(eigen_executor)
+
+if args.taskflow:
+    taskflow_modes = [
+        "TASKFLOW_GUIDED",
+        "TASKFLOW_DYNAMIC",
+        "TASKFLOW_STATIC",
+        "TASKFLOW_RANDOM",
+    ]
+    taskflow_executor = Executor(name="taskflow", flag=("TASKFLOW", 1), modes=taskflow_modes)
+
+    executors.append(taskflow_executor)
 
 def random_str(length=8):
     return "".join(random.choices(string.ascii_lowercase + string.digits, k=length))
