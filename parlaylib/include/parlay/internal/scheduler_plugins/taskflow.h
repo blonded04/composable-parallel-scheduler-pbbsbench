@@ -7,53 +7,6 @@
 
 namespace parlay {
 
-namespace internal {
-
-class NumericIterator {
-public:
-    using value_type = size_t;
-    using difference_type = std::ptrdiff_t;
-    using pointer = size_t*;
-    using reference = size_t&;
-    using iterator_category = std::forward_iterator_tag;
-
-    NumericIterator(size_t current)
-        : current(current) {}
-
-    // Dereference operator
-    reference operator*() {
-        return current;
-    }
-
-    // Prefix increment
-    NumericIterator& operator++() {
-        current++;
-        return *this;
-    }
-
-    // Postfix increment
-    NumericIterator operator++(int) {
-        NumericIterator temp = *this;
-        ++(*this);
-        return temp;
-    }
-
-    // Equality operator
-    bool operator==(const NumericIterator& other) const {
-        return current == other.current;
-    }
-
-    // Inequality operator
-    bool operator!=(const NumericIterator& other) const {
-        return !(*this == other);
-    }
-
-private:
-    size_t current;
-};
-
-}  // namespace internal
-
 inline tf::Executor& tfExecutor() {
     static tf::Executor exec;
     return exec;
@@ -83,7 +36,7 @@ inline void parallel_for(size_t start, size_t end, F&& f, long granularity, bool
     static_assert(false, "Wrong TASKFLOW_MODE mode");
 #endif  // TASKFLOW_MODE
     
-    tf.for_each(internal::NumericIterator(start), internal::NumericIterator(end), std::forward<F>(f), execution_policy);
+    tf.for_each_index(start, end, 1, std::forward<F>(f), execution_policy);
 
     tfExecutor().run(tf).get();
 }
