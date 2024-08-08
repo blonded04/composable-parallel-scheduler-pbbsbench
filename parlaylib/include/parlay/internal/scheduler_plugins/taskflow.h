@@ -54,14 +54,17 @@ private:
 
 }  // namespace internal
 
-static inline tf::Executor exec;
+tf::Executor& tfExecutor() {
+    static tf::Executor exec;
+    return exec;
+}
 
 inline size_t num_workers() {
-    return exec.num_workers();
+    return tfExecutor().num_workers();
 }
 
 inline size_t worker_id() {
-    return exec.this_worker_id();
+    return tfExecutor().this_worker_id();
 }
 
 template <typename F>
@@ -82,7 +85,7 @@ inline void parallel_for(size_t start, size_t end, F&& f, long granularity, bool
     
     tf.for_each(internal::NumericIterator(start), internal::NumericIterator(end), std::forward<F>(f), execution_policy);
 
-    exec.run(tf).get();
+    tfExecutor().run(tf).get();
 }
 
 template <typename Lf, typename Rf>
@@ -90,7 +93,7 @@ inline void par_do(Lf&& left, Rf&& right, bool) {
     tf::Taskflow tf;
 
     tf.emplace(std::forward<Lf>(left));
-    auto fut = exec.run(tf);
+    auto fut = tfExecutor().run(tf);
 
     std::forward<Rf>(right)();
 
