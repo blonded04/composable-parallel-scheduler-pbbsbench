@@ -54,7 +54,7 @@ private:
 
 }  // namespace internal
 
-tf::Executor& tfExecutor() {
+inline tf::Executor& tfExecutor() {
     static tf::Executor exec;
     return exec;
 }
