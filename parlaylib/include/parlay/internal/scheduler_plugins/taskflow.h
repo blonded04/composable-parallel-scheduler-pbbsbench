@@ -105,7 +105,7 @@ inline void init_plugin_internal() {}
 template <typename... Fs>
 void execute_with_scheduler(Fs...) {
     struct Illegal {};
-    static_assert((std::is_same_v<Illegal, Fs> && ...), "parlay::execute_with_scheduler is only available in the Parlay scheduler and is not compatible with OpenMP");
+    static_assert((std::is_same_v<Illegal, Fs> && ...), "parlay::execute_with_scheduler is only available in the Parlay scheduler and is not compatible with Taskflow");
 }
 
 }  // namespace parlay

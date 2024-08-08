@@ -14,6 +14,8 @@ parser.add_argument("--omp", action="store_true", help="set if want to run with 
 parser.add_argument("--tbb", action="store_true", help="set if want to run with oneTBB executor")
 parser.add_argument("--eigen", action="store_true", help="set if want to run with eigen executor")
 parser.add_argument("--taskflow", action="store_true", help="set if want to run with taskflow executor")
+parser.add_argument("--opencl", action="store_true", help="set if want to run with opencl executor")
+parser.add_argument("--cilk", action="store_true", help="set if want to run with opencilk")
 
 parser.add_argument("--numa", action="store_true", help="set if run on numa machine")
 parser.add_argument("--nocheck", action="store_true", help="run without result validation")
@@ -83,6 +85,22 @@ if args.taskflow:
     taskflow_executor = Executor(name="taskflow", flag=("TASKFLOW", 1), modes=taskflow_modes)
 
     executors.append(taskflow_executor)
+
+if args.opencl:
+    opencl_modes = [
+        "OPENCL",
+    ]
+    opencl_executor = Executor(name="opencl", flag=("OPENCL", 1), modes=opencl_modes)
+
+    executors.append(opencl_executor)
+
+if args.cilk:
+    cilk_modes = [
+        "OPENCILK",
+    ]
+    cilk_executor = Executor(name="cilk", flag=("CILK, 1"), modes=cilk_modes)
+
+    executors.append(cilk_executor)
 
 def random_str(length=8):
     return "".join(random.choices(string.ascii_lowercase + string.digits, k=length))

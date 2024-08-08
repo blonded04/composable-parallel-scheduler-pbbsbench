@@ -177,6 +177,9 @@ static void par_do3_if(bool do_parallel, Lf&& left, Mf&& mid, Rf&& right) {
 #elif defined(PARLAY_TASKFLOW)
 #include "internal/scheduler_plugins/taskflow.h"
 
+#elif defined(PARLAY_OPENCL)
+#include "internal/scheduler_plugins/opencl.h"
+
 // No Parallelism
 #elif defined(PARLAY_SEQUENTIAL)
 #include "internal/scheduler_plugins/sequential.h"  // IWYU pragma: keep, export
