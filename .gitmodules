@@ -4,6 +4,6 @@
 [submodule "comparisonSort/ips4o/ips4oRepository"]
 	path = benchmarks/comparisonSort/ips4o/ips4oRepository
 	url = https://github.com/ips4o/ips4o.git
-[submodule "parlaylib/include/parlay/internal/scheduler_plugins/taskflow"]
+[submodule "taskflow"]
 	path = parlaylib/include/parlay/internal/scheduler_plugins/taskflow
 	url = https://github.com/taskflow/taskflow
