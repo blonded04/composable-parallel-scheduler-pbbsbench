@@ -3,6 +3,7 @@
 import argparse
 import os
 import random
+import signal
 import string
 import subprocess
 
@@ -112,41 +113,47 @@ else:
     os.makedirs(target_dir)
 print(f"target dir for this run is {target_dir}")
 
-for executor in executors:
-    flag, value = executor.flag
-    exec_env = os.environ.copy()
-    exec_env[flag] = str(value)
+child_pids = []
+try:
+    for executor in executors:
+        flag, value = executor.flag
+        exec_env = os.environ.copy()
+        exec_env[flag] = str(value)
 
-    mode_name = f"{executor.name.upper()}_MODE"
+        mode_name = f"{executor.name.upper()}_MODE"
 
-    if args.mode:
-        modes = [args.mode]
-    else:
-        modes = executor.modes
+        if args.mode:
+            modes = [args.mode]
+        else:
+            modes = executor.modes
 
-    for mode in modes:
-        run_env = exec_env.copy()
-        run_env[mode_name] = mode
-        print(f"now {executor.name} : {mode}")
+        for mode in modes:
+            run_env = exec_env.copy()
+            run_env[mode_name] = mode
+            print(f"now {executor.name} : {mode}")
 
-        output_path = f"{target_dir}/{mode}.txt"
-        output_file = open(output_path, "w")
+            output_path = f"{target_dir}/{mode}.txt"
+            output_file = open(output_path, "w")
 
-        cmd = ["./runall", "-force", "-par"]
+            cmd = ["./runall", "-force", "-par"]
 
-        if not args.numa:
-            cmd.append("-nonuma")
-        if args.nocheck:
-            cmd.append("-nocheck")
-        if args.only:
-            cmd.append("-only")
-            cmd.extend(args.only)
-            cmd.append("-ext")
-        if args.small:
-            cmd.extend(["-small"])
+            if not args.numa:
+                cmd.append("-nonuma")
+            if args.nocheck:
+                cmd.append("-nocheck")
+            if args.only:
+                cmd.append("-only")
+                cmd.extend(args.only)
+                cmd.append("-ext")
+            if args.small:
+                cmd.extend(["-small"])
 
-        print("running command: ", cmd)
-        process = subprocess.Popen(cmd, env=run_env, universal_newlines=True, stdout=output_file)
-        rc = process.wait()
-        if rc != 0:
-            print(f"{mode_name} had bad returncode: {rc}")
+            print("running command: ", cmd)
+            process = subprocess.Popen(cmd, env=run_env, universal_newlines=True, stdout=output_file)
+            child_pids.append(process.pid)
+            rc = process.wait()
+            if rc != 0:
+                print(f"{mode_name} had bad returncode: {rc}")
+except KeyboardInterrupt:
+    for pid in child_pids:
+        os.kill(pid, signal.SIGKILL)
