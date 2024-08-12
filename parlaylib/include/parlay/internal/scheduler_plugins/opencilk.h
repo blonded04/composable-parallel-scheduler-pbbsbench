@@ -1,6 +1,10 @@
 #ifndef PARLAY_INTERNAL_SCHEDULER_PLUGINS_OPENCILK_H_
 #define PARLAY_INTERNAL_SCHEDULER_PLUGINS_OPENCILK_H_
 
+#if !defined(PARLAY_OPENCILK)
+#error "Undefined opencilk"
+#endif
+
 #include <cstddef>
 
 #include <type_traits>
@@ -16,14 +20,14 @@ namespace parlay {
 inline size_t num_workers() {
   // cache result to avoid calling getenv on every call
   static size_t threads = []() -> size_t {
-    if (const char *envThreads = std::getenv("PARLAY_NUM_THREADS")) {
+    if (const char *envThreads = std::getenv("BENCH_NUM_THREADS")) {
       return std::stoul(envThreads);
     }
     // left just for compatibility
     if (const char *envThreads = std::getenv("OMP_NUM_THREADS")) {
       return std::stoul(envThreads);
     }
-        // left just for compatibility
+    // left just for compatibility
     if (const char *envThreads = std::getenv("CILK_NWORKERS")) {
       return std::stoul(envThreads);
     }

@@ -1,6 +1,10 @@
 #ifndef PARLAY_INTERNAL_SCHEDULER_PLUGINS_EIGEN_H_
 #define PARLAY_INTERNAL_SCHEDULER_PLUGINS_EIGEN_H_
 
+#if !defined(PARLAY_EIGEN) || !defined(EIGEN_MODE)
+#error "Undefined eigen"
+#endif
+
 #include <thread>
 
 #include "eigen/eigen_pinner.h"
@@ -45,7 +49,7 @@ inline void EigenParallelFor(size_t from, size_t to, F &&func) {
 inline size_t num_workers() {
   // cache result to avoid calling getenv on every call
   static size_t threads = []() -> size_t {
-    if (const char *envThreads = std::getenv("PARLAY_NUM_THREADS")) {
+    if (const char *envThreads = std::getenv("BENCH_NUM_THREADS")) {
       return std::stoul(envThreads);
     }
     // left just for compatibility

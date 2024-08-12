@@ -11,6 +11,10 @@
 #ifndef PARLAY_INTERNAL_SCHEDULER_PLUGINS_OMP_H_
 #define PARLAY_INTERNAL_SCHEDULER_PLUGINS_OMP_H_
 
+#if !defined(PARLAY_OPENMP) || !defined(OMP_MODE)
+#error "Undefined omp"
+#endif
+
 #include <omp.h>
 
 #include <stdexcept>

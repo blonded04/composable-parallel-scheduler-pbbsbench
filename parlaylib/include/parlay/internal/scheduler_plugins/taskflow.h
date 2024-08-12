@@ -1,6 +1,10 @@
 #ifndef PARLAY_INTERNAL_SCHEDULER_PLUGINS_TASKFLOW_H_
 #define PARLAY_INTERNAL_SCHEDULER_PLUGINS_TASKFLOW_H_
 
+#if !defined(PARLAY_TASKFLOW) || !defined(TASKFLOW_MODE)
+#error "Undefined taskflow"
+#endif
+
 #include "taskflow/taskflow/taskflow.hpp"
 #include "taskflow/taskflow/algorithm/for_each.hpp"
 #include "eigen/modes.h"
@@ -10,7 +14,7 @@ namespace parlay {
 inline size_t num_workers() {
   // cache result to avoid calling getenv on every call
   static size_t threads = []() -> size_t {
-    if (const char *envThreads = std::getenv("PARLAY_NUM_THREADS")) {
+    if (const char *envThreads = std::getenv("BENCH_NUM_THREADS")) {
       return std::stoul(envThreads);
     }
     // left just for compatibility
