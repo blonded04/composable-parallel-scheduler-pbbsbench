@@ -45,11 +45,15 @@ inline void EigenParallelFor(size_t from, size_t to, F &&func) {
 inline size_t num_workers() {
   // cache result to avoid calling getenv on every call
   static size_t threads = []() -> size_t {
-    if (const char *envThreads = std::getenv("BENCH_NUM_THREADS")) {
+    if (const char *envThreads = std::getenv("PARLAY_NUM_THREADS")) {
       return std::stoul(envThreads);
     }
     // left just for compatibility
     if (const char *envThreads = std::getenv("OMP_NUM_THREADS")) {
+      return std::stoul(envThreads);
+    }
+    // left just for compatibility
+    if (const char *envThreads = std::getenv("CILK_NWORKERS")) {
       return std::stoul(envThreads);
     }
     return std::thread::hardware_concurrency();
@@ -73,6 +77,7 @@ inline void par_do(Lf&& left, Rf&& right, bool) {
 
 inline void init_plugin_internal() {
     auto threadsNum = num_workers();
+    Eigen::ThreadPool& ep = EigenPool();
 
     #if defined(EIGEN_MODE) and EIGEN_MODE != EIGEN_RAPID
     static EigenPinner pinner(threadsNum);

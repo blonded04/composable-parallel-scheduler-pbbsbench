@@ -13,7 +13,24 @@ namespace parlay {
 
 // IWYU pragma: private, include "../../parallel.h"
 
-inline size_t num_workers() { return __cilkrts_get_nworkers(); }
+inline size_t num_workers() {
+  // cache result to avoid calling getenv on every call
+  static size_t threads = []() -> size_t {
+    if (const char *envThreads = std::getenv("PARLAY_NUM_THREADS")) {
+      return std::stoul(envThreads);
+    }
+    // left just for compatibility
+    if (const char *envThreads = std::getenv("OMP_NUM_THREADS")) {
+      return std::stoul(envThreads);
+    }
+        // left just for compatibility
+    if (const char *envThreads = std::getenv("CILK_NWORKERS")) {
+      return std::stoul(envThreads);
+    }
+    return std::thread::hardware_concurrency();
+  }();
+  return threads;
+}
 
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wdeprecated-declarations"
@@ -47,7 +64,9 @@ inline void parallel_for(size_t start, size_t end, F&& f, long granularity, bool
   }
 }
 
-inline void init_plugin_internal() {}
+inline void init_plugin_internal() {
+  auto num_threads = num_workers();
+}
 
 template <typename... Fs>
 void execute_with_scheduler(Fs...) {

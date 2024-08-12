@@ -7,13 +7,28 @@
 
 namespace parlay {
 
-inline tf::Executor& tfExecutor() {
-    static tf::Executor exec;
-    return exec;
+inline size_t num_workers() {
+  // cache result to avoid calling getenv on every call
+  static size_t threads = []() -> size_t {
+    if (const char *envThreads = std::getenv("PARLAY_NUM_THREADS")) {
+      return std::stoul(envThreads);
+    }
+    // left just for compatibility
+    if (const char *envThreads = std::getenv("OMP_NUM_THREADS")) {
+      return std::stoul(envThreads);
+    }
+    // left just for compatibility
+    if (const char *envThreads = std::getenv("CILK_NWORKERS")) {
+      return std::stoul(envThreads);
+    }
+    return std::thread::hardware_concurrency();
+  }();
+  return threads;
 }
 
-inline size_t num_workers() {
-    return tfExecutor().num_workers();
+inline tf::Executor& tfExecutor() {
+    static tf::Executor exec(num_workers());
+    return exec;
 }
 
 inline size_t worker_id() {
@@ -53,7 +68,10 @@ inline void par_do(Lf&& left, Rf&& right, bool) {
     fut.wait();
 }
 
-inline void init_plugin_internal() {}
+inline void init_plugin_internal() {
+    auto num_threads = num_workers();
+    auto& exec = tfExecutor();
+}
 
 template <typename... Fs>
 void execute_with_scheduler(Fs...) {
