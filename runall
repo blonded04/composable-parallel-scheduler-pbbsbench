@@ -144,13 +144,13 @@ def detectCPUs():
      Detects the number of CPUs on a system. Cribbed from pp.
      """
     # Linux, Unix and MacOS:
-    if os.environ.has_key("BENCH_NUM_THREADS"):
+    if "BENCH_NUM_THREADS" in os.environ:
         ncpus = int(os.environ["BENCH_NUM_THREADS"]);
         return ncpus
-    if os.environ.has_key("OMP_NUM_THREADS"):
+    if "OMP_NUM_THREADS" in os.environ:
         ncpus = int(os.environ["OMP_NUM_THREADS"]);
         return ncpus
-    if os.environ.has_key("CILK_NWORKERS"):
+    if "CILK_NWORKERS" in os.environ:
         ncpus = int(os.environ["CILK_NWORKERS"]);
         return ncpus
     if hasattr(os, "sysconf"):
