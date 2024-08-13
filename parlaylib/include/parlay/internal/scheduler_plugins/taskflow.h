@@ -57,7 +57,7 @@ inline void parallel_for(size_t start, size_t end, F&& f, long granularity, bool
 
     tf.for_each_index(start, end + 1, static_cast<size_t>(1), std::forward<F>(f), execution_policy);
 
-    tfExecutor().run(tf).wait();
+    tfExecutor().run(tf).get();
 }
 
 template <typename Lf, typename Rf>
@@ -69,7 +69,7 @@ inline void par_do(Lf&& left, Rf&& right, bool) {
 
     std::forward<Rf>(right)();
 
-    fut.wait();
+    fut.get();
 }
 
 inline void init_plugin_internal() {
