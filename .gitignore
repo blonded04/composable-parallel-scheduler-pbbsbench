@@ -5,3 +5,4 @@
 *.pyc
 .history/*
 .vscode/*
+.gdb_history
