@@ -55,7 +55,7 @@ inline void parallel_for(size_t start, size_t end, F&& f, long granularity, bool
     static_assert(false, "Wrong TASKFLOW_MODE mode");
 #endif  // TASKFLOW_MODE
 
-    tf.for_each_index(start, end + 1, static_cast<size_t>(1), std::forward<F>(f), execution_policy);
+    tf.for_each_index(start, end, static_cast<size_t>(1), std::forward<F>(f), execution_policy);
 
     tfExecutor().run(tf).get();
 }
