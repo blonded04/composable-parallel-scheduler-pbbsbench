@@ -14,8 +14,6 @@ parser.add_argument("--dir", type=str, help="put output into given dir instead o
 parser.add_argument("--omp", action="store_true", help="set if want to run with OpenMP executor")
 parser.add_argument("--tbb", action="store_true", help="set if want to run with oneTBB executor")
 parser.add_argument("--eigen", action="store_true", help="set if want to run with eigen executor")
-parser.add_argument("--taskflow", action="store_true", help="set if want to run with taskflow executor")
-parser.add_argument("--opencl", action="store_true", help="set if want to run with opencl executor")
 parser.add_argument("--cilk", action="store_true", help="set if want to run with opencilk")
 
 parser.add_argument("--numa", action="store_true", help="set if run on numa machine")
@@ -75,25 +73,6 @@ if args.eigen:
     eigen_executor = Executor(name="eigen", flag=("EIGEN", 1), modes=eigen_modes)
 
     executors.append(eigen_executor)
-
-if args.taskflow:
-    taskflow_modes = [
-        "TASKFLOW_GUIDED",
-        "TASKFLOW_DYNAMIC",
-        "TASKFLOW_STATIC",
-        "TASKFLOW_RANDOM",
-    ]
-    taskflow_executor = Executor(name="taskflow", flag=("TASKFLOW", 1), modes=taskflow_modes)
-
-    executors.append(taskflow_executor)
-
-if args.opencl:
-    opencl_modes = [
-        "OPENCL",
-    ]
-    opencl_executor = Executor(name="opencl", flag=("OPENCL", 1), modes=opencl_modes)
-
-    executors.append(opencl_executor)
 
 if args.cilk:
     cilk_modes = [
