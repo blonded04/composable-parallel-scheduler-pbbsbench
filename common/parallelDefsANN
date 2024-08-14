@@ -23,7 +23,7 @@ CFLAGS = $(OMPFLAGS) $(CCFLAGS)
 LFLAGS = $(OMPFLAGS) $(CLFLAGS)
 
 else ifdef CILK
-CC = /opt/user/opencilk/clang++
+CC = /opt/user/opencilk/bin/clang++
 CFLAGS = $(CILKFLAGS) $(CCFLAGS)
 LFLAGS = $(CILKFLAGS) $(CLFLAGS)
 
