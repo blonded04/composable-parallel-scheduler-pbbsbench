@@ -6,6 +6,6 @@ RUN apt-get update && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/*
 COPY . /sources
-RUN cd sources && git submodule update --init
+RUN cd sources && git submodule update --init && chmod +x run-me.sh
 WORKDIR /sources
 

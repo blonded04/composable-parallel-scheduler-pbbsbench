@@ -7,3 +7,6 @@
 [submodule "taskflow"]
 	path = parlaylib/include/parlay/internal/scheduler_plugins/taskflow
 	url = https://github.com/taskflow/taskflow
+[submodule "onetbb"]
+	path = onetbb
+	url = https://github.com/uxlfoundation/oneTBB
