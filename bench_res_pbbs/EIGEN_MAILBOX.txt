@@ -1,0 +1,29 @@
+HOSTNAME: collab1
+Running only:  [['convexHull/quickHull', True, 0]]
+Parallel Only
+Forcing Compile
+running on 48 threads
+
+cd benchmarks/convexHull/quickHull ; make -s cleanall ; make -j 24
+g++ -DPARLAY_EIGEN -DEIGEN_MODE=EIGEN_TIMESPAN_GRAINSIZE -pthread -O1 -g -std=c++17 -D_NDEBUG -I .  -o hullTime.o -c ../bench/hullTime.C
+g++ -DPARLAY_EIGEN -DEIGEN_MODE=EIGEN_TIMESPAN_GRAINSIZE -pthread -O1 -g -std=c++17 -D_NDEBUG -I .  -c hull.C -o hull.o
+cd ../bench; make -s hullCheck
+cp ../bench/testInputs ../bench/testInputs_small .
+g++ -o hull hullTime.o hull.o -DPARLAY_EIGEN -DEIGEN_MODE=EIGEN_TIMESPAN_GRAINSIZE -pthread -ldl 
+cd benchmarks/convexHull/quickHull ; numactl -i all ./testInputs -r 3 -p 48
+running cd ../geometryData/data; make 2DinSphere_100000000
+running PARLAY_NUM_THREADS=48 ./hull  -r 3 -o /tmp/ofile927735_631767 ../geometryData/data/2DinSphere_100000000
+running ./../bench/hullCheck  ../geometryData/data/2DinSphere_100000000 /tmp/ofile927735_631767
+running rm ../geometryData/data/2DinSphere_100000000
+2DinSphere_100000000 :  -r 3 -o /tmp/ofile927735_631767 : '0.305', '0.325', '0.303', geomean = 0.311
+running cd ../geometryData/data; make 2Dkuzmin_100000000
+running PARLAY_NUM_THREADS=48 ./hull  -r 3 -o /tmp/ofile645778_259293 ../geometryData/data/2Dkuzmin_100000000
+running ./../bench/hullCheck  ../geometryData/data/2Dkuzmin_100000000 /tmp/ofile645778_259293
+running rm ../geometryData/data/2Dkuzmin_100000000
+2Dkuzmin_100000000 :  -r 3 -o /tmp/ofile645778_259293 : '0.115', '0.121', '0.12', geomean = 0.119
+running cd ../geometryData/data; make 2DonSphere_100000000
+running PARLAY_NUM_THREADS=48 ./hull  -r 3 -o /tmp/ofile986833_115389 ../geometryData/data/2DonSphere_100000000
+running ./../bench/hullCheck  ../geometryData/data/2DonSphere_100000000 /tmp/ofile986833_115389
+running rm ../geometryData/data/2DonSphere_100000000
+2DonSphere_100000000 :  -r 3 -o /tmp/ofile986833_115389 : '6.745', '6.598', '6.653', geomean = 6.665
+quickHull : 48 : geomean of mins = 0.614, geomean of geomeans = 0.628

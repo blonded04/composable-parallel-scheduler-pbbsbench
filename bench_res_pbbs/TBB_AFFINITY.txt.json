@@ -1,0 +1,1 @@
+{"integerSort/parallelRadixSort": {"mins": 0.086, "total": 0.086}, "comparisonSort/sampleSort": {"mins": 0.304, "total": 0.307}, "removeDuplicates/parlayhash": {"mins": 0.134, "total": 0.137}, "histogram/parallel": {"mins": 0.049, "total": 0.052}, "comparisonSort/quickSort": {"mins": 0.576, "total": 0.7}}

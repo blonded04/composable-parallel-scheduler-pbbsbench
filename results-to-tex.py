@@ -6,28 +6,10 @@ import pandas as pd
 dir_path = "./bench_res_pbbs/"
 files = [f for f in os.listdir(dir_path) if f.endswith(".json")]
 
-res = {}
-for file in files:
-    mode = file.split(".")[0]
-    with open(os.path.join(dir_path, file), "r") as f:
-        data = json.load(f)
-    res[mode] = data
-
-# Transform into DataFrame
-by_bench = {}
-for exec_name, benchmarks in res.items():
-    for bench_name, results in benchmarks.items():
-        if bench_name not in by_bench:
-            by_bench[bench_name] = {}
-        by_bench[bench_name][exec_name] = results["total"]
-
-df = pd.DataFrame.from_dict(by_bench, orient="index").fillna(0)
-
 # Define target execs and base exec
 base_exec = "EIGEN_MAILBOX_JE"
 target_execs = {
     "EIGEN_MAILBOX_JE": True,
-    "EIGEN_RAPID": True,
     "EIGEN_PAR_DO_STEAL": True,
     "EIGEN_FOLDED_SHARING": True,
     "EIGEN_SHARE_PROXY": True,
@@ -38,6 +20,24 @@ target_execs = {
     "TBB_SIMPLE": True,
     "TBB_CONST_AFFINITY": True,
 }
+
+res = {}
+for file in files:
+    mode = file.split(".")[0]
+    with open(os.path.join(dir_path, file), "r") as f:
+        data = json.load(f)
+    if mode in target_execs:
+        res[mode] = data
+
+# Transform into DataFrame
+by_bench = {}
+for exec_name, benchmarks in res.items():
+    for bench_name, results in benchmarks.items():
+        if bench_name not in by_bench:
+            by_bench[bench_name] = {}
+        by_bench[bench_name][exec_name] = results["total"]
+
+df = pd.DataFrame.from_dict(by_bench, orient="index").fillna(0)
 
 # Generate Heatmap LaTeX
 norm_df = df.div(df.max(axis=1), axis=0)
@@ -70,7 +70,7 @@ xyugavnomocha
 \label{tab:heatmap}
 \end{table}
 \end{document}
-""".replace("xyugavnomocha", "\n".join(heatmap_rows)).replace("chosuka", 'c' * (len(norm_df.columns) - 1)).replace("kalllketgondon", ' & '.join([s.replace('_', '-') for s in norm_df.columns]))
+""".replace("xyugavnomocha", "\n".join(heatmap_rows)).replace("chosuka", 'c' * (len(norm_df.columns) + 1)).replace("kalllketgondon", ' & '.join([s.replace('_', '-') for s in norm_df.columns]))
 
 with open("result_heatmap.tex", "w") as f:
     f.write(heatmap_tex)
